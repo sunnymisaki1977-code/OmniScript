@@ -6,6 +6,7 @@ import ReferenceContext from "@/components/ReferenceContext";
 import EditorWorkspace from "@/components/EditorWorkspace";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X } from "lucide-react";
+import ChangelogModal from "../../components/ChangelogModal";
 
 const INSPIRATION_PILLS = [
   { icon: "💡", label: "隨機來點靈感", text: "未來十年的 AI 發展趨勢與職場衝擊" },
@@ -37,6 +38,7 @@ export default function Home() {
   
   const [customApiKey, setCustomApiKey] = useState("");
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [activeInputMode, setActiveInputMode] = useState(null);
   
   // 初始化載入 LocalStorage 與主題
@@ -407,7 +409,7 @@ export default function Home() {
                   </div>
                   <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">帳號設定</button>
                   <button onClick={() => { setIsAvatarOpen(false); setIsApiKeyModalOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">API 金鑰管理</button>
-                  <a href="/changelog" className="block w-full text-left px-4 py-2 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium">更新日誌 (Changelog)</a>
+                  <button onClick={() => { setIsAvatarOpen(false); setIsChangelogOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium">更新日誌 (Changelog)</button>
                   <button className="w-full text-left px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 mt-1 border-t border-slate-100 dark:border-slate-700 pt-3">登出</button>
                 </div>
               )}
@@ -689,6 +691,8 @@ export default function Home() {
         </div>
       )}
       {renderApiModal()}
+      <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
+
     </div>
   );
 }

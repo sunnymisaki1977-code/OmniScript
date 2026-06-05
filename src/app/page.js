@@ -16,6 +16,7 @@ import {
   Pencil
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import ChangelogModal from "../components/ChangelogModal";
 
 const MILESTONES = [
   {
@@ -56,6 +57,7 @@ export default function JoinPage() {
   const [milestones, setMilestones] = useState(MILESTONES);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
 
   useEffect(() => {
     const savedMilestones = localStorage.getItem('omni_milestones');
@@ -138,13 +140,13 @@ export default function JoinPage() {
           </div>
           
           <div className="mt-8">
-            <a href="/changelog" className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-medium text-sm transition-colors border-b border-transparent hover:border-indigo-400 pb-0.5">
+            <button onClick={() => setIsChangelogOpen(true)} className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-medium text-sm transition-colors border-b border-transparent hover:border-indigo-400 pb-0.5">
               <Sparkles className="w-4 h-4" /> 查看最新更新日誌 (v1.1.0)
-            </a>
+            </button>
           </div>
         </div>
 
-              </section>
+      </section>
 
       {/* 📍 Section 4: Milestone Roadmap */}
       <section className="py-24 px-6 relative bg-slate-900 border-t border-slate-800">
@@ -516,6 +518,8 @@ export default function JoinPage() {
           </form>
         </div>
       </section>
+
+      <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
 
     </div>
   );

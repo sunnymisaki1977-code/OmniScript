@@ -150,19 +150,21 @@ export default function EditorWorkspace({
             
             <button
               onClick={onSaveNext}
-              disabled={isLoading || !value?.trim() || (isLastStep && isArchived)}
+              disabled={isLoading || !value?.trim() || isArchived}
               className={`flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all ${
-                isLastStep && isArchived
-                  ? "bg-emerald-500 dark:bg-emerald-600 cursor-not-allowed shadow-none hover:translate-y-0"
+                isArchived
+                  ? "bg-slate-400 dark:bg-slate-700 cursor-not-allowed shadow-none hover:translate-y-0"
                   : "bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 dark:shadow-none hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
               }`}
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : isArchived ? (
+                <Check className="w-4 h-4" />
               ) : isLastStep ? (
-                isArchived ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />
+                <Save className="w-4 h-4" />
               ) : null}
-              {isLastStep ? (isArchived ? "已歸檔至 Notion" : "確認並歸檔至 Notion") : "儲存並進行下一步 ➔"}
+              {isArchived ? "專案已歸檔" : isLastStep ? "確認並歸檔至 Notion" : "儲存並進行下一步 ➔"}
             </button>
           </>
         )}

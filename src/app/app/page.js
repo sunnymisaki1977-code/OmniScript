@@ -448,34 +448,110 @@ export default function Home() {
                 onKeyDown={(e) => e.key === "Enter" && handleStartAuto()}
               />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4">
-                <button
-                  onClick={handleStartManual}
-                  disabled={!theme.trim() || isAutoRunning}
-                  className="group flex flex-col items-center justify-center gap-1.5 px-4 py-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 rounded-xl transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <Hand className="w-4 h-4 text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-300" />
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">手動協作模式</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 min-h-[88px]">
+                {activeInputMode === 'manual' ? (
+                  <div className="flex flex-col justify-center gap-2 p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl transition-all animate-in fade-in zoom-in-95">
+                    <input 
+                      type="password"
+                      placeholder="請輸入 Gemini API Key..."
+                      value={customApiKey}
+                      onChange={e => setCustomApiKey(e.target.value)}
+                      className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white placeholder:text-slate-400"
+                      autoFocus
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          localStorage.setItem("omniscript_api_key", customApiKey);
+                          setActiveInputMode(null);
+                          handleStartManual();
+                        }
+                      }}
+                    />
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => {
+                          localStorage.setItem("omniscript_api_key", customApiKey);
+                          setActiveInputMode(null);
+                          handleStartManual();
+                        }} 
+                        className="flex-1 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs font-bold py-2 rounded-lg transition-colors"
+                      >
+                        確認並開始
+                      </button>
+                      <button onClick={() => setActiveInputMode(null)} className="px-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-900 dark:hover:bg-slate-950 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-lg transition-colors">
+                        取消
+                      </button>
+                    </div>
                   </div>
-                  <span className="text-xs text-slate-500 dark:text-slate-500">逐一確認與編輯</span>
-                </button>
-                
-                <button
-                  onClick={handleStartAuto}
-                  disabled={!theme.trim() || isAutoRunning}
-                  className="group flex flex-col items-center justify-center gap-1.5 px-4 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white rounded-xl transition-all shadow-md shadow-indigo-200 dark:shadow-none hover:-translate-y-0.5"
-                >
-                  <div className="flex items-center gap-2">
-                    {isAutoRunning ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <Play className="w-4 h-4" />
-                    )}
-                    <span className="text-sm font-bold">一鍵全自動模式</span>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (!theme.trim()) return;
+                      setActiveInputMode('manual');
+                    }}
+                    disabled={!theme.trim() || isAutoRunning}
+                    className="group flex flex-col items-center justify-center gap-1.5 px-4 py-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 rounded-xl transition-all h-full"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Hand className="w-4 h-4 text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-300" />
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-300">手動協作模式</span>
+                    </div>
+                    <span className="text-xs text-slate-500 dark:text-slate-500">逐一確認與編輯</span>
+                  </button>
+                )}
+
+                {activeInputMode === 'auto' ? (
+                  <div className="flex flex-col justify-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/50 rounded-xl transition-all animate-in fade-in zoom-in-95">
+                    <input 
+                      type="password"
+                      placeholder="請輸入 Gemini API Key..."
+                      value={customApiKey}
+                      onChange={e => setCustomApiKey(e.target.value)}
+                      className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-900 border border-indigo-300 dark:border-indigo-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white placeholder:text-slate-400"
+                      autoFocus
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          localStorage.setItem("omniscript_api_key", customApiKey);
+                          setActiveInputMode(null);
+                          handleStartAuto();
+                        }
+                      }}
+                    />
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => {
+                          localStorage.setItem("omniscript_api_key", customApiKey);
+                          setActiveInputMode(null);
+                          handleStartAuto();
+                        }} 
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 rounded-lg transition-colors shadow-sm shadow-indigo-500/20"
+                      >
+                        確認並開始
+                      </button>
+                      <button onClick={() => setActiveInputMode(null)} className="px-3 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-indigo-200 dark:border-indigo-700/50 text-indigo-600 dark:text-indigo-400 text-xs rounded-lg transition-colors">
+                        取消
+                      </button>
+                    </div>
                   </div>
-                  <span className="text-xs text-indigo-200">單次呼叫，自動歸檔</span>
-                </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (!theme.trim()) return;
+                      setActiveInputMode('auto');
+                    }}
+                    disabled={!theme.trim() || isAutoRunning}
+                    className="group flex flex-col items-center justify-center gap-1.5 px-4 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white rounded-xl transition-all shadow-md shadow-indigo-200 dark:shadow-none hover:-translate-y-0.5 h-full"
+                  >
+                    <div className="flex items-center gap-2">
+                      {isAutoRunning ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <Play className="w-4 h-4" />
+                      )}
+                      <span className="text-sm font-bold">一鍵全自動模式</span>
+                    </div>
+                    <span className="text-xs text-indigo-200">單次呼叫，自動歸檔</span>
+                  </button>
+                )}
               </div>
             </div>
 

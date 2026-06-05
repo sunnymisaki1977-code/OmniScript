@@ -1,573 +1,466 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Sidebar from "@/components/Sidebar";
-import ReferenceContext from "@/components/ReferenceContext";
-import EditorWorkspace from "@/components/EditorWorkspace";
-import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
-import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon } from "lucide-react";
+import { 
+  Rocket, 
+  Terminal, 
+  PenTool, 
+  GitMerge, 
+  Layers, 
+  LayoutTemplate, 
+  Database,
+  ArrowRight,
+  Code2,
+  CheckCircle2,
+  Sparkles,
+  Zap
+} from "lucide-react";
 
-const INSPIRATION_PILLS = [
-  { icon: "💡", label: "隨機來點靈感", text: "未來十年的 AI 發展趨勢與職場衝擊" },
-  { icon: "📈", label: "科技趨勢解說", text: "區塊鏈與 Web3 到底在紅什麼？給新手的白話文指南" },
-  { icon: "☕", label: "質感生活 Vlog", text: "一個自由工作者的週末早晨：找回生活的主導權" },
-];
-
-export default function Home() {
-  const [isMounted, setIsMounted] = useState(false);
-  
-  // Project State
-  const [projectId, setProjectId] = useState(null);
-  const [theme, setTheme] = useState("");
-  const [currentStep, setCurrentStep] = useState(0); 
-  const [stepData, setStepData] = useState({});
-  const [completedSteps, setCompletedSteps] = useState([]);
-  const [archivedUrl, setArchivedUrl] = useState(null);
-  
-  // App State
-  const [projects, setProjects] = useState([]);
-  const [isRefCollapsed, setIsRefCollapsed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [saveStatus, setSaveStatus] = useState("saved");
-  const [notionStatus, setNotionStatus] = useState(null);
-  const [isAutoRunning, setIsAutoRunning] = useState(false);
-  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
-
-  const [isDark, setIsDark] = useState(false);
-  
-  // 初始化載入 LocalStorage 與主題
-  useEffect(() => {
-    setIsMounted(true);
-    
-    // 初始化主題
-    if (document.documentElement.classList.contains('dark')) {
-      setIsDark(true);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    }
-    try {
-      // 遷移舊版資料或載入新版專案列表
-      let savedProjects = [];
-      const projectsRaw = localStorage.getItem("omniscript_projects");
-      
-      if (projectsRaw) {
-        savedProjects = JSON.parse(projectsRaw);
-      } else {
-        // 嘗試相容舊版單一狀態
-        const oldState = localStorage.getItem("omniscript_state");
-        if (oldState) {
-          const parsed = JSON.parse(oldState);
-          if (parsed.theme) {
-            const migratedProject = {
-              id: Date.now().toString(),
-              theme: parsed.theme,
-              currentStep: parsed.currentStep || 0,
-              stepData: parsed.stepData || {},
-              completedSteps: parsed.completedSteps || [],
-              updatedAt: Date.now(),
-              mode: "manual"
-            };
-            savedProjects = [migratedProject];
-            localStorage.setItem("omniscript_projects", JSON.stringify(savedProjects));
-            // 移除舊版
-            localStorage.removeItem("omniscript_state");
-          }
-        }
-      }
-      
-      // 根據 updatedAt 排序
-      savedProjects.sort((a, b) => b.updatedAt - a.updatedAt);
-      setProjects(savedProjects);
-
-      // 檢查是否有活躍專案
-      const activeId = localStorage.getItem("omniscript_active_project");
-      if (activeId) {
-        const activeProj = savedProjects.find(p => p.id === activeId);
-        if (activeProj && activeProj.currentStep > 0) {
-          setProjectId(activeProj.id);
-          setTheme(activeProj.theme);
-          setCurrentStep(activeProj.currentStep);
-          setStepData(activeProj.stepData);
-          setCompletedSteps(activeProj.completedSteps);
-          setArchivedUrl(activeProj.archivedUrl || null);
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load state from localStorage:", e);
-    }
-  }, []);
-
-  // 防抖自動儲存至 Projects 陣列
-  useEffect(() => {
-    if (!isMounted || currentStep === 0 || !projectId) return;
-    
-    setSaveStatus("saving");
-    const timeoutId = setTimeout(() => {
-      try {
-        setProjects(prev => {
-          const updated = [...prev];
-          const idx = updated.findIndex(p => p.id === projectId);
-          const projectData = {
-            id: projectId,
-            theme,
-            currentStep,
-            stepData,
-            completedSteps,
-            archivedUrl,
-            updatedAt: Date.now(),
-            mode: isAutoRunning ? "auto" : "manual"
-          };
-          
-          if (idx >= 0) {
-            updated[idx] = projectData;
-          } else {
-            updated.unshift(projectData);
-          }
-          
-          localStorage.setItem("omniscript_projects", JSON.stringify(updated));
-          return updated;
-        });
-        setSaveStatus("saved");
-      } catch (e) {
-        console.error("Failed to save state:", e);
-        setSaveStatus("error");
-      }
-    }, 1000);
-
-    return () => clearTimeout(timeoutId);
-  }, [theme, currentStep, stepData, completedSteps, isMounted, projectId, isAutoRunning]);
-
-  // 切換主題
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (!isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+export default function JoinPage() {
+  const handleScrollToForm = () => {
+    const element = document.getElementById("join-form");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // 建立新專案並設定為活躍
-  const createNewProject = () => {
-    const newId = Date.now().toString();
-    setProjectId(newId);
-    localStorage.setItem("omniscript_active_project", newId);
-    return newId;
-  };
-
-  // 載入歷史專案
-  const loadProject = (proj) => {
-    setProjectId(proj.id);
-    setTheme(proj.theme);
-    setStepData(proj.stepData);
-    setCompletedSteps(proj.completedSteps);
-    setCurrentStep(proj.currentStep > 0 ? proj.currentStep : 1);
-    setArchivedUrl(proj.archivedUrl || null);
-    localStorage.setItem("omniscript_active_project", proj.id);
-  };
-
-  const handleReset = () => {
-    if (window.confirm("確定要離開此專案並回到首頁嗎？")) {
-      localStorage.removeItem("omniscript_active_project");
-      setProjectId(null);
-      setTheme("");
-      setCurrentStep(0);
-      setStepData({});
-      setCompletedSteps([]);
-      setIsAutoRunning(false);
-      setNotionStatus(null);
-      setArchivedUrl(null);
-      
-      // 重新整理 Projects 陣列
-      const projectsRaw = localStorage.getItem("omniscript_projects");
-      if (projectsRaw) {
-        const parsed = JSON.parse(projectsRaw);
-        parsed.sort((a, b) => b.updatedAt - a.updatedAt);
-        setProjects(parsed);
-      }
-    }
-  };
-
-  // API 呼叫區塊
-  const generateContent = async (stepId, context) => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/gemini", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stepId, context }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed");
-      
-      setStepData((prev) => ({ ...prev, [`step${stepId}`]: data.result }));
-      return data.result;
-    } catch (error) {
-      alert("生成失敗: " + error.message);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const exportToNotion = async (contextOverride) => {
-    setIsLoading(true);
-    try {
-      const payloadContext = contextOverride || { theme, ...stepData };
-      const res = await fetch("/api/notion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context: payloadContext }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Export failed");
-      
-      setNotionStatus(data.url);
-      setArchivedUrl(data.url);
-      if (!isAutoRunning) alert("成功歸檔至 Notion!");
-    } catch (error) {
-      alert("歸檔失敗: " + error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleStartManual = () => {
-    if (!theme.trim()) return;
-    createNewProject();
-    setCurrentStep(1);
-    generateContent(1, { theme });
-  };
-
-  const handleStartAuto = async () => {
-    if (!theme.trim()) return;
-    
-    setIsAutoRunning(true);
-    createNewProject();
-    setStepData({});
-    setCompletedSteps([]);
-    
-    try {
-      setCurrentStep(1);
-      setIsLoading(true);
-      
-      const res = await fetch("/api/gemini-batch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ theme }),
-      });
-      
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Batch generation failed");
-      
-      const batchResult = data.result; 
-      
-      setIsLoading(false);
-      let currentContext = { theme };
-      let currentCompleted = [];
-      
-      for (let i = 1; i <= 9; i++) {
-        setCurrentStep(i);
-        const stepContent = batchResult[`step${i}`] || "無內容";
-        
-        currentContext = { ...currentContext, [`step${i}`]: stepContent };
-        setStepData({...currentContext});
-        
-        currentCompleted.push(i);
-        setCompletedSteps([...currentCompleted]);
-        
-        await new Promise(resolve => setTimeout(resolve, 800));
-      }
-      
-      setCurrentStep(9);
-      await exportToNotion(currentContext);
-      
-    } catch (error) {
-      console.error("自動生成中斷:", error);
-      alert("自動生成失敗: " + error.message);
-    } finally {
-      setIsAutoRunning(false);
-      setIsLoading(false);
-    }
-  };
-
-  const handleNextStep = () => {
-    if (currentStep === 9) {
-      exportToNotion();
-      return;
-    }
-    const nextStepId = currentStep + 1;
-    setCompletedSteps((prev) => {
-      if (!prev.includes(currentStep)) return [...prev, currentStep].sort((a, b) => a - b);
-      return prev;
-    });
-    setCurrentStep(nextStepId);
-    if (!stepData[`step${nextStepId}`]) {
-      const contextForNext = { theme, ...stepData };
-      generateContent(nextStepId, contextForNext);
-    }
-  };
-
-  const handleRegenerate = () => {
-    const contextForCurrent = { theme, ...stepData };
-    generateContent(currentStep, contextForCurrent);
-  };
-
-  const currentStepConfig = WORKFLOW_STEPS.find((s) => s.id === currentStep);
-
-  // 防止伺服器端渲染與客戶端不一致
-  if (!isMounted) return <div className="h-screen bg-slate-50 dark:bg-slate-900" />;
-
-  // -----------------------------------------------------
-  // Step 0: Dashboard
-  // -----------------------------------------------------
-  if (currentStep === 0) {
-    return (
-      <div className="min-h-screen bg-[#F9FAFB] dark:bg-[#0F172A] flex flex-col font-sans">
-        
-        {/* Global Header */}
-        <header className="h-16 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between sticky top-0 z-50">
-          <div className="flex items-center gap-2 cursor-pointer">
-            <span className="text-2xl">✨</span>
-            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              OmniScript
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 rounded-full font-medium text-sm border border-amber-200 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors cursor-pointer">
-              <Zap className="w-4 h-4" />
-              <span>125 點額度</span>
-            </div>
-            
-            <div className="relative">
-              <button 
-                onClick={toggleTheme}
-                className="w-9 h-9 mr-2 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:ring-2 ring-slate-200 dark:ring-slate-700 transition-all"
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-            </div>
-            
-            <div className="relative">
-              <button 
-                onClick={() => setIsAvatarOpen(!isAvatarOpen)}
-                className="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:ring-2 ring-indigo-500/30 transition-all"
-              >
-                <User className="w-5 h-5" />
-              </button>
-              
-              {isAvatarOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 mb-2">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Alex Chen</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Pro Plan</p>
-                  </div>
-                  <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">帳號設定</button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">API 金鑰管理</button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 mt-1 border-t border-slate-100 dark:border-slate-700 pt-3">登出</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="flex-1 max-w-4xl w-full mx-auto p-6 pt-12">
-          
-          {/* Central Card */}
-          <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 md:p-12 text-center mb-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-              今天想創作什麼？
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-lg mx-auto">
-              輸入你想探討的主題，AI 將為你生成從研究、長短影音腳本到社群貼文的全域企劃。
-            </p>
-            
-            <div className="max-w-2xl mx-auto space-y-4">
-              <input
-                type="text"
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-                placeholder="例如：日本京阪神五日遊攻略"
-                className="w-full px-6 py-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-lg text-slate-900 dark:text-white placeholder:text-slate-400"
-                onKeyDown={(e) => e.key === "Enter" && handleStartAuto()}
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4">
-                <button
-                  onClick={handleStartManual}
-                  disabled={!theme.trim() || isAutoRunning}
-                  className="group flex flex-col items-center justify-center gap-1.5 px-4 py-4 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 disabled:opacity-50 disabled:cursor-not-allowed border border-slate-200 dark:border-slate-700 rounded-xl transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <Hand className="w-4 h-4 text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-300" />
-                    <span className="text-sm font-bold text-slate-700 dark:text-slate-300">手動協作模式</span>
-                  </div>
-                  <span className="text-xs text-slate-500 dark:text-slate-500">逐一確認與編輯</span>
-                </button>
-                
-                <button
-                  onClick={handleStartAuto}
-                  disabled={!theme.trim() || isAutoRunning}
-                  className="group flex flex-col items-center justify-center gap-1.5 px-4 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white rounded-xl transition-all shadow-md shadow-indigo-200 dark:shadow-none hover:-translate-y-0.5"
-                >
-                  <div className="flex items-center gap-2">
-                    {isAutoRunning ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <Play className="w-4 h-4" />
-                    )}
-                    <span className="text-sm font-bold">一鍵全自動模式</span>
-                  </div>
-                  <span className="text-xs text-indigo-200">單次呼叫，自動歸檔</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Inspiration Pills */}
-            <div className="mt-10 pt-8 border-t border-slate-100 dark:border-slate-800/60">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">缺乏靈感嗎？</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {INSPIRATION_PILLS.map((pill, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setTheme(pill.text)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-full transition-colors"
-                  >
-                    <span>{pill.icon}</span>
-                    <span>{pill.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Workspaces */}
-          {projects.length > 0 && (
-            <div className="mt-12 mb-20 animate-in fade-in slide-in-from-bottom-4">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-indigo-500" />
-                  近期專案
-                </h2>
-                <span className="text-xs font-medium px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full">
-                  共 {projects.length} 個
-                </span>
-              </div>
-              
-              <div className="grid gap-3">
-                {projects.slice(0, 5).map(proj => (
-                  <button
-                    key={proj.id}
-                    onClick={() => loadProject(proj)}
-                    className="group flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl transition-all text-left"
-                  >
-                    <div className="flex-1 min-w-0 pr-4">
-                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 truncate mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        {proj.theme}
-                      </h3>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                        <span className="flex items-center gap-1">
-                          {proj.mode === "auto" ? <Play className="w-3 h-3" /> : <Hand className="w-3 h-3" />}
-                          {proj.mode === "auto" ? "全自動" : "手動"}
-                        </span>
-                        <span>•</span>
-                        <span className={`px-2 py-0.5 rounded-full ${
-                          proj.currentStep === 9 
-                            ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
-                            : "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
-                        }`}>
-                          {proj.currentStep === 9 ? "已歸檔" : `進行至 Step ${proj.currentStep}`}
-                        </span>
-                        <span>•</span>
-                        <span>{new Date(proj.updatedAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors shrink-0">
-                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-        </main>
-      </div>
-    );
-  }
-
-  // -----------------------------------------------------
-  // Step 1~9: Workspace
-  // -----------------------------------------------------
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
-      <Sidebar
-        steps={WORKFLOW_STEPS}
-        currentStep={currentStep}
-        theme={theme}
-        completedSteps={completedSteps}
-        onStepClick={(id) => {
-          if (!isAutoRunning) setCurrentStep(id);
-        }}
-        onReset={handleReset}
-      />
+    <div className="min-h-screen bg-slate-950 text-slate-300 font-sans selection:bg-indigo-500/30">
       
-      {currentStepConfig && (
-        <ReferenceContext
-          isCollapsed={isRefCollapsed}
-          onToggleCollapse={() => setIsRefCollapsed(!isRefCollapsed)}
-          contextData={{ theme, ...stepData }}
-          dependencies={currentStepConfig.dependsOn}
-        />
-      )}
-      
-      {currentStepConfig && (
-        <EditorWorkspace
-          step={currentStepConfig}
-          value={stepData[`step${currentStep}`]}
-          onChange={(val) => setStepData((prev) => ({ ...prev, [`step${currentStep}`]: val }))}
-          isLoading={isLoading}
-          onRegenerate={handleRegenerate}
-          onSaveNext={handleNextStep}
-          isLastStep={currentStep === 9}
-          saveStatus={saveStatus}
-          isAutoRunning={isAutoRunning}
-          isArchived={!!archivedUrl}
-        />
-      )}
+      {/* 🚀 Hero Section */}
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden px-6">
+        {/* 背景光暈效果 */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="max-w-6xl mx-auto relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8">
+            <Sparkles className="w-4 h-4" />
+            <span>2024 結訓專題戰隊招募中</span>
+          </div>
+          
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-8 leading-tight">
+            不只是結訓專題，我們正在打造<br className="hidden md:block"/>
+            下一個具商業潛力的 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">AI SaaS 產品</span>
+          </h1>
+          
+          <p className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed">
+            加入 OmniScript 戰隊，與具備實戰思維的 PM 一起，從 0 到 1 打造「全域內容自動化工作流」。這將是你履歷上最亮眼的一筆！
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button 
+              onClick={handleScrollToForm}
+              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-[0_0_40px_-10px_rgba(79,70,229,0.5)] hover:shadow-[0_0_60px_-15px_rgba(79,70,229,0.7)] hover:-translate-y-1"
+            >
+              🔥 我要加入戰隊
+              <ArrowRight className="w-5 h-5" />
+            </button>
 
-      {notionStatus && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center space-y-6">
-            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8" />
+            <a 
+              href="/app"
+              className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all border border-slate-700 hover:border-slate-600 hover:-translate-y-1"
+            >
+              💻 體驗 OmniScript Demo
+            </a>
+          </div>
+        </div>
+
+        {/* 具象化 CSS Dashboard Mockup */}
+        <div className="max-w-5xl mx-auto mt-24 relative z-10 perspective-1000">
+          <div className="rounded-2xl border border-slate-800 bg-[#0F172A] shadow-2xl overflow-hidden flex h-[400px] md:h-[500px] transform rotate-x-2 translate-y-4">
+            {/* 模擬 Sidebar */}
+            <div className="w-[240px] border-r border-slate-800 bg-slate-900/50 flex flex-col hidden md:flex">
+              <div className="p-5 border-b border-slate-800">
+                <div className="text-lg font-bold text-white flex items-center gap-2">
+                  <span className="text-indigo-500">✨</span> OmniScript
+                </div>
+              </div>
+              <div className="p-3 space-y-1">
+                {[
+                  "1. 專案目標",
+                  "2. 受眾輪廓",
+                  "3. 核心觀點",
+                  "4. 大綱結構",
+                  "5. 詳細腳本"
+                ].map((step, i) => (
+                  <div key={i} className={`flex items-center gap-3 p-2 rounded-lg text-sm ${i === 0 ? 'bg-indigo-900/30 text-indigo-300' : 'text-slate-500'}`}>
+                    <div className={`w-4 h-4 rounded-full border-2 ${i === 0 ? 'border-indigo-500' : 'border-slate-700'}`}></div>
+                    Step {step}
+                  </div>
+                ))}
+              </div>
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">歸檔成功！</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              您的全域腳本已成功同步至 Notion 資料庫。
-            </p>
-            <div className="pt-4 flex gap-3">
-              <button
-                onClick={() => setNotionStatus(null)}
-                className="flex-1 px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors"
-              >
-                關閉
-              </button>
-              <a
-                href={notionStatus}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors flex items-center justify-center"
-              >
-                前往 Notion
-              </a>
+            {/* 模擬主畫面 */}
+            <div className="flex-1 flex flex-col relative bg-[#0F172A]">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+              {/* Global Header */}
+              <div className="h-14 border-b border-slate-800 flex justify-end items-center px-4 gap-4">
+                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-900/20 text-amber-500 text-xs rounded-full border border-amber-800/30">
+                  <Zap className="w-3 h-3" /> 125 點額度
+                </div>
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xs text-white font-bold">U</div>
+              </div>
+              {/* Dashboard Content */}
+              <div className="flex-1 flex flex-col items-center justify-center p-8">
+                <div className="w-full max-w-xl">
+                  <h2 className="text-2xl font-bold text-white text-center mb-2">開始新的 OmniScript 專案</h2>
+                  <p className="text-sm text-slate-400 text-center mb-6">輸入一個靈感，我們為你自動生成全套企劃</p>
+                  
+                  <div className="bg-slate-900 border border-slate-700 rounded-xl p-2 flex items-center gap-2 mb-4 shadow-inner">
+                    <span className="text-xl pl-2">✨</span>
+                    <div className="flex-1 text-slate-300 text-sm py-2">未來十年的 AI 發展趨勢與職場衝擊...</div>
+                  </div>
+                  
+                  <div className="flex justify-center gap-2 mb-8">
+                    <div className="px-3 py-1 bg-slate-800 text-slate-300 text-xs rounded-full border border-slate-700">💡 隨機來點靈感</div>
+                    <div className="px-3 py-1 bg-slate-800 text-slate-300 text-xs rounded-full border border-slate-700">📈 科技趨勢解說</div>
+                  </div>
+                  
+                  <div className="flex justify-center gap-3">
+                    <div className="px-6 py-2.5 bg-slate-800 text-slate-300 rounded-lg text-sm font-medium border border-slate-700">手動協作模式</div>
+                    <div className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-indigo-900/50">一鍵全自動模式 ✨</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </section>
+
+      {/* 🎯 Section 1: Value Proposition */}
+      <section className="py-24 bg-slate-900 px-6 relative z-10 border-t border-slate-800">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">為什麼你該加入這個專題？</h2>
+            <p className="text-slate-400">這不是圖書管理系統，這是能為你面試帶來絕對優勢的實戰舞台</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-slate-950/50 border border-slate-800 p-8 rounded-2xl hover:border-indigo-500/50 transition-colors group">
+              <div className="w-14 h-14 bg-indigo-900/30 text-indigo-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Rocket className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">告別「玩具型專案」</h3>
+              <p className="text-slate-400 leading-relaxed">
+                你將接觸到真實業界正在渴求的技術：AI API 串接（Gemini/Suno）、多模態內容生成、以及 SaaS 等級的多租戶狀態管理。
+              </p>
+            </div>
+            
+            <div className="bg-slate-950/50 border border-slate-800 p-8 rounded-2xl hover:border-indigo-500/50 transition-colors group">
+              <div className="w-14 h-14 bg-emerald-900/30 text-emerald-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <GitMerge className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">體驗正規的敏捷開發</h3>
+              <p className="text-slate-400 leading-relaxed">
+                由 PM 控管需求規格 (PRD)、UI/UX Guideline 與開發時程。帶你體驗真實的 Sprint 衝刺與版控流程，面試時有說不完的協作故事。
+              </p>
+            </div>
+
+            <div className="bg-slate-950/50 border border-slate-800 p-8 rounded-2xl hover:border-indigo-500/50 transition-colors group">
+              <div className="w-14 h-14 bg-purple-900/30 text-purple-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <LayoutTemplate className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">打造高顏值的技術火力展示</h3>
+              <p className="text-slate-400 leading-relaxed">
+                你的程式碼不會被醜陋的介面埋沒。我們採用現代極簡風格 (Modern Minimalist)，讓面試官一眼就覺得「這是一個成熟的產品」。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 💡 Section 2: The Product */}
+      <section className="py-24 px-6 relative">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-16 items-center">
+          <div className="lg:w-1/2">
+            <div className="inline-block px-3 py-1 bg-slate-800 text-slate-300 rounded-full text-sm font-medium mb-6">
+              The Product: OmniScript
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+              一個主題不可知的<br/>AI 內容產製引擎
+            </h2>
+            <p className="text-xl text-slate-400 mb-8 leading-relaxed">
+              只要輸入一個靈感，系統會自動跑完 9 道工作流，產出 YouTube 腳本、SEO 標籤、視覺 Prompt 與社群貼文。
+            </p>
+          </div>
+          
+          <div className="lg:w-1/2 space-y-6">
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex gap-6">
+              <div className="shrink-0 w-12 h-12 bg-indigo-900/50 text-indigo-400 rounded-lg flex items-center justify-center">
+                <Layers className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-white font-bold text-lg mb-2">模組 1：鏈式記憶引擎 (Chained Context)</h4>
+                <p className="text-slate-400 text-sm">挑戰複雜的前端狀態管理，實作步驟之間的資料連動，前一步驟的產出自動成為下一步驟的 Prompt 背景。</p>
+              </div>
+            </div>
+            
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex gap-6 ml-0 md:ml-6">
+              <div className="shrink-0 w-12 h-12 bg-cyan-900/50 text-cyan-400 rounded-lg flex items-center justify-center">
+                <Code2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-white font-bold text-lg mb-2">模組 2：雙軌執行模式 (Dual Execution)</h4>
+                <p className="text-slate-400 text-sm">同時開發「手動協作（單步控制）」與「一鍵全自動（非同步隊列 Batch API）」的複雜商業邏輯。</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex gap-6 ml-0 md:ml-12">
+              <div className="shrink-0 w-12 h-12 bg-emerald-900/50 text-emerald-400 rounded-lg flex items-center justify-center">
+                <Database className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-white font-bold text-lg mb-2">模組 3：Notion API 防護寫入</h4>
+                <p className="text-slate-400 text-sm">實作大文本切割演算法 (Chunking)，突破 API 限制，完成資料的雲端結構化歸檔。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 🧑‍💻 Section 3: Open Roles */}
+      <section className="py-24 bg-slate-900 px-6 border-y border-slate-800">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">招募職缺與技術棧</h2>
+            <p className="text-slate-400">不用等到技術完美才敢來，我們一起在專案中變強</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Frontend */}
+            <div className="bg-slate-950 border border-slate-800 p-8 rounded-2xl flex flex-col">
+              <div className="mb-6 flex justify-between items-start">
+                <div className="w-12 h-12 bg-blue-900/30 text-blue-400 rounded-xl flex items-center justify-center">
+                  <Terminal className="w-6 h-6" />
+                </div>
+                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求 2-3 名</span>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">前端工程師 (Frontend)</h3>
+              <p className="text-slate-400 text-sm mb-6 flex-1">
+                你的戰場：實作高互動性的 SaaS Dashboard、複雜的九步驟 Stepper、以及跨專案的全域狀態管理。
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <div className="text-xs text-slate-500 mb-2">技術棧</div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2 py-1 bg-blue-900/20 text-blue-400 text-xs rounded">React / Next.js</span>
+                    <span className="px-2 py-1 bg-cyan-900/20 text-cyan-400 text-xs rounded">Tailwind CSS</span>
+                    <span className="px-2 py-1 bg-yellow-900/20 text-yellow-400 text-xs rounded">Zustand</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500 mb-2">加分項</div>
+                  <ul className="text-xs text-slate-400 space-y-1">
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0"/> 微互動 (Micro-interactions)</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0"/> 防抖 (Debounce) 儲存機制</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Backend */}
+            <div className="bg-slate-950 border border-slate-800 p-8 rounded-2xl flex flex-col">
+              <div className="mb-6 flex justify-between items-start">
+                <div className="w-12 h-12 bg-green-900/30 text-green-400 rounded-xl flex items-center justify-center">
+                  <Database className="w-6 h-6" />
+                </div>
+                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求 1-2 名</span>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">後端工程師 (Backend)</h3>
+              <p className="text-slate-400 text-sm mb-6 flex-1">
+                你的戰場：設計穩定的 RESTful API、串接第三方 AI 服務 (Gemini/Notion)、處理會員認證與資料庫設計。
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <div className="text-xs text-slate-500 mb-2">技術棧</div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2 py-1 bg-green-900/20 text-green-400 text-xs rounded">Node.js / Python</span>
+                    <span className="px-2 py-1 bg-slate-800 text-slate-300 text-xs rounded">SQL / NoSQL</span>
+                    <span className="px-2 py-1 bg-slate-800 text-slate-300 text-xs rounded">JWT</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500 mb-2">加分項</div>
+                  <ul className="text-xs text-slate-400 space-y-1">
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0"/> 高併發 API 處理經驗</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0"/> 非同步隊列 (Queue) 架構</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* UI/UX */}
+            <div className="bg-slate-950 border border-slate-800 p-8 rounded-2xl flex flex-col">
+              <div className="mb-6 flex justify-between items-start">
+                <div className="w-12 h-12 bg-pink-900/30 text-pink-400 rounded-xl flex items-center justify-center">
+                  <PenTool className="w-6 h-6" />
+                </div>
+                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求 1 名</span>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">UI/UX 設計師</h3>
+              <p className="text-slate-400 text-sm mb-6 flex-1">
+                你的戰場：將 PM 的 Wireframe 轉化為高保真 Prototype，制定 Design System（色彩、字體、元件庫）。
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <div className="text-xs text-slate-500 mb-2">技術棧</div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2 py-1 bg-pink-900/20 text-pink-400 text-xs rounded">Figma</span>
+                    <span className="px-2 py-1 bg-slate-800 text-slate-300 text-xs rounded">Design System</span>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500 mb-2">加分項</div>
+                  <ul className="text-xs text-slate-400 space-y-1">
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0"/> SaaS 產品設計思維</li>
+                    <li className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0"/> 深/淺色模式設計規範</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 📅 Section 4: Roadmap */}
+      <section className="py-24 px-6 relative">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-white mb-4">開發時程與專案管理</h2>
+            <p className="text-slate-400">完整的規劃，確保這個團隊絕不爛尾</p>
+          </div>
+          
+          <div className="relative border-l border-slate-800 ml-4 md:ml-0 md:pl-0">
+            {/* Timeline Item 1 */}
+            <div className="mb-12 relative md:flex items-center">
+              <div className="hidden md:block w-1/2 pr-8 text-right">
+                <h4 className="text-lg font-bold text-white">Sprint 1 (Week 1-2)</h4>
+                <p className="text-sm text-slate-400">基石與架構</p>
+              </div>
+              <div className="absolute left-[-5px] md:left-1/2 md:-ml-[5px] w-3 h-3 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.8)]"></div>
+              <div className="pl-8 md:w-1/2 md:pl-8">
+                <div className="md:hidden mb-2">
+                  <h4 className="text-lg font-bold text-white">Sprint 1 (Week 1-2)</h4>
+                  <p className="text-sm text-indigo-400">基石與架構</p>
+                </div>
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                  <p className="text-slate-400 text-sm">PRD 確認、Figma 完稿、資料庫 Schema 建立、前端 Component 共用庫搭建。</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline Item 2 */}
+            <div className="mb-12 relative md:flex items-center">
+              <div className="hidden md:block w-1/2 pr-8 text-right">
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                  <p className="text-slate-400 text-sm">完成 9 步核心 Prompt 的 API 串接與前端狀態連動（手動模式）。</p>
+                </div>
+              </div>
+              <div className="absolute left-[-5px] md:left-1/2 md:-ml-[5px] w-3 h-3 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
+              <div className="pl-8 md:w-1/2 md:pl-8">
+                <div className="md:hidden mb-2">
+                  <h4 className="text-lg font-bold text-white">Sprint 2 (Week 3-4)</h4>
+                  <p className="text-sm text-cyan-400">核心 AI 工作流串接</p>
+                </div>
+                <div className="md:hidden bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                  <p className="text-slate-400 text-sm">完成 9 步核心 Prompt 的 API 串接與前端狀態連動（手動模式）。</p>
+                </div>
+                <div className="hidden md:block">
+                  <h4 className="text-lg font-bold text-white">Sprint 2 (Week 3-4)</h4>
+                  <p className="text-sm text-slate-400">核心 AI 工作流串接</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline Item 3 */}
+            <div className="mb-12 relative md:flex items-center">
+              <div className="hidden md:block w-1/2 pr-8 text-right">
+                <h4 className="text-lg font-bold text-white">Sprint 3 (Week 5-6)</h4>
+                <p className="text-sm text-slate-400">自動化與 Notion 歸檔</p>
+              </div>
+              <div className="absolute left-[-5px] md:left-1/2 md:-ml-[5px] w-3 h-3 bg-purple-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.8)]"></div>
+              <div className="pl-8 md:w-1/2 md:pl-8">
+                <div className="md:hidden mb-2">
+                  <h4 className="text-lg font-bold text-white">Sprint 3 (Week 5-6)</h4>
+                  <p className="text-sm text-purple-400">自動化與 Notion 歸檔</p>
+                </div>
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                  <p className="text-slate-400 text-sm">實作一鍵全自動模式、Notion API 匯出、防呆與 Error Handling。</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Timeline Item 4 */}
+            <div className="relative md:flex items-center">
+              <div className="hidden md:block w-1/2 pr-8 text-right">
+                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                  <p className="text-slate-400 text-sm">Debug、效能優化、首頁 Dashboard 完善、製作專題發表 Demo 影片。</p>
+                </div>
+              </div>
+              <div className="absolute left-[-5px] md:left-1/2 md:-ml-[5px] w-3 h-3 bg-pink-500 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.8)]"></div>
+              <div className="pl-8 md:w-1/2 md:pl-8">
+                <div className="md:hidden mb-2">
+                  <h4 className="text-lg font-bold text-white">Sprint 4 (Week 7-8)</h4>
+                  <p className="text-sm text-pink-400">UI 打磨與發表準備</p>
+                </div>
+                <div className="md:hidden bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                  <p className="text-slate-400 text-sm">Debug、效能優化、首頁 Dashboard 完善、製作專題發表 Demo 影片。</p>
+                </div>
+                <div className="hidden md:block">
+                  <h4 className="text-lg font-bold text-white">Sprint 4 (Week 7-8)</h4>
+                  <p className="text-sm text-slate-400">UI 打磨與發表準備</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ✉️ Final CTA */}
+      <section id="join-form" className="py-24 px-6 bg-gradient-to-b from-slate-950 to-indigo-950 border-t border-slate-800 text-center">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">準備好打造你的代表作了嗎？</h2>
+          <p className="text-xl text-indigo-200 mb-12">
+            只要你有實作的熱情與解決問題的決心，我們一起在專案中變強！
+          </p>
+          
+          <form 
+            className="bg-slate-900/50 backdrop-blur-md border border-slate-700/50 p-8 rounded-2xl max-w-xl mx-auto text-left"
+            onSubmit={(e) => { e.preventDefault(); alert('感謝您的報名！PM 會盡快與您聯繫！'); }}
+          >
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">您的稱呼</label>
+                <input type="text" required className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="王小明" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">想應徵的角色</label>
+                <select className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
+                  <option>前端工程師 (Frontend)</option>
+                  <option>後端工程師 (Backend)</option>
+                  <option>UI/UX 設計師</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Github 或作品集連結</label>
+                <input type="url" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="https://github.com/..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">簡單說說為什麼想加入？</label>
+                <textarea rows="3" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="我想挑戰..."></textarea>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl transition-colors">
+                送出報名表單
+              </button>
+              <a href="/app" className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-3 px-4 rounded-xl transition-colors text-center">
+                先去玩玩看 Demo
+              </a>
+            </div>
+          </form>
+        </div>
+      </section>
+
     </div>
   );
 }

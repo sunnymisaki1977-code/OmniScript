@@ -9,9 +9,23 @@ export function createSafeParagraphBlocks(longText) {
 
   const MAX_LENGTH = 2000;
   const blocks = [];
+  
+  // 防呆：如果傳入的 longText 是物件，強制轉為字串
+  let textToProcess = longText;
+  if (typeof textToProcess === "object") {
+    try {
+      textToProcess = Object.entries(textToProcess)
+        .map(([k, v]) => Array.isArray(v) ? `【${k}】\n${v.join('\n')}` : `【${k}】\n${v}`)
+        .join('\n\n');
+    } catch(e) {
+      textToProcess = JSON.stringify(textToProcess, null, 2);
+    }
+  } else {
+    textToProcess = String(textToProcess);
+  }
 
   // 先用兩個換行符號或單個換行符號進行切割
-  const paragraphs = longText.split(/\n\n|\n/).filter((p) => p.trim() !== "");
+  const paragraphs = textToProcess.split(/\n\n|\n/).filter((p) => p.trim() !== "");
 
   for (const p of paragraphs) {
     if (p.length <= MAX_LENGTH) {

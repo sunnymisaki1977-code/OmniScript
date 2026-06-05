@@ -288,7 +288,22 @@ export default function Home() {
       
       for (let i = 1; i <= 9; i++) {
         setCurrentStep(i);
-        const stepContent = batchResult[`step${i}`] || "無內容";
+        let stepContent = batchResult[`step${i}`];
+        
+        // 防呆：如果 AI 回傳了 JSON 物件，強制轉為字串排版
+        if (stepContent && typeof stepContent === "object") {
+          try {
+            stepContent = Object.entries(stepContent)
+              .map(([k, v]) => Array.isArray(v) ? `【${k}】\n${v.join('\n')}` : `【${k}】\n${v}`)
+              .join('\n\n');
+          } catch(e) {
+            stepContent = JSON.stringify(stepContent, null, 2);
+          }
+        } else if (stepContent === undefined || stepContent === null) {
+          stepContent = "無內容";
+        } else {
+          stepContent = String(stepContent);
+        }
         
         currentContext = { ...currentContext, [`step${i}`]: stepContent };
         setStepData({...currentContext});

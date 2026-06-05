@@ -2,6 +2,8 @@ import { GoogleGenAI } from "@google/genai";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 60; // Next.js App Router 設定，延長 Vercel 預設截斷時間
+
 export async function POST(req) {
   try {
     const body = await req.json();

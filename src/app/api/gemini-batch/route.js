@@ -2,10 +2,9 @@ import { GoogleGenAI } from "@google/genai";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 60; // Next.js App Router 設定，延長 Vercel 預設截斷時間
+
 export async function POST(req) {
-  // 設定較長的 timeout 以免 Vercel 預設截斷 (如果有設定 maxDuration 的話)
-  // export const maxDuration = 60; // Next.js App Router 設定 (可選)
-  
   try {
     const body = await req.json();
     const { theme } = body;
@@ -74,7 +73,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Gemini Batch API Error:", error);
     return NextResponse.json(
-      { error: "Failed to generate batch content", details: error.message },
+      { error: `API 錯誤: ${error.message || "Failed to generate batch content"}` },
       { status: 500 }
     );
   }

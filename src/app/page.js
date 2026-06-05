@@ -306,7 +306,7 @@ export default function JoinPage() {
                 <div className="w-12 h-12 bg-blue-900/30 text-blue-400 rounded-xl flex items-center justify-center">
                   <Terminal className="w-6 h-6" />
                 </div>
-                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求 2-3 名</span>
+                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求 1 名</span>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">前端工程師 (Frontend)</h3>
               <p className="text-slate-400 text-sm mb-6 flex-1">
@@ -337,7 +337,7 @@ export default function JoinPage() {
                 <div className="w-12 h-12 bg-green-900/30 text-green-400 rounded-xl flex items-center justify-center">
                   <Database className="w-6 h-6" />
                 </div>
-                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求 1-2 名</span>
+                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求 1 名</span>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">後端工程師 (Backend)</h3>
               <p className="text-slate-400 text-sm mb-6 flex-1">
@@ -368,7 +368,7 @@ export default function JoinPage() {
                 <div className="w-12 h-12 bg-pink-900/30 text-pink-400 rounded-xl flex items-center justify-center">
                   <PenTool className="w-6 h-6" />
                 </div>
-                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求 1 名</span>
+                <span className="px-3 py-1 bg-slate-800 text-xs rounded-full">徵求各 1 名</span>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">UI/UX 設計師</h3>
               <p className="text-slate-400 text-sm mb-6 flex-1">

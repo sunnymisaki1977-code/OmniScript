@@ -31,10 +31,28 @@ export async function POST(req) {
     // Note: The new @google/genai SDK is used here
     const ai = new GoogleGenAI({ apiKey: apiKey });
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: finalPrompt,
-    });
+    // 自動重試機制 (最高 3 次) 處理 503 High Demand 錯誤
+    let response;
+    let retries = 3;
+    let delay = 2000;
+    while (retries > 0) {
+      try {
+        response = await ai.models.generateContent({
+          model: "gemini-2.0-flash", // 切換為更穩定的 2.0-flash
+          contents: finalPrompt,
+        });
+        break; // 成功則跳出迴圈
+      } catch (err) {
+        if (err.message && err.message.includes("503") && retries > 1) {
+          console.warn(`Model high demand, retrying in ${delay/1000}s... (${retries-1} attempts left)`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          retries--;
+          delay *= 2; // 指數退避 (Exponential backoff)
+        } else {
+          throw err; // 非 503 錯誤或重試耗盡，直接往外拋
+        }
+      }
+    }
 
     const generatedText = response.text || "";
 

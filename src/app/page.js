@@ -483,15 +483,13 @@ export default function JoinPage() {
                     </div>
                   ) : (
                     <>
-                      {isActive && (
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); startEdit(m); }}
-                          className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition-colors border border-slate-700"
-                          title="編輯此卡片"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                      )}
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); startEdit(m); }}
+                        className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition-colors border border-slate-700 shadow-sm"
+                        title="編輯此卡片"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
                       <h3 className="text-lg font-bold text-white mb-1 pr-8">{m.title}</h3>
                       <p className={`text-xs mb-4 font-medium tracking-wider ${isActive ? 'text-indigo-300' : 'text-slate-500'}`}>{m.label}</p>
                       

@@ -14,8 +14,41 @@ import {
   Sparkles,
   Zap
 } from "lucide-react";
+import { useState } from "react";
+
+const MILESTONES = [
+  {
+    id: 1,
+    title: "M1: 基石與架構搭建",
+    label: "INFRASTRUCTURE",
+    goal: "PRD 確認、Figma 完稿、資料庫 Schema 建立、前端 Component 共用庫搭建。",
+    condition: "確保前後端底層架構穩固，團隊對技術堆疊與資料流向達成共識。"
+  },
+  {
+    id: 2,
+    title: "M2: 核心工作流串接",
+    label: "CORE INTEGRATION",
+    goal: "完成 9 步核心 Prompt 的 API 串接與前端狀態連動（完成手動協作模式）。",
+    condition: "確保「鏈式記憶」資料傳遞無誤，API 串接穩定不報錯。"
+  },
+  {
+    id: 3,
+    title: "M3: 進階自動化與歸檔",
+    label: "AUTOMATION",
+    goal: "挑戰高難度的一鍵全自動模式、Notion API 匯出防護機制、完整的 Error Handling。",
+    condition: "複雜的非同步邏輯能順暢運行，極端操作下的防呆機制測試通過。"
+  },
+  {
+    id: 4,
+    title: "M4: 體驗打磨與發表",
+    label: "LAUNCH & POLISH",
+    goal: "全面 Debug、UI 微互動與載入狀態優化、首頁 Dashboard 完善、製作專題 Demo。",
+    condition: "介面達到 SaaS 商業級質感，準備在結訓發表會上驚豔全場。"
+  }
+];
 
 export default function JoinPage() {
+  const [currentMilestone, setCurrentMilestone] = useState(3);
   const handleScrollToForm = () => {
     const element = document.getElementById("join-form");
     if (element) {
@@ -336,88 +369,54 @@ export default function JoinPage() {
             {/* 連接線 (Desktop) */}
             <div className="hidden lg:block absolute top-12 left-0 w-full h-0.5 bg-slate-800 z-0"></div>
 
-            {/* Milestone 1 */}
-            <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl relative z-10 opacity-70 hover:opacity-100 transition-opacity">
-              <div className="w-12 h-12 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0">
-                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1">M1: 基石與架構搭建</h3>
-              <p className="text-xs text-slate-500 mb-4 font-medium tracking-wider">INFRASTRUCTURE</p>
+            {MILESTONES.map((m) => {
+              const isActive = currentMilestone === m.id;
+              const isPast = m.id < currentMilestone;
               
-              <div className="space-y-3">
-                <div className="bg-slate-800/50 p-3 rounded-lg">
-                  <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
-                  <p className="text-sm text-slate-300 leading-relaxed">PRD 確認、Figma 完稿、資料庫 Schema 建立、前端 Component 共用庫搭建。</p>
+              return (
+                <div 
+                  key={m.id}
+                  onClick={() => setCurrentMilestone(m.id)}
+                  className={`p-6 rounded-2xl relative z-10 cursor-pointer transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-indigo-950/40 border-2 border-indigo-500 transform md:-translate-y-2 shadow-[0_0_30px_rgba(79,70,229,0.2)]' 
+                      : 'bg-slate-900 border border-slate-700 opacity-70 hover:opacity-100 hover:-translate-y-1'
+                  }`}
+                >
+                  {isActive && (
+                    <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-indigo-500/50">
+                      <Rocket className="w-3 h-3" /> 當前進度
+                    </div>
+                  )}
+                  
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0 ${
+                    isActive ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.6)]' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {isActive ? (
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                    ) : isPast ? (
+                      <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                    ) : (
+                      <div className="w-3 h-3 bg-slate-700 rounded-full"></div>
+                    )}
+                  </div>
+                  
+                  <h3 className="text-lg font-bold text-white mb-1">{m.title}</h3>
+                  <p className={`text-xs mb-4 font-medium tracking-wider ${isActive ? 'text-indigo-300' : 'text-slate-500'}`}>{m.label}</p>
+                  
+                  <div className="space-y-3">
+                    <div className={`p-3 rounded-lg ${isActive ? 'bg-indigo-900/30 border border-indigo-500/30' : 'bg-slate-800/50'}`}>
+                      <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
+                      <p className={`text-sm leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-300'}`}>{m.goal}</p>
+                    </div>
+                    <div className={`p-3 rounded-lg border-l-2 ${isActive ? 'bg-slate-900/50 border-indigo-500' : 'bg-slate-800/50 border-emerald-500/50'}`}>
+                      <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
+                      <p className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-400'}`}>{m.condition}</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-slate-800/50 p-3 rounded-lg border-l-2 border-emerald-500/50">
-                  <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
-                  <p className="text-xs text-slate-400">確保前後端底層架構穩固，團隊對技術堆疊與資料流向達成共識。</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Milestone 2 */}
-            <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl relative z-10 opacity-70 hover:opacity-100 transition-opacity">
-              <div className="w-12 h-12 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0">
-                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1">M2: 核心工作流串接</h3>
-              <p className="text-xs text-slate-500 mb-4 font-medium tracking-wider">CORE INTEGRATION</p>
-              
-              <div className="space-y-3">
-                <div className="bg-slate-800/50 p-3 rounded-lg">
-                  <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
-                  <p className="text-sm text-slate-300 leading-relaxed">完成 9 步核心 Prompt 的 API 串接與前端狀態連動（完成手動協作模式）。</p>
-                </div>
-                <div className="bg-slate-800/50 p-3 rounded-lg border-l-2 border-emerald-500/50">
-                  <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
-                  <p className="text-xs text-slate-400">確保「鏈式記憶」資料傳遞無誤，API 串接穩定不報錯。</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Milestone 3 - CURRENT */}
-            <div className="bg-indigo-950/40 border-2 border-indigo-500 p-6 rounded-2xl relative z-10 transform md:-translate-y-2 shadow-[0_0_30px_rgba(79,70,229,0.2)]">
-              <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-indigo-500/50">
-                <Rocket className="w-3 h-3" /> 當前進度
-              </div>
-              <div className="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0 shadow-[0_0_20px_rgba(79,70,229,0.6)]">
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1">M3: 進階自動化與歸檔</h3>
-              <p className="text-xs text-indigo-300 mb-4 font-medium tracking-wider">AUTOMATION</p>
-              
-              <div className="space-y-3">
-                <div className="bg-indigo-900/30 p-3 rounded-lg border border-indigo-500/30">
-                  <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
-                  <p className="text-sm text-slate-200 leading-relaxed">挑戰高難度的一鍵全自動模式、Notion API 匯出防護機制、完整的 Error Handling。</p>
-                </div>
-                <div className="bg-slate-900/50 p-3 rounded-lg border-l-2 border-indigo-500">
-                  <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
-                  <p className="text-xs text-slate-300">複雜的非同步邏輯能順暢運行，極端操作下的防呆機制測試通過。</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Milestone 4 */}
-            <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative z-10 opacity-50">
-              <div className="w-12 h-12 bg-slate-950 text-slate-600 rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0">
-                <div className="w-3 h-3 bg-slate-700 rounded-full"></div>
-              </div>
-              <h3 className="text-lg font-bold text-white mb-1">M4: 體驗打磨與發表</h3>
-              <p className="text-xs text-slate-600 mb-4 font-medium tracking-wider">LAUNCH & POLISH</p>
-              
-              <div className="space-y-3">
-                <div className="bg-slate-800/30 p-3 rounded-lg">
-                  <div className="text-xs text-indigo-500 mb-1 font-bold">解鎖目標</div>
-                  <p className="text-sm text-slate-400 leading-relaxed">全面 Debug、UI 微互動與載入狀態優化、首頁 Dashboard 完善、製作專題 Demo。</p>
-                </div>
-                <div className="bg-slate-800/30 p-3 rounded-lg border-l-2 border-slate-700">
-                  <div className="text-xs text-emerald-600 mb-1 font-bold">推進條件</div>
-                  <p className="text-xs text-slate-500">介面達到 SaaS 商業級質感，準備在結訓發表會上驚豔全場。</p>
-                </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
 
           {/* PM Manifesto */}

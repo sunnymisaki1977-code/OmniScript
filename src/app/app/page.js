@@ -271,7 +271,14 @@ export default function Home() {
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Batch generation failed");
+      if (!res.ok) {
+        if (data.rawOutput) {
+          console.error("生成內容包含未預期格式，原始備份資料如下：\n", data.rawOutput);
+          localStorage.setItem("omni_error_dump", data.rawOutput);
+          alert(`雖然發生錯誤，但 AI 已經完成了部分生成！\n為避免您的心血白費，我已經將原始資料緊急備份到了瀏覽器的 LocalStorage (omni_error_dump) 與 F12 開發者工具的 Console 中。\n\n詳細錯誤：${data.error}`);
+        }
+        throw new Error(data.error || "Batch generation failed");
+      }
       
       const batchResult = data.result; 
       

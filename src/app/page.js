@@ -136,6 +136,12 @@ export default function JoinPage() {
               💻 體驗 OmniScript Demo
             </a>
           </div>
+          
+          <div className="mt-8">
+            <a href="/changelog" className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-medium text-sm transition-colors border-b border-transparent hover:border-indigo-400 pb-0.5">
+              <Sparkles className="w-4 h-4" /> 查看最新更新日誌 (v1.1.0)
+            </a>
+          </div>
         </div>
 
               </section>

@@ -407,6 +407,7 @@ export default function Home() {
                   </div>
                   <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">帳號設定</button>
                   <button onClick={() => { setIsAvatarOpen(false); setIsApiKeyModalOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">API 金鑰管理</button>
+                  <a href="/changelog" className="block w-full text-left px-4 py-2 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium">更新日誌 (Changelog)</a>
                   <button className="w-full text-left px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 mt-1 border-t border-slate-100 dark:border-slate-700 pt-3">登出</button>
                 </div>
               )}

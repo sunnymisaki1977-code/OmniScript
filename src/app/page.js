@@ -321,95 +321,113 @@ export default function JoinPage() {
         </div>
       </section>
 
-      {/* 📅 Section 4: Roadmap */}
-      <section className="py-24 px-6 relative">
-        <div className="max-w-4xl mx-auto">
+      {/* 📍 Section 4: Milestone Roadmap */}
+      <section className="py-24 px-6 relative bg-slate-900 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">開發時程與專案管理</h2>
-            <p className="text-slate-400">完整的規劃，確保這個團隊絕不爛尾</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">開發時程與專案管理</h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">
+              我們捨棄傳統死板的日曆，採用「里程碑解鎖」模式。<br/>團隊進度是由實際的開發品質來決定，而不是為了趕上死線而妥協。
+            </p>
           </div>
-          
-          <div className="relative border-l border-slate-800 ml-4 md:ml-0 md:pl-0">
-            {/* Timeline Item 1 */}
-            <div className="mb-12 relative md:flex items-center">
-              <div className="hidden md:block w-1/2 pr-8 text-right">
-                <h4 className="text-lg font-bold text-white">Sprint 1 (Week 1-2)</h4>
-                <p className="text-sm text-slate-400">基石與架構</p>
+
+          {/* Kanban / Milestone Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 relative">
+            {/* 連接線 (Desktop) */}
+            <div className="hidden lg:block absolute top-12 left-0 w-full h-0.5 bg-slate-800 z-0"></div>
+
+            {/* Milestone 1 */}
+            <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl relative z-10 opacity-70 hover:opacity-100 transition-opacity">
+              <div className="w-12 h-12 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0">
+                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               </div>
-              <div className="absolute left-[-5px] md:left-1/2 md:-ml-[5px] w-3 h-3 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.8)]"></div>
-              <div className="pl-8 md:w-1/2 md:pl-8">
-                <div className="md:hidden mb-2">
-                  <h4 className="text-lg font-bold text-white">Sprint 1 (Week 1-2)</h4>
-                  <p className="text-sm text-indigo-400">基石與架構</p>
+              <h3 className="text-lg font-bold text-white mb-1">M1: 基石與架構搭建</h3>
+              <p className="text-xs text-slate-500 mb-4 font-medium tracking-wider">INFRASTRUCTURE</p>
+              
+              <div className="space-y-3">
+                <div className="bg-slate-800/50 p-3 rounded-lg">
+                  <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
+                  <p className="text-sm text-slate-300 leading-relaxed">PRD 確認、Figma 完稿、資料庫 Schema 建立、前端 Component 共用庫搭建。</p>
                 </div>
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                  <p className="text-slate-400 text-sm">PRD 確認、Figma 完稿、資料庫 Schema 建立、前端 Component 共用庫搭建。</p>
+                <div className="bg-slate-800/50 p-3 rounded-lg border-l-2 border-emerald-500/50">
+                  <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
+                  <p className="text-xs text-slate-400">確保前後端底層架構穩固，團隊對技術堆疊與資料流向達成共識。</p>
                 </div>
               </div>
             </div>
 
-            {/* Timeline Item 2 */}
-            <div className="mb-12 relative md:flex items-center">
-              <div className="hidden md:block w-1/2 pr-8 text-right">
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                  <p className="text-slate-400 text-sm">完成 9 步核心 Prompt 的 API 串接與前端狀態連動（手動模式）。</p>
-                </div>
+            {/* Milestone 2 */}
+            <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl relative z-10 opacity-70 hover:opacity-100 transition-opacity">
+              <div className="w-12 h-12 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0">
+                <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               </div>
-              <div className="absolute left-[-5px] md:left-1/2 md:-ml-[5px] w-3 h-3 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
-              <div className="pl-8 md:w-1/2 md:pl-8">
-                <div className="md:hidden mb-2">
-                  <h4 className="text-lg font-bold text-white">Sprint 2 (Week 3-4)</h4>
-                  <p className="text-sm text-cyan-400">核心 AI 工作流串接</p>
+              <h3 className="text-lg font-bold text-white mb-1">M2: 核心工作流串接</h3>
+              <p className="text-xs text-slate-500 mb-4 font-medium tracking-wider">CORE INTEGRATION</p>
+              
+              <div className="space-y-3">
+                <div className="bg-slate-800/50 p-3 rounded-lg">
+                  <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
+                  <p className="text-sm text-slate-300 leading-relaxed">完成 9 步核心 Prompt 的 API 串接與前端狀態連動（完成手動協作模式）。</p>
                 </div>
-                <div className="md:hidden bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                  <p className="text-slate-400 text-sm">完成 9 步核心 Prompt 的 API 串接與前端狀態連動（手動模式）。</p>
-                </div>
-                <div className="hidden md:block">
-                  <h4 className="text-lg font-bold text-white">Sprint 2 (Week 3-4)</h4>
-                  <p className="text-sm text-slate-400">核心 AI 工作流串接</p>
+                <div className="bg-slate-800/50 p-3 rounded-lg border-l-2 border-emerald-500/50">
+                  <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
+                  <p className="text-xs text-slate-400">確保「鏈式記憶」資料傳遞無誤，API 串接穩定不報錯。</p>
                 </div>
               </div>
             </div>
 
-            {/* Timeline Item 3 */}
-            <div className="mb-12 relative md:flex items-center">
-              <div className="hidden md:block w-1/2 pr-8 text-right">
-                <h4 className="text-lg font-bold text-white">Sprint 3 (Week 5-6)</h4>
-                <p className="text-sm text-slate-400">自動化與 Notion 歸檔</p>
+            {/* Milestone 3 - CURRENT */}
+            <div className="bg-indigo-950/40 border-2 border-indigo-500 p-6 rounded-2xl relative z-10 transform md:-translate-y-2 shadow-[0_0_30px_rgba(79,70,229,0.2)]">
+              <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-indigo-500/50">
+                <Rocket className="w-3 h-3" /> 當前進度
               </div>
-              <div className="absolute left-[-5px] md:left-1/2 md:-ml-[5px] w-3 h-3 bg-purple-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.8)]"></div>
-              <div className="pl-8 md:w-1/2 md:pl-8">
-                <div className="md:hidden mb-2">
-                  <h4 className="text-lg font-bold text-white">Sprint 3 (Week 5-6)</h4>
-                  <p className="text-sm text-purple-400">自動化與 Notion 歸檔</p>
+              <div className="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0 shadow-[0_0_20px_rgba(79,70,229,0.6)]">
+                <div className="w-3 h-3 bg-white rounded-full"></div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">M3: 進階自動化與歸檔</h3>
+              <p className="text-xs text-indigo-300 mb-4 font-medium tracking-wider">AUTOMATION</p>
+              
+              <div className="space-y-3">
+                <div className="bg-indigo-900/30 p-3 rounded-lg border border-indigo-500/30">
+                  <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
+                  <p className="text-sm text-slate-200 leading-relaxed">挑戰高難度的一鍵全自動模式、Notion API 匯出防護機制、完整的 Error Handling。</p>
                 </div>
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                  <p className="text-slate-400 text-sm">實作一鍵全自動模式、Notion API 匯出、防呆與 Error Handling。</p>
+                <div className="bg-slate-900/50 p-3 rounded-lg border-l-2 border-indigo-500">
+                  <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
+                  <p className="text-xs text-slate-300">複雜的非同步邏輯能順暢運行，極端操作下的防呆機制測試通過。</p>
                 </div>
               </div>
             </div>
 
-            {/* Timeline Item 4 */}
-            <div className="relative md:flex items-center">
-              <div className="hidden md:block w-1/2 pr-8 text-right">
-                <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                  <p className="text-slate-400 text-sm">Debug、效能優化、首頁 Dashboard 完善、製作專題發表 Demo 影片。</p>
+            {/* Milestone 4 */}
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative z-10 opacity-50">
+              <div className="w-12 h-12 bg-slate-950 text-slate-600 rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0">
+                <div className="w-3 h-3 bg-slate-700 rounded-full"></div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">M4: 體驗打磨與發表</h3>
+              <p className="text-xs text-slate-600 mb-4 font-medium tracking-wider">LAUNCH & POLISH</p>
+              
+              <div className="space-y-3">
+                <div className="bg-slate-800/30 p-3 rounded-lg">
+                  <div className="text-xs text-indigo-500 mb-1 font-bold">解鎖目標</div>
+                  <p className="text-sm text-slate-400 leading-relaxed">全面 Debug、UI 微互動與載入狀態優化、首頁 Dashboard 完善、製作專題 Demo。</p>
+                </div>
+                <div className="bg-slate-800/30 p-3 rounded-lg border-l-2 border-slate-700">
+                  <div className="text-xs text-emerald-600 mb-1 font-bold">推進條件</div>
+                  <p className="text-xs text-slate-500">介面達到 SaaS 商業級質感，準備在結訓發表會上驚豔全場。</p>
                 </div>
               </div>
-              <div className="absolute left-[-5px] md:left-1/2 md:-ml-[5px] w-3 h-3 bg-pink-500 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.8)]"></div>
-              <div className="pl-8 md:w-1/2 md:pl-8">
-                <div className="md:hidden mb-2">
-                  <h4 className="text-lg font-bold text-white">Sprint 4 (Week 7-8)</h4>
-                  <p className="text-sm text-pink-400">UI 打磨與發表準備</p>
-                </div>
-                <div className="md:hidden bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                  <p className="text-slate-400 text-sm">Debug、效能優化、首頁 Dashboard 完善、製作專題發表 Demo 影片。</p>
-                </div>
-                <div className="hidden md:block">
-                  <h4 className="text-lg font-bold text-white">Sprint 4 (Week 7-8)</h4>
-                  <p className="text-sm text-slate-400">UI 打磨與發表準備</p>
-                </div>
-              </div>
+            </div>
+          </div>
+
+          {/* PM Manifesto */}
+          <div className="bg-gradient-to-r from-indigo-900/40 to-slate-900 border border-indigo-500/20 p-8 rounded-2xl max-w-4xl mx-auto flex gap-6 items-start shadow-xl">
+            <div className="text-5xl text-indigo-500/40 font-serif leading-none pt-2">"</div>
+            <div>
+              <h4 className="text-indigo-400 font-bold mb-3 text-lg tracking-wide">PM 專案管理宣言</h4>
+              <p className="text-slate-300 leading-relaxed text-lg italic">
+                我們採用「里程碑導向」的敏捷開發。進度是由團隊實際的開發品質來決定，而不是死板的日曆。卡關了我們就一起解決，穩紮穩打，確保每個人都能在專案中留下扎實的技術足跡！
+              </p>
             </div>
           </div>
         </div>

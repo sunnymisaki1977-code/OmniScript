@@ -20,6 +20,7 @@ import { useState, useEffect } from "react";
 const MILESTONES = [
   {
     id: 1,
+    status: "done",
     title: "M1: 基石與架構搭建",
     label: "INFRASTRUCTURE",
     goal: "PRD 確認、Figma 完稿、資料庫 Schema 建立、前端 Component 共用庫搭建。",
@@ -27,6 +28,7 @@ const MILESTONES = [
   },
   {
     id: 2,
+    status: "done",
     title: "M2: 核心工作流串接",
     label: "CORE INTEGRATION",
     goal: "完成 9 步核心 Prompt 的 API 串接與前端狀態連動（完成手動協作模式）。",
@@ -34,6 +36,7 @@ const MILESTONES = [
   },
   {
     id: 3,
+    status: "in-progress",
     title: "M3: 進階自動化與歸檔",
     label: "AUTOMATION",
     goal: "挑戰高難度的一鍵全自動模式、Notion API 匯出防護機制、完整的 Error Handling。",
@@ -41,6 +44,7 @@ const MILESTONES = [
   },
   {
     id: 4,
+    status: "todo",
     title: "M4: 體驗打磨與發表",
     label: "LAUNCH & POLISH",
     goal: "全面 Debug、UI 微互動與載入狀態優化、首頁 Dashboard 完善、製作專題 Demo。",
@@ -49,7 +53,6 @@ const MILESTONES = [
 ];
 
 export default function JoinPage() {
-  const [currentMilestone, setCurrentMilestone] = useState(3);
   const [milestones, setMilestones] = useState(MILESTONES);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -57,15 +60,11 @@ export default function JoinPage() {
   useEffect(() => {
     const savedMilestones = localStorage.getItem('omni_milestones');
     if (savedMilestones) setMilestones(JSON.parse(savedMilestones));
-    
-    const savedCurrent = localStorage.getItem('omni_current_milestone');
-    if (savedCurrent) setCurrentMilestone(parseInt(savedCurrent));
   }, []);
 
   const handleMilestoneClick = (id) => {
     if (editingId) return; // 編輯中不切換
-    setCurrentMilestone(id);
-    localStorage.setItem('omni_current_milestone', id.toString());
+    // 單擊卡片不再自動變成當前進度，改由編輯模式修改狀態
   };
 
   const startEdit = (m) => {
@@ -401,27 +400,30 @@ export default function JoinPage() {
             <div className="hidden lg:block absolute top-12 left-0 w-full h-0.5 bg-slate-800 z-0"></div>
 
             {milestones.map((m) => {
-              const isActive = currentMilestone === m.id;
-              const isPast = m.id < currentMilestone;
+              const isActive = m.status === 'in-progress';
+              const isPast = m.status === 'done';
               const isEditing = editingId === m.id;
               
               return (
                 <div 
                   key={m.id}
                   onClick={() => handleMilestoneClick(m.id)}
-                  className={`p-6 rounded-2xl relative z-10 ${!isEditing && 'cursor-pointer'} transition-all duration-300 ${
+                  className={`p-6 rounded-2xl relative z-10 transition-all duration-300 ${
                     isActive 
                       ? 'bg-indigo-950/40 border-2 border-indigo-500 transform md:-translate-y-2 shadow-[0_0_30px_rgba(79,70,229,0.2)]' 
-                      : 'bg-slate-900 border border-slate-700 opacity-70 hover:opacity-100 hover:-translate-y-1'
+                      : 'bg-slate-900 border border-slate-700 opacity-70'
                   }`}
                 >
-                  {isActive && !isEditing && (
-                    <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-indigo-500/50">
-                      <Rocket className="w-3 h-3" /> 當前進度
+                  {/* Status Badges */}
+                  {!isEditing && (
+                    <div className="absolute -top-3 left-6 flex gap-2">
+                      {m.status === 'todo' && <span className="bg-slate-800 text-slate-400 text-xs font-bold px-3 py-1 rounded-full shadow-lg border border-slate-700">⏳ 待辦</span>}
+                      {m.status === 'in-progress' && <span className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-lg shadow-indigo-500/50 flex items-center gap-1"><Rocket className="w-3 h-3" /> 進行中</span>}
+                      {m.status === 'done' && <span className="bg-emerald-600/20 text-emerald-500 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full shadow-lg">✅ 完成</span>}
                     </div>
                   )}
                   
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-6 border-4 border-slate-900 mx-auto lg:mx-0 ${
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-6 mt-2 border-4 border-slate-900 mx-auto lg:mx-0 ${
                     isActive ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.6)]' : 'bg-slate-800 text-slate-400'
                   }`}>
                     {isActive ? (
@@ -435,6 +437,18 @@ export default function JoinPage() {
                   
                   {isEditing ? (
                     <div className="space-y-3" onClick={e => e.stopPropagation()}>
+                      <div>
+                        <label className="text-[10px] text-slate-500">狀態</label>
+                        <select 
+                          value={editForm.status} 
+                          onChange={e => setEditForm({...editForm, status: e.target.value})} 
+                          className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                        >
+                          <option value="todo">⏳ 待辦</option>
+                          <option value="in-progress">🚀 進行中</option>
+                          <option value="done">✅ 完成</option>
+                        </select>
+                      </div>
                       <div>
                         <label className="text-[10px] text-slate-500">標題</label>
                         <input value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white text-sm" />

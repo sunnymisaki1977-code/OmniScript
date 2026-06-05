@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import ReferenceContext from "@/components/ReferenceContext";
 import EditorWorkspace from "@/components/EditorWorkspace";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
-import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon } from "lucide-react";
+import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X } from "lucide-react";
 
 const INSPIRATION_PILLS = [
   { icon: "💡", label: "隨機來點靈感", text: "未來十年的 AI 發展趨勢與職場衝擊" },
@@ -35,6 +35,9 @@ export default function Home() {
 
   const [isDark, setIsDark] = useState(false);
   
+  const [customApiKey, setCustomApiKey] = useState("");
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  
   // 初始化載入 LocalStorage 與主題
   useEffect(() => {
     setIsMounted(true);
@@ -47,6 +50,8 @@ export default function Home() {
       document.documentElement.classList.add('dark');
     }
     try {
+      const savedApiKey = localStorage.getItem("omniscript_api_key");
+      if (savedApiKey) setCustomApiKey(savedApiKey);
       // 遷移舊版資料或載入新版專案列表
       let savedProjects = [];
       const projectsRaw = localStorage.getItem("omniscript_projects");
@@ -195,7 +200,10 @@ export default function Home() {
     try {
       const res = await fetch("/api/gemini", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-gemini-api-key": customApiKey || ""
+        },
         body: JSON.stringify({ stepId, context }),
       });
       const data = await res.json();
@@ -254,7 +262,10 @@ export default function Home() {
       
       const res = await fetch("/api/gemini-batch", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-gemini-api-key": customApiKey || ""
+        },
         body: JSON.stringify({ theme }),
       });
       
@@ -316,6 +327,48 @@ export default function Home() {
 
   const currentStepConfig = WORKFLOW_STEPS.find((s) => s.id === currentStep);
 
+  const renderApiModal = () => {
+    if (!isApiKeyModalOpen) return null;
+    return (
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95">
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-indigo-500" /> API 金鑰管理
+            </h3>
+            <button onClick={() => setIsApiKeyModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="p-6 space-y-4 text-left">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">自訂 Gemini API Key</label>
+              <input 
+                type="password" 
+                value={customApiKey}
+                onChange={(e) => setCustomApiKey(e.target.value)}
+                placeholder="AIzaSy..."
+                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                您的金鑰僅會安全地儲存在本地瀏覽器中，不會上傳至任何伺服器。若留空，將使用系統預設金鑰。
+              </p>
+            </div>
+            <button 
+              onClick={() => {
+                localStorage.setItem("omniscript_api_key", customApiKey);
+                setIsApiKeyModalOpen(false);
+              }}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm"
+            >
+              儲存設定
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 防止伺服器端渲染與客戶端不一致
   if (!isMounted) return <div className="h-screen bg-slate-50 dark:bg-slate-900" />;
 
@@ -364,7 +417,7 @@ export default function Home() {
                     <p className="text-xs text-slate-500 dark:text-slate-400">Pro Plan</p>
                   </div>
                   <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">帳號設定</button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">API 金鑰管理</button>
+                  <button onClick={() => { setIsAvatarOpen(false); setIsApiKeyModalOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">API 金鑰管理</button>
                   <button className="w-full text-left px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 mt-1 border-t border-slate-100 dark:border-slate-700 pt-3">登出</button>
                 </div>
               )}
@@ -495,6 +548,7 @@ export default function Home() {
           )}
 
         </main>
+        {renderApiModal()}
       </div>
     );
   }
@@ -568,6 +622,7 @@ export default function Home() {
           </div>
         </div>
       )}
+      {renderApiModal()}
     </div>
   );
 }

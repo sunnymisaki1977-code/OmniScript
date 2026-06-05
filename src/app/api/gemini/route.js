@@ -12,10 +12,12 @@ export async function POST(req) {
       return NextResponse.json({ error: "Invalid step ID" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const customApiKey = req.headers.get("x-gemini-api-key");
+    const apiKey = customApiKey || process.env.GEMINI_API_KEY;
+    
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Gemini API key is not configured in environment variables." },
+        { error: "Gemini API key is not configured or provided." },
         { status: 500 }
       );
     }

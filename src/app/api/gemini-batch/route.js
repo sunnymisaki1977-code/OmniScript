@@ -10,10 +10,12 @@ export async function POST(req) {
     const body = await req.json();
     const { theme } = body;
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const customApiKey = req.headers.get("x-gemini-api-key");
+    const apiKey = customApiKey || process.env.GEMINI_API_KEY;
+    
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Gemini API key is not configured in environment variables." },
+        { error: "Gemini API key is not configured or provided." },
         { status: 500 }
       );
     }

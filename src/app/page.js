@@ -138,67 +138,7 @@ export default function JoinPage() {
           </div>
         </div>
 
-        {/* 具象化 CSS Dashboard Mockup */}
-        <div className="max-w-5xl mx-auto mt-24 relative z-10 perspective-1000">
-          <div className="rounded-2xl border border-slate-800 bg-[#0F172A] shadow-2xl overflow-hidden flex h-[400px] md:h-[500px] transform rotate-x-2 translate-y-4">
-            {/* 模擬 Sidebar */}
-            <div className="w-[240px] border-r border-slate-800 bg-slate-900/50 flex flex-col hidden md:flex">
-              <div className="p-5 border-b border-slate-800">
-                <div className="text-lg font-bold text-white flex items-center gap-2">
-                  <span className="text-indigo-500">✨</span> OmniScript
-                </div>
-              </div>
-              <div className="p-3 space-y-1">
-                {[
-                  "1. 專案目標",
-                  "2. 受眾輪廓",
-                  "3. 核心觀點",
-                  "4. 大綱結構",
-                  "5. 詳細腳本"
-                ].map((step, i) => (
-                  <div key={i} className={`flex items-center gap-3 p-2 rounded-lg text-sm ${i === 0 ? 'bg-indigo-900/30 text-indigo-300' : 'text-slate-500'}`}>
-                    <div className={`w-4 h-4 rounded-full border-2 ${i === 0 ? 'border-indigo-500' : 'border-slate-700'}`}></div>
-                    Step {step}
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* 模擬主畫面 */}
-            <div className="flex-1 flex flex-col relative bg-[#0F172A]">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-              {/* Global Header */}
-              <div className="h-14 border-b border-slate-800 flex justify-end items-center px-4 gap-4">
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-900/20 text-amber-500 text-xs rounded-full border border-amber-800/30">
-                  <Zap className="w-3 h-3" /> 125 點額度
-                </div>
-                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xs text-white font-bold">U</div>
-              </div>
-              {/* Dashboard Content */}
-              <div className="flex-1 flex flex-col items-center justify-center p-8">
-                <div className="w-full max-w-xl">
-                  <h2 className="text-2xl font-bold text-white text-center mb-2">開始新的 OmniScript 專案</h2>
-                  <p className="text-sm text-slate-400 text-center mb-6">輸入一個靈感，我們為你自動生成全套企劃</p>
-                  
-                  <div className="bg-slate-900 border border-slate-700 rounded-xl p-2 flex items-center gap-2 mb-4 shadow-inner">
-                    <span className="text-xl pl-2">✨</span>
-                    <div className="flex-1 text-slate-300 text-sm py-2">未來十年的 AI 發展趨勢與職場衝擊...</div>
-                  </div>
-                  
-                  <div className="flex justify-center gap-2 mb-8">
-                    <div className="px-3 py-1 bg-slate-800 text-slate-300 text-xs rounded-full border border-slate-700">💡 隨機來點靈感</div>
-                    <div className="px-3 py-1 bg-slate-800 text-slate-300 text-xs rounded-full border border-slate-700">📈 科技趨勢解說</div>
-                  </div>
-                  
-                  <div className="flex justify-center gap-3">
-                    <div className="px-6 py-2.5 bg-slate-800 text-slate-300 rounded-lg text-sm font-medium border border-slate-700">手動協作模式</div>
-                    <div className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-indigo-900/50">一鍵全自動模式 ✨</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+        
 
       {/* 🎯 Section 1: Value Proposition */}
       <section className="py-24 bg-slate-900 px-6 relative z-10 border-t border-slate-800">

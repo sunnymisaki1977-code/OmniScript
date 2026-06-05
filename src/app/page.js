@@ -138,7 +138,135 @@ export default function JoinPage() {
           </div>
         </div>
 
-        
+              </section>
+
+      {/* 📍 Section 4: Milestone Roadmap */}
+      <section className="py-24 px-6 relative bg-slate-900 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">開發時程與專案管理</h2>
+            <p className="text-slate-400 max-w-2xl mx-auto">
+              我們捨棄傳統死板的日曆，採用「里程碑解鎖」模式。<br/>團隊進度是由實際的開發品質來決定，而不是為了趕上死線而妥協。
+            </p>
+          </div>
+
+          {/* Kanban / Milestone Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 relative">
+            {/* 連接線 (Desktop) */}
+            <div className="hidden lg:block absolute top-12 left-0 w-full h-0.5 bg-slate-800 z-0"></div>
+
+            {milestones.map((m) => {
+              const isActive = m.status === 'in-progress';
+              const isPast = m.status === 'done';
+              const isEditing = editingId === m.id;
+              
+              return (
+                <div 
+                  key={m.id}
+                  onClick={() => handleMilestoneClick(m.id)}
+                  className={`p-6 rounded-2xl relative z-10 transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-indigo-950/40 border-2 border-indigo-500 transform md:-translate-y-2 shadow-[0_0_30px_rgba(79,70,229,0.2)]' 
+                      : 'bg-slate-900 border border-slate-700 opacity-70'
+                  }`}
+                >
+                  {/* Status Badges */}
+                  {!isEditing && (
+                    <div className="absolute -top-3 left-6 flex gap-2">
+                      {m.status === 'todo' && <span className="bg-slate-800 text-slate-400 text-xs font-bold px-3 py-1 rounded-full shadow-lg border border-slate-700">⏳ 待辦</span>}
+                      {m.status === 'in-progress' && <span className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-lg shadow-indigo-500/50 flex items-center gap-1"><Rocket className="w-3 h-3" /> 進行中</span>}
+                      {m.status === 'done' && <span className="bg-emerald-600/20 text-emerald-500 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full shadow-lg">✅ 完成</span>}
+                    </div>
+                  )}
+                  
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-6 mt-2 border-4 border-slate-900 mx-auto lg:mx-0 ${
+                    isActive ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.6)]' : 'bg-slate-800 text-slate-400'
+                  }`}>
+                    {isActive ? (
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                    ) : isPast ? (
+                      <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                    ) : (
+                      <div className="w-3 h-3 bg-slate-700 rounded-full"></div>
+                    )}
+                  </div>
+                  
+                  {isEditing ? (
+                    <div className="space-y-3" onClick={e => e.stopPropagation()}>
+                      <div>
+                        <label className="text-[10px] text-slate-500">狀態</label>
+                        <select 
+                          value={editForm.status} 
+                          onChange={e => setEditForm({...editForm, status: e.target.value})} 
+                          className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white text-sm focus:outline-none focus:border-indigo-500"
+                        >
+                          <option value="todo">⏳ 待辦</option>
+                          <option value="in-progress">🚀 進行中</option>
+                          <option value="done">✅ 完成</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500">標題</label>
+                        <input value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500">英文小標</label>
+                        <input value={editForm.label} onChange={e => setEditForm({...editForm, label: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-indigo-300 text-xs" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-indigo-400">解鎖目標</label>
+                        <textarea rows={2} value={editForm.goal} onChange={e => setEditForm({...editForm, goal: e.target.value})} className="w-full bg-slate-950 border border-indigo-900/50 rounded p-2 text-slate-200 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-emerald-400">推進條件</label>
+                        <textarea rows={2} value={editForm.condition} onChange={e => setEditForm({...editForm, condition: e.target.value})} className="w-full bg-slate-950 border border-emerald-900/50 rounded p-2 text-slate-300 text-xs" />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg py-2 text-sm font-bold transition-colors">儲存修改</button>
+                        <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-lg py-2 text-sm transition-colors">取消</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); startEdit(m); }}
+                        className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition-colors border border-slate-700 shadow-sm"
+                        title="編輯此卡片"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <h3 className="text-lg font-bold text-white mb-1 pr-8">{m.title}</h3>
+                      <p className={`text-xs mb-4 font-medium tracking-wider ${isActive ? 'text-indigo-300' : 'text-slate-500'}`}>{m.label}</p>
+                      
+                      <div className="space-y-3">
+                        <div className={`p-3 rounded-lg ${isActive ? 'bg-indigo-900/30 border border-indigo-500/30' : 'bg-slate-800/50'}`}>
+                          <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
+                          <p className={`text-sm leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-300'}`}>{m.goal}</p>
+                        </div>
+                        <div className={`p-3 rounded-lg border-l-2 ${isActive ? 'bg-slate-900/50 border-indigo-500' : 'bg-slate-800/50 border-emerald-500/50'}`}>
+                          <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
+                          <p className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-400'}`}>{m.condition}</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* PM Manifesto */}
+          <div className="bg-gradient-to-r from-indigo-900/40 to-slate-900 border border-indigo-500/20 p-8 rounded-2xl max-w-4xl mx-auto flex gap-6 items-start shadow-xl">
+            <div className="text-5xl text-indigo-500/40 font-serif leading-none pt-2">"</div>
+            <div>
+              <h4 className="text-indigo-400 font-bold mb-3 text-lg tracking-wide">PM 專案管理宣言</h4>
+              <p className="text-slate-300 leading-relaxed text-lg italic">
+                我們採用「里程碑導向」的敏捷開發。進度是由團隊實際的開發品質來決定，而不是死板的日曆。卡關了我們就一起解決，穩紮穩打，確保每個人都能在專案中留下扎實的技術足跡！
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 🎯 Section 1: Value Proposition */}
       <section className="py-24 bg-slate-900 px-6 relative z-10 border-t border-slate-800">
@@ -335,133 +463,7 @@ export default function JoinPage() {
         </div>
       </section>
 
-      {/* 📍 Section 4: Milestone Roadmap */}
-      <section className="py-24 px-6 relative bg-slate-900 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">開發時程與專案管理</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              我們捨棄傳統死板的日曆，採用「里程碑解鎖」模式。<br/>團隊進度是由實際的開發品質來決定，而不是為了趕上死線而妥協。
-            </p>
-          </div>
-
-          {/* Kanban / Milestone Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 relative">
-            {/* 連接線 (Desktop) */}
-            <div className="hidden lg:block absolute top-12 left-0 w-full h-0.5 bg-slate-800 z-0"></div>
-
-            {milestones.map((m) => {
-              const isActive = m.status === 'in-progress';
-              const isPast = m.status === 'done';
-              const isEditing = editingId === m.id;
-              
-              return (
-                <div 
-                  key={m.id}
-                  onClick={() => handleMilestoneClick(m.id)}
-                  className={`p-6 rounded-2xl relative z-10 transition-all duration-300 ${
-                    isActive 
-                      ? 'bg-indigo-950/40 border-2 border-indigo-500 transform md:-translate-y-2 shadow-[0_0_30px_rgba(79,70,229,0.2)]' 
-                      : 'bg-slate-900 border border-slate-700 opacity-70'
-                  }`}
-                >
-                  {/* Status Badges */}
-                  {!isEditing && (
-                    <div className="absolute -top-3 left-6 flex gap-2">
-                      {m.status === 'todo' && <span className="bg-slate-800 text-slate-400 text-xs font-bold px-3 py-1 rounded-full shadow-lg border border-slate-700">⏳ 待辦</span>}
-                      {m.status === 'in-progress' && <span className="bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse shadow-lg shadow-indigo-500/50 flex items-center gap-1"><Rocket className="w-3 h-3" /> 進行中</span>}
-                      {m.status === 'done' && <span className="bg-emerald-600/20 text-emerald-500 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full shadow-lg">✅ 完成</span>}
-                    </div>
-                  )}
-                  
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-6 mt-2 border-4 border-slate-900 mx-auto lg:mx-0 ${
-                    isActive ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.6)]' : 'bg-slate-800 text-slate-400'
-                  }`}>
-                    {isActive ? (
-                      <div className="w-3 h-3 bg-white rounded-full"></div>
-                    ) : isPast ? (
-                      <CheckCircle2 className="w-6 h-6 text-emerald-500" />
-                    ) : (
-                      <div className="w-3 h-3 bg-slate-700 rounded-full"></div>
-                    )}
-                  </div>
-                  
-                  {isEditing ? (
-                    <div className="space-y-3" onClick={e => e.stopPropagation()}>
-                      <div>
-                        <label className="text-[10px] text-slate-500">狀態</label>
-                        <select 
-                          value={editForm.status} 
-                          onChange={e => setEditForm({...editForm, status: e.target.value})} 
-                          className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white text-sm focus:outline-none focus:border-indigo-500"
-                        >
-                          <option value="todo">⏳ 待辦</option>
-                          <option value="in-progress">🚀 進行中</option>
-                          <option value="done">✅ 完成</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-slate-500">標題</label>
-                        <input value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white text-sm" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-slate-500">英文小標</label>
-                        <input value={editForm.label} onChange={e => setEditForm({...editForm, label: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-indigo-300 text-xs" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-indigo-400">解鎖目標</label>
-                        <textarea rows={2} value={editForm.goal} onChange={e => setEditForm({...editForm, goal: e.target.value})} className="w-full bg-slate-950 border border-indigo-900/50 rounded p-2 text-slate-200 text-sm" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-emerald-400">推進條件</label>
-                        <textarea rows={2} value={editForm.condition} onChange={e => setEditForm({...editForm, condition: e.target.value})} className="w-full bg-slate-950 border border-emerald-900/50 rounded p-2 text-slate-300 text-xs" />
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg py-2 text-sm font-bold transition-colors">儲存修改</button>
-                        <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-lg py-2 text-sm transition-colors">取消</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); startEdit(m); }}
-                        className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition-colors border border-slate-700 shadow-sm"
-                        title="編輯此卡片"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <h3 className="text-lg font-bold text-white mb-1 pr-8">{m.title}</h3>
-                      <p className={`text-xs mb-4 font-medium tracking-wider ${isActive ? 'text-indigo-300' : 'text-slate-500'}`}>{m.label}</p>
-                      
-                      <div className="space-y-3">
-                        <div className={`p-3 rounded-lg ${isActive ? 'bg-indigo-900/30 border border-indigo-500/30' : 'bg-slate-800/50'}`}>
-                          <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
-                          <p className={`text-sm leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-300'}`}>{m.goal}</p>
-                        </div>
-                        <div className={`p-3 rounded-lg border-l-2 ${isActive ? 'bg-slate-900/50 border-indigo-500' : 'bg-slate-800/50 border-emerald-500/50'}`}>
-                          <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
-                          <p className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-400'}`}>{m.condition}</p>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* PM Manifesto */}
-          <div className="bg-gradient-to-r from-indigo-900/40 to-slate-900 border border-indigo-500/20 p-8 rounded-2xl max-w-4xl mx-auto flex gap-6 items-start shadow-xl">
-            <div className="text-5xl text-indigo-500/40 font-serif leading-none pt-2">"</div>
-            <div>
-              <h4 className="text-indigo-400 font-bold mb-3 text-lg tracking-wide">PM 專案管理宣言</h4>
-              <p className="text-slate-300 leading-relaxed text-lg italic">
-                我們採用「里程碑導向」的敏捷開發。進度是由團隊實際的開發品質來決定，而不是死板的日曆。卡關了我們就一起解決，穩紮穩打，確保每個人都能在專案中留下扎實的技術足跡！
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* ✉️ Final CTA */}
       <section id="join-form" className="py-24 px-6 bg-gradient-to-b from-slate-950 to-indigo-950 border-t border-slate-800 text-center">

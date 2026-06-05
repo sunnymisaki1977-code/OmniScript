@@ -37,6 +37,7 @@ export default function Home() {
   
   const [customApiKey, setCustomApiKey] = useState("");
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+  const [activeInputMode, setActiveInputMode] = useState(null);
   
   // 初始化載入 LocalStorage 與主題
   useEffect(() => {

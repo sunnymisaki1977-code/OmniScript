@@ -79,6 +79,20 @@ export function createHeading2Block(text) {
 }
 
 export function createCodeBlock(text) {
+  let safeText = text;
+  if (typeof safeText === "object") {
+    try {
+      safeText = JSON.stringify(safeText, null, 2);
+    } catch(e) {
+      safeText = String(safeText);
+    }
+  } else {
+    safeText = String(safeText || "");
+  }
+  
+  // Notion API limit for rich_text content is 2000 characters.
+  safeText = safeText.substring(0, 2000);
+  
   return {
     object: "block",
     type: "code",
@@ -87,7 +101,7 @@ export function createCodeBlock(text) {
         {
           type: "text",
           text: {
-            content: text,
+            content: safeText,
           },
         },
       ],

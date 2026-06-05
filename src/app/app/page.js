@@ -230,7 +230,9 @@ export default function Home() {
         body: JSON.stringify({ context: payloadContext }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Export failed");
+      if (!res.ok) {
+        throw new Error(data.details || data.error || "Export failed");
+      }
       
       setNotionStatus(data.url);
       setArchivedUrl(data.url);
@@ -257,60 +259,24 @@ export default function Home() {
     setStepData({});
     setCompletedSteps([]);
     
+    let currentContext = { theme };
+    let currentCompleted = [];
+    
     try {
-      setCurrentStep(1);
-      setIsLoading(true);
-      
-      const res = await fetch("/api/gemini-batch", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "x-gemini-api-key": customApiKey || ""
-        },
-        body: JSON.stringify({ theme }),
-      });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        if (data.rawOutput) {
-          console.error("生成內容包含未預期格式，原始備份資料如下：\n", data.rawOutput);
-          localStorage.setItem("omni_error_dump", data.rawOutput);
-          alert(`雖然發生錯誤，但 AI 已經完成了部分生成！\n為避免您的心血白費，我已經將原始資料緊急備份到了瀏覽器的 LocalStorage (omni_error_dump) 與 F12 開發者工具的 Console 中。\n\n詳細錯誤：${data.error}`);
-        }
-        throw new Error(data.error || "Batch generation failed");
-      }
-      
-      const batchResult = data.result; 
-      
-      setIsLoading(false);
-      let currentContext = { theme };
-      let currentCompleted = [];
-      
       for (let i = 1; i <= 9; i++) {
-        setCurrentStep(i);
-        let stepContent = batchResult[`step${i}`];
+        setCurrentStep(i); // 讓左側選單與畫面跟著移動
         
-        // 防呆：如果 AI 回傳了 JSON 物件，強制轉為字串排版
-        if (stepContent && typeof stepContent === "object") {
-          try {
-            stepContent = Object.entries(stepContent)
-              .map(([k, v]) => Array.isArray(v) ? `【${k}】\n${v.join('\n')}` : `【${k}】\n${v}`)
-              .join('\n\n');
-          } catch(e) {
-            stepContent = JSON.stringify(stepContent, null, 2);
-          }
-        } else if (stepContent === undefined || stepContent === null) {
-          stepContent = "無內容";
-        } else {
-          stepContent = String(stepContent);
-        }
+        // 使用現有的 generateContent 單步生成函數
+        const result = await generateContent(i, currentContext);
         
-        currentContext = { ...currentContext, [`step${i}`]: stepContent };
-        setStepData({...currentContext});
+        // 同步最新的 Context，供下一步參考
+        currentContext = { ...currentContext, [`step${i}`]: result };
         
+        // 標記此步驟已完成
         currentCompleted.push(i);
         setCompletedSteps([...currentCompleted]);
         
+        // 稍作停頓讓畫面有切換的呼吸感
         await new Promise(resolve => setTimeout(resolve, 800));
       }
       
@@ -319,7 +285,7 @@ export default function Home() {
       
     } catch (error) {
       console.error("自動生成中斷:", error);
-      alert("自動生成失敗: " + error.message);
+      alert("自動生成意外中斷！但不用擔心，已經為您保留了中斷前生成的所有卡片資料，您可以點選左側步驟查看或重新生成。");
     } finally {
       setIsAutoRunning(false);
       setIsLoading(false);

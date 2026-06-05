@@ -108,7 +108,7 @@ export default function JoinPage() {
         <div className="max-w-6xl mx-auto relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8">
             <Sparkles className="w-4 h-4" />
-            <span>2024 結訓專題戰隊招募中</span>
+            <span>2026 結訓專題</span>
           </div>
           
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-8 leading-tight">

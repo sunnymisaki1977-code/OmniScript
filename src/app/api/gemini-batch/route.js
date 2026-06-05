@@ -46,14 +46,14 @@ export async function POST(req) {
 
     const ai = new GoogleGenAI({ apiKey: apiKey });
 
-    // 自動重試機制 (最高 3 次) 處理 503 High Demand 錯誤
+    // 自動重試機制 (最高 3 次) 處理 503/429 錯誤
     let response;
     let retries = 3;
     let delay = 2000;
     while (retries > 0) {
       try {
         response = await ai.models.generateContent({
-          model: "gemini-2.0-flash", // 切換為更穩定的 2.0-flash
+          model: "gemini-1.5-flash", // 切換為 1.5-flash，因為 2.0 可能有 quota limit 0 的問題
           contents: masterPrompt,
           config: {
             responseMimeType: "application/json",
@@ -61,13 +61,13 @@ export async function POST(req) {
         });
         break; // 成功則跳出迴圈
       } catch (err) {
-        if (err.message && err.message.includes("503") && retries > 1) {
-          console.warn(`Model high demand, retrying in ${delay/1000}s... (${retries-1} attempts left)`);
+        if (err.message && (err.message.includes("503") || err.message.includes("429")) && retries > 1) {
+          console.warn(`Model busy or rate limited, retrying in ${delay/1000}s... (${retries-1} attempts left)`);
           await new Promise(resolve => setTimeout(resolve, delay));
           retries--;
           delay *= 2; // 指數退避 (Exponential backoff)
         } else {
-          throw err; // 非 503 錯誤或重試耗盡，直接往外拋
+          throw err; // 其他錯誤或重試耗盡，直接往外拋
         }
       }
     }

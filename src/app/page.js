@@ -12,9 +12,10 @@ import {
   Code2,
   CheckCircle2,
   Sparkles,
-  Zap
+  Zap,
+  Pencil
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const MILESTONES = [
   {
@@ -49,6 +50,36 @@ const MILESTONES = [
 
 export default function JoinPage() {
   const [currentMilestone, setCurrentMilestone] = useState(3);
+  const [milestones, setMilestones] = useState(MILESTONES);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({});
+
+  useEffect(() => {
+    const savedMilestones = localStorage.getItem('omni_milestones');
+    if (savedMilestones) setMilestones(JSON.parse(savedMilestones));
+    
+    const savedCurrent = localStorage.getItem('omni_current_milestone');
+    if (savedCurrent) setCurrentMilestone(parseInt(savedCurrent));
+  }, []);
+
+  const handleMilestoneClick = (id) => {
+    if (editingId) return; // 編輯中不切換
+    setCurrentMilestone(id);
+    localStorage.setItem('omni_current_milestone', id.toString());
+  };
+
+  const startEdit = (m) => {
+    setEditingId(m.id);
+    setEditForm(m);
+  };
+
+  const handleSave = () => {
+    const updated = milestones.map(m => m.id === editingId ? editForm : m);
+    setMilestones(updated);
+    localStorage.setItem('omni_milestones', JSON.stringify(updated));
+    setEditingId(null);
+  };
+
   const handleScrollToForm = () => {
     const element = document.getElementById("join-form");
     if (element) {
@@ -369,21 +400,22 @@ export default function JoinPage() {
             {/* 連接線 (Desktop) */}
             <div className="hidden lg:block absolute top-12 left-0 w-full h-0.5 bg-slate-800 z-0"></div>
 
-            {MILESTONES.map((m) => {
+            {milestones.map((m) => {
               const isActive = currentMilestone === m.id;
               const isPast = m.id < currentMilestone;
+              const isEditing = editingId === m.id;
               
               return (
                 <div 
                   key={m.id}
-                  onClick={() => setCurrentMilestone(m.id)}
-                  className={`p-6 rounded-2xl relative z-10 cursor-pointer transition-all duration-300 ${
+                  onClick={() => handleMilestoneClick(m.id)}
+                  className={`p-6 rounded-2xl relative z-10 ${!isEditing && 'cursor-pointer'} transition-all duration-300 ${
                     isActive 
                       ? 'bg-indigo-950/40 border-2 border-indigo-500 transform md:-translate-y-2 shadow-[0_0_30px_rgba(79,70,229,0.2)]' 
                       : 'bg-slate-900 border border-slate-700 opacity-70 hover:opacity-100 hover:-translate-y-1'
                   }`}
                 >
-                  {isActive && (
+                  {isActive && !isEditing && (
                     <div className="absolute -top-3 right-4 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse flex items-center gap-1 shadow-lg shadow-indigo-500/50">
                       <Rocket className="w-3 h-3" /> 當前進度
                     </div>
@@ -401,19 +433,55 @@ export default function JoinPage() {
                     )}
                   </div>
                   
-                  <h3 className="text-lg font-bold text-white mb-1">{m.title}</h3>
-                  <p className={`text-xs mb-4 font-medium tracking-wider ${isActive ? 'text-indigo-300' : 'text-slate-500'}`}>{m.label}</p>
-                  
-                  <div className="space-y-3">
-                    <div className={`p-3 rounded-lg ${isActive ? 'bg-indigo-900/30 border border-indigo-500/30' : 'bg-slate-800/50'}`}>
-                      <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
-                      <p className={`text-sm leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-300'}`}>{m.goal}</p>
+                  {isEditing ? (
+                    <div className="space-y-3" onClick={e => e.stopPropagation()}>
+                      <div>
+                        <label className="text-[10px] text-slate-500">標題</label>
+                        <input value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-white text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500">英文小標</label>
+                        <input value={editForm.label} onChange={e => setEditForm({...editForm, label: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-indigo-300 text-xs" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-indigo-400">解鎖目標</label>
+                        <textarea rows={2} value={editForm.goal} onChange={e => setEditForm({...editForm, goal: e.target.value})} className="w-full bg-slate-950 border border-indigo-900/50 rounded p-2 text-slate-200 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-emerald-400">推進條件</label>
+                        <textarea rows={2} value={editForm.condition} onChange={e => setEditForm({...editForm, condition: e.target.value})} className="w-full bg-slate-950 border border-emerald-900/50 rounded p-2 text-slate-300 text-xs" />
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg py-2 text-sm font-bold transition-colors">儲存修改</button>
+                        <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-lg py-2 text-sm transition-colors">取消</button>
+                      </div>
                     </div>
-                    <div className={`p-3 rounded-lg border-l-2 ${isActive ? 'bg-slate-900/50 border-indigo-500' : 'bg-slate-800/50 border-emerald-500/50'}`}>
-                      <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
-                      <p className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-400'}`}>{m.condition}</p>
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      {isActive && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); startEdit(m); }}
+                          className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition-colors border border-slate-700"
+                          title="編輯此卡片"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      )}
+                      <h3 className="text-lg font-bold text-white mb-1 pr-8">{m.title}</h3>
+                      <p className={`text-xs mb-4 font-medium tracking-wider ${isActive ? 'text-indigo-300' : 'text-slate-500'}`}>{m.label}</p>
+                      
+                      <div className="space-y-3">
+                        <div className={`p-3 rounded-lg ${isActive ? 'bg-indigo-900/30 border border-indigo-500/30' : 'bg-slate-800/50'}`}>
+                          <div className="text-xs text-indigo-400 mb-1 font-bold">解鎖目標</div>
+                          <p className={`text-sm leading-relaxed ${isActive ? 'text-slate-200' : 'text-slate-300'}`}>{m.goal}</p>
+                        </div>
+                        <div className={`p-3 rounded-lg border-l-2 ${isActive ? 'bg-slate-900/50 border-indigo-500' : 'bg-slate-800/50 border-emerald-500/50'}`}>
+                          <div className="text-xs text-emerald-400 mb-1 font-bold">推進條件</div>
+                          <p className={`text-xs ${isActive ? 'text-slate-300' : 'text-slate-400'}`}>{m.condition}</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}

@@ -59,7 +59,18 @@ export default function JoinPage() {
 
   useEffect(() => {
     const savedMilestones = localStorage.getItem('omni_milestones');
-    if (savedMilestones) setMilestones(JSON.parse(savedMilestones));
+    if (savedMilestones) {
+      const parsed = JSON.parse(savedMilestones);
+      // 自動補齊舊版資料缺少的 status 欄位
+      const migrated = parsed.map(m => {
+        if (!m.status) {
+          const defaultStatus = MILESTONES.find(dm => dm.id === m.id)?.status || 'todo';
+          return { ...m, status: defaultStatus };
+        }
+        return m;
+      });
+      setMilestones(migrated);
+    }
   }, []);
 
   const handleMilestoneClick = (id) => {

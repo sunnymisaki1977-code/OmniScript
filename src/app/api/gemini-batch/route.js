@@ -76,14 +76,26 @@ export async function POST(req) {
 
     const generatedText = response.text || "{}";
     
+    // 去除可能的 markdown 區塊標記 (例如 ```json 和 ```)
+    let cleanText = generatedText.trim();
+    if (cleanText.startsWith("```json")) {
+      cleanText = cleanText.replace(/^```json\s*/, "");
+    } else if (cleanText.startsWith("```")) {
+      cleanText = cleanText.replace(/^```\s*/, "");
+    }
+    if (cleanText.endsWith("```")) {
+      cleanText = cleanText.replace(/\s*```$/, "");
+    }
+    cleanText = cleanText.trim();
+
     // 解析 JSON
     let parsedResult;
     try {
-      parsedResult = JSON.parse(generatedText);
+      parsedResult = JSON.parse(cleanText);
     } catch (e) {
       console.error("JSON 解析失敗，原始回應:", generatedText);
       return NextResponse.json(
-        { error: "AI 回傳的格式不正確，無法解析為 JSON。" },
+        { error: "AI 回傳的格式不正確，無法解析為 JSON。內容可能過大被截斷，或包含非預期的符號。" },
         { status: 500 }
       );
     }

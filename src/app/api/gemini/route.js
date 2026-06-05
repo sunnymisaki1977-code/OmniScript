@@ -37,8 +37,10 @@ export async function POST(req) {
     let delay = 2000;
     while (retries > 0) {
       try {
+        // 如果重試最後一次，降級為 lite 版本以提高成功率
+        const modelName = retries === 1 ? "gemini-2.5-flash-lite" : "gemini-2.5-flash";
         response = await ai.models.generateContent({
-          model: "gemini-1.5-flash", // 切換為 1.5-flash 避免 2.0 quota limit 0 問題
+          model: modelName,
           contents: finalPrompt,
         });
         break; // 成功則跳出迴圈

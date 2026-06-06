@@ -26,12 +26,9 @@ export default function Sidebar({ steps, currentStep, theme, onStepClick, comple
   return (
     <div className="w-[280px] h-screen shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex flex-col">
       <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <span className="text-indigo-600">✨</span> OmniScript
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 truncate" title={theme || "OmniScript"}>
+          <span className="text-indigo-600">✨</span> {theme || "OmniScript"}
         </h1>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 truncate" title={theme}>
-          {theme ? `專案: ${theme}` : "尚未設定主題"}
-        </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">

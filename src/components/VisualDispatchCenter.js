@@ -1,23 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Copy, ExternalLink, Image as ImageIcon, Smartphone, AlertCircle, CheckCircle2, Cloud } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Copy, ExternalLink, Image as ImageIcon, Smartphone, AlertCircle, CheckCircle2, Cloud, Upload } from "lucide-react";
 
 // 解析 Markdown 資料
 const parseVisualData = (text, type) => {
   if (!text) return [];
   
-  // 以 ### 作為區塊分割點
   const blocks = text.split(/###\s+/).filter(b => b.trim().length > 0);
   
   return blocks.map((block, index) => {
-    // 嘗試提取欄位，支援帶有或沒有粗體的格式
     const extractLine = (keywordRegex) => {
       const match = block.match(keywordRegex);
       return match ? match[1].trim() : "";
     };
     
-    // 取得第一行作為標題
     const lines = block.split('\n');
     const title = lines[0].trim() || `提案 ${index + 1}`;
     
@@ -26,31 +23,33 @@ const parseVisualData = (text, type) => {
     const zhPrompt = extractLine(/\*?中文(?:指令)?\*?[：:]\s*(.*?)(?=\n|$)/i);
     const enPrompt = extractLine(/\*?English(?: Prompt)?\*?[：:]\s*(.*?)(?=\n|$)/i);
     
-    // 組合最終字串
     const ratioStr = type === "step6" ? "16:9" : "9:16";
     let compiledText = `[請幫我生成一張 ${ratioStr} 圖像]\nPrompt:\n${enPrompt || zhPrompt}\n\n文字排版參考：\n主標：${mainTitle}`;
     if (subTitle) {
       compiledText += `\n副標：${subTitle}`;
     }
     if (!enPrompt && !zhPrompt) {
-      // 找不到明確欄位，就丟原始字串
       compiledText = `[請幫我生成一張 ${ratioStr} 圖像]\n\n${block}`;
     }
     
     return {
       id: index,
-      title: title.replace(/^第[一二三]組[：:]\s*/, ''), // 移除前面的「第一組：」
+      title: title.replace(/^第[一二三]組[：:]\s*/, ''),
       compiledText
     };
   });
 };
 
-export default function VisualDispatchCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false }) {
+export default function VisualDispatchCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null }) {
   const [activeTab, setActiveTab] = useState("step6");
   const [bubbles, setBubbles] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
+  
+  // 上傳相關狀態
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
 
-  // 當切換 Tab 或資料變動時，重新解析
   useEffect(() => {
     const rawData = stepData[activeTab];
     if (rawData) {
@@ -66,21 +65,63 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
     setBubbles(newBubbles);
   };
 
-  const handleCopyAndGo = async (text) => {
+  const handleCopy = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      setToastMessage("✅ 指令已複製！正在開啟 Gemini...");
-      
-      // 1.5 秒後消失
-      setTimeout(() => {
-        setToastMessage(null);
-      }, 2000);
-
-      // 開新分頁
-      window.open('https://gemini.google.com/app', '_blank');
+      setToastMessage("✅ 指令已複製！");
+      setTimeout(() => setToastMessage(null), 2000);
     } catch (err) {
       console.error("複製失敗", err);
       alert("複製失敗，請手動複製！");
+    }
+  };
+
+  const handleCopyAndGo = async (text) => {
+    await handleCopy(text);
+    setTimeout(() => {
+      window.open('https://gemini.google.com/app', '_blank');
+    }, 500);
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!activeProjectId) {
+      alert("尚未載入或儲存至 Notion 專案，無法上傳圖片。請先確保專案已同步。");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress("上傳中...");
+    
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("pageId", activeProjectId); // activeProjectId 為 Notion 的 page ID
+
+      const res = await fetch("/api/notion/upload", {
+        method: "POST",
+        body: formData
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setUploadProgress("上傳成功！");
+        setTimeout(() => setUploadProgress(""), 3000);
+      } else {
+        setUploadProgress("上傳失敗");
+        console.error(data.error);
+        alert("上傳失敗: " + data.error);
+      }
+    } catch (err) {
+      console.error("Upload error", err);
+      setUploadProgress("發生錯誤");
+      alert("發生錯誤，請稍後再試");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -146,115 +187,168 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
       </div>
 
       {/* 右側主畫面 */}
-      <div className="flex-1 h-full overflow-y-auto bg-slate-50 dark:bg-slate-900 p-8 lg:p-12">
-        <div className="max-w-4xl mx-auto space-y-10">
+      <div className="flex-1 h-full overflow-y-auto bg-slate-100 dark:bg-slate-900/50 p-6 lg:p-10">
+        <div className="max-w-5xl mx-auto flex flex-col h-full space-y-6">
           
+          {/* 選擇歸檔主題下拉選單 */}
+          <div className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4 shrink-0">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap flex items-center gap-2">
+              <Cloud className="w-4 h-4 text-sky-500" />
+              選擇歸檔主題
+            </span>
+            <div className="relative flex-1">
+              {isFetchingTeam ? (
+                <div className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-500 flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-sky-200 border-t-sky-500 rounded-full animate-spin"></div>
+                  同步資料中...
+                </div>
+              ) : (
+                <select
+                  onChange={(e) => {
+                    const proj = teamProjects.find(p => p.id === e.target.value);
+                    if (proj) loadNotionProject(proj);
+                  }}
+                  disabled={isLoading || teamProjects.length === 0}
+                  className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
+                  value={activeProjectId || ""}
+                >
+                  <option value="" disabled>-- 點擊選擇團隊專案 --</option>
+                  {teamProjects.map(proj => (
+                    <option key={proj.id} value={proj.id}>
+                      【{proj.theme}】歸檔於 {new Date(proj.updatedAt).toLocaleDateString()}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {!isFetchingTeam && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              )}
+            </div>
+          </div>
+
           {bubbles.length === 0 ? (
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 p-8 rounded-2xl flex flex-col items-center justify-center text-center">
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 p-8 rounded-2xl flex flex-col items-center justify-center text-center flex-1">
               <AlertCircle className="w-12 h-12 text-amber-500 mb-4" />
               <h3 className="text-xl font-bold text-amber-700 dark:text-amber-500 mb-2">
                 尚未產生視覺指令
               </h3>
-              <p className="text-amber-600/80 dark:text-amber-400/80 max-w-md mb-6">
-                目前專案尚未包含 {activeTab === "step6" ? "Step 6" : "Step 7"} 的資料，您可以從下方選單直接載入既有的 Notion 專案，或回到企劃工作區進行產製。
+              <p className="text-amber-600/80 dark:text-amber-400/80 max-w-md">
+                目前專案尚未包含 {activeTab === "step6" ? "Step 6" : "Step 7"} 的資料，請透過上方選單載入既有的 Notion 專案，或回到企劃工作區進行產製。
               </p>
-
-              {/* Notion Import Dropdown for Visual Dispatch Center */}
-              <div className="w-full max-w-md bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-left">
-                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-                  <Cloud className="w-4 h-4 text-sky-500" />
-                  快速載入 Notion 專案
-                </label>
-                
-                <div className="relative">
-                  {isFetchingTeam ? (
-                    <div className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-500 flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-sky-200 border-t-sky-500 rounded-full animate-spin"></div>
-                      正在同步資料...
-                    </div>
-                  ) : (
-                    <select
-                      onChange={(e) => {
-                        const proj = teamProjects.find(p => p.id === e.target.value);
-                        if (proj) loadNotionProject(proj);
-                      }}
-                      disabled={isLoading || teamProjects.length === 0}
-                      className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
-                      defaultValue=""
-                    >
-                      <option value="" disabled>-- 點擊選擇團隊專案 --</option>
-                      {teamProjects.map(proj => (
-                        <option key={proj.id} value={proj.id}>
-                          {proj.theme} (歸檔於 {new Date(proj.updatedAt).toLocaleDateString()})
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  {!isFetchingTeam && (
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
           ) : (
-            bubbles.map((bubble, index) => (
-              <div key={index} className="animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${index * 100}ms` }}>
-                <div className="flex flex-col items-end w-full">
-                  
-                  {/* Chat Bubble Header */}
-                  <div className="flex items-center gap-2 mb-2 mr-2">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                      Option {index + 1}
-                    </span>
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                      {bubble.title}
-                    </span>
+            /* 大卡片框架 (左深右淺) */
+            <div className="flex flex-col lg:flex-row bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden flex-1 min-h-0">
+              
+              {/* 左側深色區塊 (Dark Panel) */}
+              <div className="w-full lg:w-[320px] shrink-0 bg-slate-900 text-white p-8 flex flex-col justify-between">
+                <div>
+                  <div className="text-amber-400 text-sm font-bold tracking-wider mb-2">
+                    {activeTab === "step6" ? "長影音縮圖 (16:9)" : "短影音縮圖 (9:16)"}
                   </div>
+                  <h3 className="text-3xl font-extrabold mb-8 leading-tight">
+                    {theme}
+                  </h3>
+                  
+                  <div className="space-y-6 text-sm text-slate-300 leading-relaxed">
+                    <p>每張卡片皆分為三個獨立小組。</p>
+                    <p>請在右側文字框中反白選取您需要的段落，然後點擊小卡下方的按鈕進行複製。</p>
+                    <p>未框選則預設複製該小卡的全部內容。</p>
+                  </div>
+                </div>
 
-                  {/* Editable Bubble */}
-                  <div className="w-[85%] relative group">
-                    <textarea
-                      value={bubble.compiledText}
-                      onChange={(e) => handleTextChange(index, e.target.value)}
-                      className="w-full min-h-[150px] p-5 rounded-2xl rounded-tr-sm bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-md border-none focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none leading-relaxed transition-all"
-                      style={{ 
-                        height: 'auto',
-                        overflow: 'hidden'
-                      }}
-                      onInput={(e) => {
-                        e.target.style.height = 'auto';
-                        e.target.style.height = e.target.scrollHeight + 'px';
-                      }}
-                      ref={el => {
-                        if (el) {
-                          el.style.height = 'auto';
-                          el.style.height = el.scrollHeight + 'px';
-                        }
-                      }}
-                    />
-                    
-                    {/* Action Button (Attached to bubble) */}
-                    <div className="absolute -bottom-5 right-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0">
-                      <button
-                        onClick={() => handleCopyAndGo(bubble.compiledText)}
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm transition-all hover:scale-105"
-                      >
-                        <Copy className="w-4 h-4" />
-                        🚀 複製指令並開啟 Gemini
-                        <ExternalLink className="w-4 h-4 ml-1 opacity-70" />
-                      </button>
+                {/* Notion 上傳區塊 */}
+                <div className="mt-8">
+                  <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5">
+                    <div className="text-sm font-semibold mb-3 flex items-center justify-between">
+                      <span>匯入生成圖像至 Notion</span>
+                      {uploadProgress && (
+                        <span className="text-xs text-amber-400">{uploadProgress}</span>
+                      )}
                     </div>
+                    
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading || !activeProjectId}
+                      className="w-full border-2 border-dashed border-slate-600 hover:border-slate-400 hover:bg-slate-700/50 transition-colors rounded-xl p-6 flex flex-col items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                      />
+                      <ImageIcon className="w-8 h-8 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                      <span className="text-sm text-slate-400 group-hover:text-slate-300 font-medium">
+                        {isUploading ? "上傳中..." : "點擊上傳圖檔"}
+                      </span>
+                    </button>
+                    {!activeProjectId && (
+                      <p className="text-xs text-rose-400 mt-2 text-center">
+                        未連結 Notion 專案，無法上傳
+                      </p>
+                    )}
                   </div>
-                  
-                  {/* Invisible spacer for the absolute button */}
-                  <div className="h-8"></div>
                 </div>
               </div>
-            ))
+
+              {/* 右側淺色區塊 (Light Panel - Grid of Cards) */}
+              <div className="flex-1 bg-slate-50 dark:bg-slate-900 p-6 lg:p-8 overflow-y-auto">
+                <div className="grid gap-6">
+                  {bubbles.map((bubble, index) => (
+                    <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 animate-in fade-in slide-in-from-right-4" style={{ animationDelay: `${index * 100}ms` }}>
+                      
+                      {/* 小卡標題 */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500 flex items-center justify-center text-xs font-bold">
+                          {index + 1}
+                        </span>
+                        <h4 className="font-bold text-slate-800 dark:text-slate-200">
+                          {bubble.title}
+                        </h4>
+                      </div>
+
+                      {/* 文字輸入區 */}
+                      <textarea
+                        value={bubble.compiledText}
+                        onChange={(e) => handleTextChange(index, e.target.value)}
+                        className="w-full min-h-[120px] p-4 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-y leading-relaxed text-sm mb-4"
+                      />
+
+                      {/* 按鈕列 */}
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          onClick={() => {
+                            const selection = window.getSelection().toString();
+                            handleCopy(selection || bubble.compiledText);
+                          }}
+                          className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors flex items-center gap-2 shadow-sm"
+                        >
+                          <Copy className="w-4 h-4" />
+                          複製框選文字
+                        </button>
+                        <button
+                          onClick={() => {
+                            const selection = window.getSelection().toString();
+                            handleCopyAndGo(selection || bubble.compiledText);
+                          }}
+                          className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold transition-colors flex items-center gap-2 shadow-sm shadow-amber-500/20"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          複製並前往
+                        </button>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
           )}
-          
         </div>
       </div>
     </div>

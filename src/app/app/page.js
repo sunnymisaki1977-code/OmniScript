@@ -794,6 +794,8 @@ export default function Home() {
             isFetchingTeam={isFetchingTeam} 
             loadNotionProject={loadNotionProject} 
             isLoading={isLoading}
+            theme={theme}
+            activeProjectId={projectId}
           />
         )}
       </div>

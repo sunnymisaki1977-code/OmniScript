@@ -585,6 +585,52 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Notion Import Dropdown */}
+            <div className="mt-12 bg-white dark:bg-slate-800/80 p-6 rounded-2xl border border-slate-200 dark:border-slate-700/80 shadow-sm max-w-2xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 font-semibold">
+                  <Cloud className="w-5 h-5 text-sky-500" />
+                  <span>從 Notion 載入已歸檔專案</span>
+                </div>
+                
+                <div className="w-full max-w-md relative">
+                  {isFetchingTeam ? (
+                    <div className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-500 flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-sky-200 border-t-sky-500 rounded-full animate-spin"></div>
+                      正在同步 Notion 資料...
+                    </div>
+                  ) : (
+                    <select
+                      onChange={(e) => {
+                        const proj = teamProjects.find(p => p.id === e.target.value);
+                        if (proj) loadNotionProject(proj);
+                      }}
+                      disabled={isLoading || teamProjects.length === 0}
+                      className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>-- 點擊選擇團隊專案 --</option>
+                      {teamProjects.map(proj => (
+                        <option key={proj.id} value={proj.id}>
+                          {proj.theme} (歸檔於 {new Date(proj.updatedAt).toLocaleDateString()})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {/* Custom Arrow */}
+                  {!isFetchingTeam && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                  )}
+                </div>
+                
+                {teamProjects.length === 0 && !isFetchingTeam && (
+                  <p className="text-xs text-slate-500">目前尚無團隊歸檔專案</p>
+                )}
+              </div>
+            </div>
+
             {/* Inspiration Pills */}
             <div className="mt-10 pt-8 border-t border-slate-100 dark:border-slate-800/60">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">缺乏靈感嗎？</p>
@@ -662,57 +708,7 @@ export default function Home() {
 
           </div>
 
-          {/* Recent Workspaces */}
-          {projects.length > 0 && (
-            <div className="mt-12 mb-20 animate-in fade-in slide-in-from-bottom-4">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-indigo-500" />
-                  🧑‍💻 我的草稿 (本機)
-                </h2>
-                <span className="text-xs font-medium px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full">
-                  共 {projects.length} 個
-                </span>
-              </div>
-              
-              <div className="grid gap-3">
-                {projects.slice(0, 5).map(proj => (
-                  <button
-                    key={proj.id}
-                    onClick={() => loadProject(proj)}
-                    className="group flex items-center justify-between p-4 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl transition-all text-left"
-                  >
-                    <div className="flex-1 min-w-0 pr-4">
-                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 truncate mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        {proj.theme}
-                      </h3>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                        <span className="flex items-center gap-1">
-                          {proj.mode === "auto" ? <Play className="w-3 h-3" /> : <Hand className="w-3 h-3" />}
-                          {proj.mode === "auto" ? "全自動" : "手動"}
-                        </span>
-                        <span>•</span>
-                        <span className={`px-2 py-0.5 rounded-full ${
-                          proj.currentStep === 9 
-                            ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
-                            : "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400"
-                        }`}>
-                          {proj.currentStep === 9 ? "已歸檔" : `進行至 Step ${proj.currentStep}`}
-                        </span>
-                        <span>•</span>
-                        <span>{new Date(proj.updatedAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-colors shrink-0">
-                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-        </main>
+          </main>
         {renderApiModal()}
       </div>
     );

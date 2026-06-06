@@ -228,9 +228,7 @@ export default function JoinPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">開發時程與專案管理</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              我們捨棄傳統死板的日曆，採用「里程碑解鎖」模式。<br/>團隊進度是由實際的開發品質來決定，而不是為了趕上死線而妥協。
-            </p>
+          
           </div>
 
           {/* Kanban / Milestone Grid */}
@@ -344,8 +342,7 @@ export default function JoinPage() {
             <div>
               <h4 className="text-indigo-400 font-bold mb-3 text-lg tracking-wide">PM 專案管理宣言</h4>
               <p className="text-slate-300 leading-relaxed text-lg italic">
-                我們採用「里程碑導向」的敏捷開發。進度是由團隊實際的開發品質來決定。卡關了我們就一起解決，確保每個人都能在專案中留下扎實的技術足跡！
- 我們正在打造<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">AI SaaS 產品</span>
+                我們採用「里程碑導向」的敏捷開發。進度是由團隊實際的開發品質來決定，而不是死板的日曆。卡關了我們就一起解決，穩紮穩打，確保每個人都能在專案中留下扎實的技術足跡！
 
               </p>
             </div>
@@ -353,35 +350,7 @@ export default function JoinPage() {
         </div>
       </section>
 
-      {/* 🚀 Hero Section (Buttons only) */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden px-6">
-        {/* 背景光暈效果 */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
-        
-        <div className="max-w-6xl mx-auto relative z-10 text-center">
-          
-          
-          
-          
-          
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a 
-              href="/app"
-              className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all border border-slate-700 hover:border-slate-600 hover:-translate-y-1"
-            >
-              💻 體驗 OmniScript Demo
-            </a>
-          </div>
-          
-          <div className="mt-8">
-            <button onClick={() => setIsChangelogOpen(true)} className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-medium text-sm transition-colors border-b border-transparent hover:border-indigo-400 pb-0.5">
-              <Sparkles className="w-4 h-4" /> 查看最新更新日誌 (v1.1.0)
-            </button>
-          </div>
-        </div>
-
-      </section>
+      
 
       {/* 🚀 Section: Activity Feed */}
       <section className="py-12 bg-slate-950 px-6">

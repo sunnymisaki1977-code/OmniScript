@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Copy, ExternalLink, Image as ImageIcon, Smartphone, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Copy, ExternalLink, Image as ImageIcon, Smartphone, AlertCircle, CheckCircle2, Cloud } from "lucide-react";
 
 // 解析 Markdown 資料
 const parseVisualData = (text, type) => {
@@ -45,7 +45,7 @@ const parseVisualData = (text, type) => {
   });
 };
 
-export default function VisualDispatchCenter({ stepData }) {
+export default function VisualDispatchCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false }) {
   const [activeTab, setActiveTab] = useState("step6");
   const [bubbles, setBubbles] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
@@ -155,9 +155,48 @@ export default function VisualDispatchCenter({ stepData }) {
               <h3 className="text-xl font-bold text-amber-700 dark:text-amber-500 mb-2">
                 尚未產生視覺指令
               </h3>
-              <p className="text-amber-600/80 dark:text-amber-400/80 max-w-md">
-                目前專案尚未包含 {activeTab === "step6" ? "Step 6" : "Step 7"} 的資料，請先回到企劃工作區完成該步驟的 AI 產製。
+              <p className="text-amber-600/80 dark:text-amber-400/80 max-w-md mb-6">
+                目前專案尚未包含 {activeTab === "step6" ? "Step 6" : "Step 7"} 的資料，您可以從下方選單直接載入既有的 Notion 專案，或回到企劃工作區進行產製。
               </p>
+
+              {/* Notion Import Dropdown for Visual Dispatch Center */}
+              <div className="w-full max-w-md bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm text-left">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                  <Cloud className="w-4 h-4 text-sky-500" />
+                  快速載入 Notion 專案
+                </label>
+                
+                <div className="relative">
+                  {isFetchingTeam ? (
+                    <div className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-500 flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-sky-200 border-t-sky-500 rounded-full animate-spin"></div>
+                      正在同步資料...
+                    </div>
+                  ) : (
+                    <select
+                      onChange={(e) => {
+                        const proj = teamProjects.find(p => p.id === e.target.value);
+                        if (proj) loadNotionProject(proj);
+                      }}
+                      disabled={isLoading || teamProjects.length === 0}
+                      className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>-- 點擊選擇團隊專案 --</option>
+                      {teamProjects.map(proj => (
+                        <option key={proj.id} value={proj.id}>
+                          {proj.theme} (歸檔於 {new Date(proj.updatedAt).toLocaleDateString()})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {!isFetchingTeam && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
             bubbles.map((bubble, index) => (

@@ -403,60 +403,9 @@ export default function Home() {
   // -----------------------------------------------------
   // Step 0: Dashboard
   // -----------------------------------------------------
-  if (currentStep === 0) {
-    return (
-      <div className="min-h-screen bg-[#F9FAFB] dark:bg-[#0F172A] flex flex-col font-sans">
-        <IdentityModal />
-        
-        {/* Global Header */}
-        <header className="h-16 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between sticky top-0 z-50">
-          <div className="flex items-center gap-2 cursor-pointer">
-            <span className="text-2xl">✨</span>
-            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              OmniScript
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 rounded-full font-medium text-sm border border-amber-200 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors cursor-pointer">
-              <Zap className="w-4 h-4" />
-              <span>125 點額度</span>
-            </div>
-            
-            <div className="relative">
-              <button 
-                onClick={toggleTheme}
-                className="w-9 h-9 mr-2 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:ring-2 ring-slate-200 dark:ring-slate-700 transition-all"
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-            </div>
-            
-            <div className="relative">
-              <button 
-                onClick={() => setIsAvatarOpen(!isAvatarOpen)}
-                className="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:ring-2 ring-indigo-500/30 transition-all"
-              >
-                <User className="w-5 h-5" />
-              </button>
-              
-              {isAvatarOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 mb-2">
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Alex Chen</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Pro Plan</p>
-                  </div>
-                  <button className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">帳號設定</button>
-                  <button onClick={() => { setIsAvatarOpen(false); setIsApiKeyModalOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50">API 金鑰管理</button>
-                  <button onClick={() => { setIsAvatarOpen(false); setIsChangelogOpen(true); }} className="w-full text-left px-4 py-2 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 font-medium">更新日誌 (Changelog)</button>
-                  <button className="w-full text-left px-4 py-2 text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 mt-1 border-t border-slate-100 dark:border-slate-700 pt-3">登出</button>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+    const renderDashboardHero = () => (
+    <div className="flex-1 max-w-4xl w-full mx-auto p-6 pt-12 animate-in fade-in slide-in-from-bottom-4">
 
-        {/* Main Content */}
-        <main className="flex-1 max-w-4xl w-full mx-auto p-6 pt-12">
           
           {/* Central Card */}
           <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 md:p-12 text-center mb-6 relative overflow-hidden">
@@ -707,12 +656,9 @@ export default function Home() {
           </div>
 
           </div>
+    </div>
+  );
 
-          </main>
-        {renderApiModal()}
-      </div>
-    );
-  }
 
   // -----------------------------------------------------
   // Step 1~9: Workspace
@@ -783,7 +729,7 @@ export default function Home() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {activeTab === 'planning' ? (
+        {activeTab === 'planning' ? currentStep === 0 ? renderDashboardHero() : (
           <>
             <Sidebar
               steps={WORKFLOW_STEPS}
@@ -821,7 +767,13 @@ export default function Home() {
             )}
           </>
         ) : (
-          <VisualDispatchCenter stepData={stepData} />
+          <VisualDispatchCenter 
+            stepData={stepData} 
+            teamProjects={teamProjects} 
+            isFetchingTeam={isFetchingTeam} 
+            loadNotionProject={loadNotionProject} 
+            isLoading={isLoading}
+          />
         )}
       </div>
     </div>

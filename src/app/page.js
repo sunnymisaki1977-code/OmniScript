@@ -13,10 +13,86 @@ import {
   CheckCircle2,
   Sparkles,
   Zap,
-  Pencil
+  Pencil,
+  Palette,
+  Waypoints,
+  UserCheck
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ChangelogModal from "../components/ChangelogModal";
+
+const INITIAL_ROLES = [
+  {
+    id: "frontend",
+    title: "前端工程師 (Frontend)",
+    battlefield: "實作高互動性的 SaaS Dashboard、複雜的九步驟 Stepper、以及跨專案的全域狀態管理。",
+    color: "blue",
+    icon: "Terminal",
+    techStack: [
+      { label: "React / Next.js", color: "blue" },
+      { label: "Tailwind CSS", color: "cyan" },
+      { label: "Zustand", color: "yellow" }
+    ],
+    bonus: [
+      "微互動 (Micro-interactions)",
+      "防抖 (Debounce) 儲存機制"
+    ],
+    assignee: ""
+  },
+  {
+    id: "backend",
+    title: "後端工程師 (Backend)",
+    battlefield: "設計穩定的 RESTful API、串接第三方 AI 服務 (Gemini/Notion)、處理會員認證與資料庫設計。",
+    color: "green",
+    icon: "Database",
+    techStack: [
+      { label: "Node.js / Python", color: "green" },
+      { label: "SQL / NoSQL", color: "slate" },
+      { label: "JWT", color: "slate" }
+    ],
+    bonus: [
+      "高併發 API 處理經驗",
+      "非同步隊列 (Queue) 架構"
+    ],
+    assignee: ""
+  },
+  {
+    id: "ui",
+    title: "UI 設計師 (User Interface)",
+    battlefield: "負責 OmniScript 的視覺靈魂。將 Wireframe 轉化為具備 SaaS 商業高級感的高保真 Prototype，並從零打造具備擴充性的 Design System（包含色彩計畫、字體層級與共用元件庫）。",
+    color: "pink",
+    icon: "Palette",
+    techStack: [
+      { label: "Figma", color: "pink" },
+      { label: "Design System", color: "blue" },
+      { label: "Auto Layout", color: "slate" }
+    ],
+    bonus: [
+      "熟練掌握深/淺色模式轉換的設計規範",
+      "具備微互動 (Micro-interactions) 與動態視覺設計概念",
+      "了解前端切版邏輯，設計出「工程師寫得出來」的畫面"
+    ],
+    assignee: ""
+  },
+  {
+    id: "ux",
+    title: "UX 設計師 (User Experience)",
+    battlefield: "負責 OmniScript 的操作大腦。與 PM 密切合作，繪製 9 步工作流的 Wireframe 與 User Flow。解決複雜的「狀態流轉」與「錯誤防呆」問題，確保使用者在生成過程中不迷失。",
+    color: "emerald",
+    icon: "Waypoints",
+    techStack: [
+      { label: "Wireframing", color: "emerald" },
+      { label: "User Flow", color: "blue" },
+      { label: "Information Architecture", color: "slate" }
+    ],
+    bonus: [
+      "具備強烈的 SaaS 產品設計思維，理解多步驟表單的痛點",
+      "能設計友善的錯誤狀態 (Error States) 與極端情況",
+      "具備可用性測試 (Usability Testing) 概念"
+    ],
+    assignee: ""
+  }
+];
 
 const MILESTONES = [
   {
@@ -58,6 +134,10 @@ export default function JoinPage() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+  
+  const [roles, setRoles] = useState(INITIAL_ROLES);
+  const [editingRoleId, setEditingRoleId] = useState(null);
+  const [editRoleForm, setEditRoleForm] = useState({});
 
   useEffect(() => {
     const savedMilestones = localStorage.getItem('omni_milestones');
@@ -72,6 +152,11 @@ export default function JoinPage() {
         return m;
       });
       setMilestones(migrated);
+    }
+    
+    const savedRoles = localStorage.getItem('omni_roles');
+    if (savedRoles) {
+      setRoles(JSON.parse(savedRoles));
     }
   }, []);
 
@@ -90,6 +175,39 @@ export default function JoinPage() {
     setMilestones(updated);
     localStorage.setItem('omni_milestones', JSON.stringify(updated));
     setEditingId(null);
+  };
+
+  const startEditRole = (r) => {
+    setEditingRoleId(r.id);
+    setEditRoleForm(r);
+  };
+
+  const handleSaveRole = () => {
+    const updated = roles.map(r => r.id === editingRoleId ? editRoleForm : r);
+    setRoles(updated);
+    localStorage.setItem('omni_roles', JSON.stringify(updated));
+    setEditingRoleId(null);
+  };
+
+  const getIcon = (iconName) => {
+    if (iconName === 'Terminal') return <Terminal className="w-6 h-6" />;
+    if (iconName === 'Database') return <Database className="w-6 h-6" />;
+    if (iconName === 'Palette') return <Palette className="w-6 h-6" />;
+    if (iconName === 'Waypoints') return <Waypoints className="w-6 h-6" />;
+    return <PenTool className="w-6 h-6" />;
+  };
+
+  const getColorClasses = (color, isActive) => {
+    const map = {
+      blue: { bg: 'bg-blue-900/30', text: 'text-blue-400', active: 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]' },
+      green: { bg: 'bg-green-900/30', text: 'text-green-400', active: 'border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.3)]' },
+      pink: { bg: 'bg-pink-900/30', text: 'text-pink-400', active: 'border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]' },
+      emerald: { bg: 'bg-emerald-900/30', text: 'text-emerald-400', active: 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)]' },
+      cyan: { bg: 'bg-cyan-900/20', text: 'text-cyan-400' },
+      yellow: { bg: 'bg-yellow-900/20', text: 'text-yellow-400' },
+      slate: { bg: 'bg-slate-800', text: 'text-slate-300' }
+    };
+    return map[color] || map.slate;
   };
 
   const handleScrollToForm = () => {
@@ -495,7 +613,8 @@ export default function JoinPage() {
                 <select className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
                   <option>前端工程師 (Frontend)</option>
                   <option>後端工程師 (Backend)</option>
-                  <option>UI/UX 設計師</option>
+                  <option>UI 設計師</option>
+                  <option>UX 設計師</option>
                 </select>
               </div>
               <div>

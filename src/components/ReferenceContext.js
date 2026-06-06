@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 export default function ReferenceContext({ isCollapsed, onToggleCollapse, contextData, dependencies }) {
   if (isCollapsed) {
     return (
-      <div className="w-12 h-screen shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col items-center py-4">
+      <div className="w-12 h-full shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col items-center py-4">
         <button
           onClick={onToggleCollapse}
           className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"
@@ -16,7 +16,7 @@ export default function ReferenceContext({ isCollapsed, onToggleCollapse, contex
   }
 
   return (
-    <div className="w-[40%] max-w-[500px] min-w-[300px] h-screen shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col transition-all">
+    <div className="w-[40%] max-w-[500px] min-w-[300px] h-full shrink-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col transition-all">
       <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
           <Info className="w-4 h-4 text-slate-400" />

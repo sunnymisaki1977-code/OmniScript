@@ -240,6 +240,7 @@ export default function Home() {
       setIsAutoRunning(false);
       setNotionStatus(null);
       setArchivedUrl(null);
+      setActiveTab('planning');
       
       // 重新整理 Projects 陣列
       const projectsRaw = localStorage.getItem("omniscript_projects");

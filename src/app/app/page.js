@@ -424,7 +424,8 @@ export default function Home() {
   // Step 0: Dashboard
   // -----------------------------------------------------
     const renderDashboardHero = () => (
-    <div className="flex-1 max-w-4xl w-full mx-auto p-6 pt-12 animate-in fade-in slide-in-from-bottom-4">
+    <div className="w-full h-full overflow-y-auto">
+      <div className="flex-1 max-w-4xl w-full mx-auto p-6 pt-12 animate-in fade-in slide-in-from-bottom-4">
 
           
           {/* Central Card */}
@@ -676,6 +677,7 @@ export default function Home() {
           </div>
 
           </div>
+        </div>
     </div>
   );
 

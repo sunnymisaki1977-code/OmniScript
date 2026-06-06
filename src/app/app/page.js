@@ -696,6 +696,7 @@ export default function Home() {
             </span>
           </div>
           
+          {currentStep > 0 && (
           <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
             <button 
               onClick={() => setActiveTab('planning')}
@@ -710,6 +711,7 @@ export default function Home() {
               🎨 視覺發控中心
             </button>
           </div>
+          )}
         </div>
 
 

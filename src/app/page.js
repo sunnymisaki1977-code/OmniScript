@@ -223,51 +223,6 @@ export default function JoinPage() {
     <div className="min-h-screen bg-slate-950 text-slate-300 font-sans selection:bg-indigo-500/30">
       <IdentityModal />
       
-      {/* 🚀 Hero Section */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden px-6">
-        {/* 背景光暈效果 */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
-        
-        <div className="max-w-6xl mx-auto relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-8">
-            <Sparkles className="w-4 h-4" />
-            <span>2026 結訓專題</span>
-          </div>
-          
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight mb-8 leading-tight">
-            不只是結訓專題，我們正在打造<br className="hidden md:block"/>
-            下一個具商業潛力的 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">AI SaaS 產品</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-            加入 OmniScript 戰隊，與具備實戰思維的 PM 一起，從 0 到 1 打造「全域內容自動化工作流」。這將是你履歷上最亮眼的一筆！
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a 
-              href="/app"
-              className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all border border-slate-700 hover:border-slate-600 hover:-translate-y-1"
-            >
-              💻 體驗 OmniScript Demo
-            </a>
-          </div>
-          
-          <div className="mt-8">
-            <button onClick={() => setIsChangelogOpen(true)} className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-medium text-sm transition-colors border-b border-transparent hover:border-indigo-400 pb-0.5">
-              <Sparkles className="w-4 h-4" /> 查看最新更新日誌 (v1.1.0)
-            </button>
-          </div>
-        </div>
-
-      </section>
-
-      {/* 🚀 Section: Activity Feed */}
-      <section className="py-12 bg-slate-950 px-6">
-        <div className="max-w-4xl mx-auto">
-          <ActivityFeed />
-        </div>
-      </section>
-
       {/* 📍 Section 4: Milestone Roadmap */}
       <section className="py-24 px-6 relative bg-slate-900 border-t border-slate-800">
         <div className="max-w-7xl mx-auto">
@@ -389,12 +344,53 @@ export default function JoinPage() {
             <div>
               <h4 className="text-indigo-400 font-bold mb-3 text-lg tracking-wide">PM 專案管理宣言</h4>
               <p className="text-slate-300 leading-relaxed text-lg italic">
-                我們採用「里程碑導向」的敏捷開發。進度是由團隊實際的開發品質來決定，而不是死板的日曆。卡關了我們就一起解決，穩紮穩打，確保每個人都能在專案中留下扎實的技術足跡！
+                我們採用「里程碑導向」的敏捷開發。進度是由團隊實際的開發品質來決定。卡關了我們就一起解決，確保每個人都能在專案中留下扎實的技術足跡！
+ 我們正在打造<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">AI SaaS 產品</span>
+
               </p>
             </div>
           </div>
         </div>
       </section>
+
+      {/* 🚀 Hero Section (Buttons only) */}
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden px-6">
+        {/* 背景光暈效果 */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="max-w-6xl mx-auto relative z-10 text-center">
+          
+          
+          
+          
+          
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a 
+              href="/app"
+              className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-8 py-4 rounded-full font-bold text-lg transition-all border border-slate-700 hover:border-slate-600 hover:-translate-y-1"
+            >
+              💻 體驗 OmniScript Demo
+            </a>
+          </div>
+          
+          <div className="mt-8">
+            <button onClick={() => setIsChangelogOpen(true)} className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-medium text-sm transition-colors border-b border-transparent hover:border-indigo-400 pb-0.5">
+              <Sparkles className="w-4 h-4" /> 查看最新更新日誌 (v1.1.0)
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      {/* 🚀 Section: Activity Feed */}
+      <section className="py-12 bg-slate-950 px-6">
+        <div className="max-w-4xl mx-auto">
+          <ActivityFeed />
+        </div>
+      </section>
+
+      
 
       {/* 🎯 Section 1: Value Proposition */}
       <section className="py-24 bg-slate-900 px-6 relative z-10 border-t border-slate-800">

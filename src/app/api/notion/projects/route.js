@@ -15,26 +15,25 @@ export async function GET() {
 
     const notion = new Client({ auth: apiKey });
 
-    // 查詢最近歸檔的 20 筆專案
-    const response = await notion.databases.query({
-      database_id: databaseId,
-      sorts: [
-        {
-          timestamp: "created_time",
-          direction: "descending",
-        },
-      ],
-      page_size: 20,
+    // 使用 search 來取得最近歸檔的專案，因為部分 Client 版本不支援 query
+    const response = await notion.search({
+      filter: { property: "object", value: "page" },
+      sort: { direction: "descending", timestamp: "last_edited_time" }
     });
 
-    const projects = response.results.map((page) => {
+    // 過濾出屬於該資料庫的頁面
+    const dbPages = response.results.filter(
+      p => p.parent && p.parent.database_id && p.parent.database_id.replace(/-/g, '') === databaseId.replace(/-/g, '')
+    ).slice(0, 20);
+
+    const projects = dbPages.map((page) => {
       // 嘗試獲取 Title 屬性
       const titleProperty = Object.values(page.properties).find(
         (p) => p.type === "title"
       );
       
       let title = "未命名專案";
-      if (titleProperty && titleProperty.title.length > 0) {
+      if (titleProperty && titleProperty.title && titleProperty.title.length > 0) {
         title = titleProperty.title.map((t) => t.plain_text).join("");
       }
 

@@ -5,6 +5,17 @@ import { X, Rocket, Bug, Layout, Zap, Star } from "lucide-react";
 
 export const changelogs = [
   {
+    version: "v1.1.1",
+    date: "2026/06/06",
+    title: "全域版面流暢度與即時動態修復",
+    description: "徹底解決了各個工作區的版面高度裁切問題，並修復了 Notion API 的相容性問題以確保團隊即時軌跡的運作。",
+    updates: [
+      { type: "UI/UX", content: "版面捲動優化：修正了編輯工作區、側邊欄、參考資料及視覺發控中心高度被強制裁切的「雙重捲軸 (Double Scrollbar)」問題，全面提供自然順暢的滿版捲動體驗。" },
+      { type: "Fix", content: "修復後端呼叫 Notion API 時因版本相容性所導致的隱形 500 錯誤，現在首頁的「團隊活動軌跡」已能精準且即時地同步成員動態。" },
+      { type: "UI/UX", content: "首頁動線升級：將「體驗 Demo」與「更新日誌」按鈕完美無縫融入開發時程與專案管理區塊，提升視覺連貫性。" }
+    ]
+  },
+  {
     version: "v1.1.0",
     date: "2026/06/05",
     title: "自動化流程與系統穩定性大升級",

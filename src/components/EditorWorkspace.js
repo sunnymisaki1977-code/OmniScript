@@ -58,7 +58,7 @@ export default function EditorWorkspace({
   const isCodeType = step.type === "code";
 
   return (
-    <div className="flex-1 h-screen flex flex-col bg-white dark:bg-[#0F172A] relative">
+    <div className="flex-1 h-full flex flex-col bg-white dark:bg-[#0F172A] relative">
       <div className="px-10 py-8 max-w-4xl mx-auto w-full flex-1 flex flex-col overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

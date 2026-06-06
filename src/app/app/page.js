@@ -46,6 +46,25 @@ export default function Home() {
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [activeInputMode, setActiveInputMode] = useState(null);
   const [activeTab, setActiveTab] = useState("planning");
+
+  // Fetch Team Projects from Notion on mount
+  useEffect(() => {
+    const fetchTeamProjects = async () => {
+      setIsFetchingTeam(true);
+      try {
+        const res = await fetch("/api/notion/projects", { cache: 'no-store' });
+        const data = await res.json();
+        if (data.success && data.projects) {
+          setTeamProjects(data.projects);
+        }
+      } catch (err) {
+        console.error("Failed to fetch team projects", err);
+      } finally {
+        setIsFetchingTeam(false);
+      }
+    };
+    fetchTeamProjects();
+  }, []);
   
   // 初始化載入 LocalStorage 與主題
   useEffect(() => {

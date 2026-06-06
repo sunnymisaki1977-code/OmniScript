@@ -228,7 +228,24 @@ export default function JoinPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">開發時程與專案管理</h2>
-          
+            <p className="text-slate-400 max-w-2xl mx-auto mb-8">
+              我們捨棄傳統死板的日曆，採用「里程碑解鎖」模式。<br/>團隊進度是由實際的開發品質來決定，而不是為了趕上死線而妥協。
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a 
+                href="/app"
+                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-4 rounded-full font-bold text-lg transition-all border border-indigo-500 hover:border-indigo-400 shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:-translate-y-1"
+              >
+                💻 體驗 OmniScript Demo
+              </a>
+            </div>
+            
+            <div className="mt-8">
+              <button onClick={() => setIsChangelogOpen(true)} className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-400 font-medium text-sm transition-colors border-b border-transparent hover:border-indigo-400 pb-0.5">
+                <Sparkles className="w-4 h-4" /> 查看最新更新日誌 (v1.1.0)
+              </button>
+            </div>
           </div>
 
           {/* Kanban / Milestone Grid */}

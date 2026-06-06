@@ -188,7 +188,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
 
       {/* 右側主畫面 */}
       <div className="flex-1 h-full overflow-y-auto bg-slate-100 dark:bg-slate-900/50 p-6 lg:p-10">
-        <div className="max-w-5xl mx-auto flex flex-col h-full space-y-6">
+        <div className="max-w-5xl mx-auto flex flex-col min-h-full space-y-6">
           
           {/* 選擇歸檔主題下拉選單 */}
           <div className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4 shrink-0">
@@ -259,8 +259,8 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
                   </div>
                 </div>
 
-                {/* Notion 上傳區塊 */}
-                <div className="mt-8">
+                {/* Notion 上傳區塊 (Sticky) */}
+                <div className="mt-8 sticky bottom-8">
                   <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5">
                     <div className="text-sm font-semibold mb-3 flex items-center justify-between">
                       <span>匯入生成圖像至 Notion</span>
@@ -296,7 +296,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
               </div>
 
               {/* 右側淺色區塊 (Light Panel - Grid of Cards) */}
-              <div className="flex-1 bg-slate-50 dark:bg-slate-900 p-6 lg:p-8 overflow-y-auto">
+              <div className="flex-1 bg-slate-50 dark:bg-slate-900 p-6 lg:p-8">
                 <div className="grid gap-6">
                   {bubbles.map((bubble, index) => (
                     <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 animate-in fade-in slide-in-from-right-4" style={{ animationDelay: `${index * 100}ms` }}>

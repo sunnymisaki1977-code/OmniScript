@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req, { params }) {
   try {
-    const { id: pageId } = params;
+    const { id: pageId } = await params;
     const apiKey = process.env.NOTION_API_KEY;
 
     if (!apiKey) {

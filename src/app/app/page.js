@@ -5,6 +5,8 @@ import Sidebar from "@/components/Sidebar";
 import ReferenceContext from "@/components/ReferenceContext";
 import EditorWorkspace from "@/components/EditorWorkspace";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
+import { logActivity } from "../../utils/activityLogger";
+import IdentityModal from "../../components/IdentityModal";
 import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X } from "lucide-react";
 import ChangelogModal from "../../components/ChangelogModal";
 
@@ -160,6 +162,7 @@ export default function Home() {
   const createNewProject = () => {
     const newId = Date.now().toString();
     setProjectId(newId);
+    logActivity("建立了一個新專案");
     localStorage.setItem("omniscript_active_project", newId);
     return newId;
   };
@@ -213,6 +216,7 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error || "Generation failed");
       
       setStepData((prev) => ({ ...prev, [`step${stepId}`]: data.result }));
+      logActivity(`執行了 AI 智能產製 (Step ${stepId})`);
       return data.result;
     } catch (error) {
       alert("生成失敗: " + error.message);
@@ -239,6 +243,7 @@ export default function Home() {
       setNotionStatus(data.url);
       setArchivedUrl(data.url);
       if (!isAutoRunning) alert("成功歸檔至 Notion!");
+      logActivity("已將專案歸檔至 Notion");
     } catch (error) {
       alert("歸檔失敗: " + error.message);
     } finally {
@@ -369,6 +374,7 @@ export default function Home() {
   if (currentStep === 0) {
     return (
       <div className="min-h-screen bg-[#F9FAFB] dark:bg-[#0F172A] flex flex-col font-sans">
+        <IdentityModal />
         
         {/* Global Header */}
         <header className="h-16 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between sticky top-0 z-50">
@@ -626,6 +632,7 @@ export default function Home() {
   // -----------------------------------------------------
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+      <IdentityModal />
       <Sidebar
         steps={WORKFLOW_STEPS}
         currentStep={currentStep}

@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import ChangelogModal from "../components/ChangelogModal";
+import IdentityModal from "../components/IdentityModal";
+import ActivityFeed from "../components/ActivityFeed";
 
 const INITIAL_ROLES = [
   {
@@ -219,6 +221,7 @@ export default function JoinPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-300 font-sans selection:bg-indigo-500/30">
+      <IdentityModal />
       
       {/* 🚀 Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden px-6">
@@ -264,6 +267,13 @@ export default function JoinPage() {
           </div>
         </div>
 
+      </section>
+
+      {/* 🚀 Section: Activity Feed */}
+      <section className="py-12 bg-slate-950 px-6">
+        <div className="max-w-4xl mx-auto">
+          <ActivityFeed />
+        </div>
       </section>
 
       {/* 📍 Section 4: Milestone Roadmap */}

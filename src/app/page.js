@@ -579,52 +579,7 @@ export default function JoinPage() {
 
       
 
-      {/* ✉️ Final CTA */}
-      <section id="join-form" className="py-24 px-6 bg-gradient-to-b from-slate-950 to-indigo-950 border-t border-slate-800 text-center">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">準備好打造你的代表作了嗎？</h2>
-          <p className="text-xl text-indigo-200 mb-12">
-            只要你有實作的熱情與解決問題的決心，我們一起在專案中變強！
-          </p>
-          
-          <form 
-            className="bg-slate-900/50 backdrop-blur-md border border-slate-700/50 p-8 rounded-2xl max-w-xl mx-auto text-left"
-            onSubmit={(e) => { e.preventDefault(); alert('感謝您的報名！PM 會盡快與您聯繫！'); }}
-          >
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">您的稱呼</label>
-                <input type="text" required className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="王小明" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">想應徵的角色</label>
-                <select className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500">
-                  <option>前端工程師 (Frontend)</option>
-                  <option>後端工程師 (Backend)</option>
-                  <option>UI 設計師</option>
-                  <option>UX 設計師</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">Github 或作品集連結</label>
-                <input type="url" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="https://github.com/..." />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">簡單說說為什麼想加入？</label>
-                <textarea rows="3" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="我想挑戰..."></textarea>
-              </div>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl transition-colors">
-                送出報名表單
-              </button>
-              <a href="/app" className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold py-3 px-4 rounded-xl transition-colors text-center">
-                先去玩玩看 Demo
-              </a>
-            </div>
-          </form>
-        </div>
-      </section>
+      
 
       <ChangelogModal isOpen={isChangelogOpen} onClose={() => setIsChangelogOpen(false)} />
 

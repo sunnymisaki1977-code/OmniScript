@@ -692,7 +692,7 @@ export default function Home() {
           <div className="flex items-center gap-2 cursor-pointer" onClick={handleReset}>
             <span className="text-xl">✨</span>
             <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[150px]">
-              {theme || "OmniScript"}
+              OmniScript
             </span>
           </div>
           

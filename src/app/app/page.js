@@ -185,7 +185,7 @@ export default function Home() {
   const loadNotionProject = async (proj) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/notion/page/${proj.id}`);
+      const res = await fetch(`/api/notion/page/${proj.id}?t=` + Date.now(), { cache: 'no-store' });
       const data = await res.json();
       if (data.success) {
         setProjectId(proj.id);

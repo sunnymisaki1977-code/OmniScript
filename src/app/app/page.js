@@ -715,7 +715,8 @@ export default function Home() {
               <ReferenceContext
                 isCollapsed={isRefCollapsed}
                 onToggleCollapse={() => setIsRefCollapsed(!isRefCollapsed)}
-                step={currentStepConfig}
+                contextData={{ theme, ...stepData }}
+                dependencies={currentStepConfig.dependsOn || []}
               />
             )}
             

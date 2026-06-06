@@ -62,19 +62,17 @@ export async function GET() {
 
     const notion = new Client({ auth: apiKey });
 
-    // Fetch the latest 10 activities
-    const response = await notion.databases.query({
-      database_id: ACTIVITY_DB_ID,
-      sorts: [
-        {
-          timestamp: "created_time",
-          direction: "descending",
-        },
-      ],
-      page_size: 10,
+    // Fetch the latest activities using search and filtering by database ID
+    const response = await notion.search({
+      filter: { property: "object", value: "page" },
+      sort: { direction: "descending", timestamp: "last_edited_time" }
     });
 
-    const logs = response.results.map((page) => {
+    const dbPages = response.results.filter(
+      p => p.parent && p.parent.database_id && p.parent.database_id.replace(/-/g, '') === ACTIVITY_DB_ID.replace(/-/g, '')
+    ).slice(0, 10);
+
+    const logs = dbPages.map((page) => {
       // Extract the text from the title property
       // We look for a property of type "title"
       const titlePropertyKey = Object.keys(page.properties).find(

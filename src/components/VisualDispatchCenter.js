@@ -49,6 +49,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     const rawData = stepData[activeTab];
@@ -107,6 +108,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
       const data = await res.json();
       if (data.success) {
         setUploadProgress("上傳成功！");
+        setPreviewUrl(URL.createObjectURL(file));
         setTimeout(() => setUploadProgress(""), 3000);
       } else {
         setUploadProgress("上傳失敗");
@@ -272,7 +274,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
                     <button 
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isUploading || !activeProjectId}
-                      className="w-full border-2 border-dashed border-slate-600 hover:border-slate-400 hover:bg-slate-700/50 transition-colors rounded-xl p-6 flex flex-col items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full border-2 border-dashed border-slate-600 hover:border-slate-400 hover:bg-slate-700/50 transition-colors rounded-xl p-6 flex flex-col items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative min-h-[160px]"
                     >
                       <input 
                         type="file" 
@@ -281,10 +283,21 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
                         ref={fileInputRef}
                         onChange={handleFileChange}
                       />
-                      <ImageIcon className="w-8 h-8 text-slate-500 group-hover:text-slate-300 transition-colors" />
-                      <span className="text-sm text-slate-400 group-hover:text-slate-300 font-medium">
-                        {isUploading ? "上傳中..." : "點擊上傳圖檔"}
-                      </span>
+                      {previewUrl ? (
+                        <>
+                          <img src={previewUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-white text-sm font-bold bg-slate-900/60 px-3 py-1.5 rounded-full">點擊重新上傳</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className="w-8 h-8 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                          <span className="text-sm text-slate-400 group-hover:text-slate-300 font-medium z-10">
+                            {isUploading ? "上傳中..." : "點擊上傳圖檔"}
+                          </span>
+                        </>
+                      )}
                     </button>
                     {!activeProjectId && (
                       <p className="text-xs text-rose-400 mt-2 text-center">

@@ -30,11 +30,23 @@ export async function POST(req) {
       mode: "single_part",
     });
     
-    // 2. 送出檔案 (將前端傳來的 Blob/File 直接送給 Notion SDK)
-    await notion.fileUploads.send({
-      file_upload_id: uploadRes.id,
-      file: file,
+    // 2. 送出檔案 (使用原生的 fetch 搭配 FormData 以確保 Content-Type 正確)
+    const uploadFormData = new FormData();
+    uploadFormData.append("file", file, file.name);
+
+    const sendRes = await fetch(uploadRes.upload_url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Notion-Version": "2022-06-28"
+      },
+      body: uploadFormData
     });
+
+    if (!sendRes.ok) {
+      const errorText = await sendRes.text();
+      throw new Error(`Upload failed: ${sendRes.status} ${errorText}`);
+    }
 
     // 3. 將上傳的檔案附加到 Notion 頁面中
     await notion.blocks.children.append({

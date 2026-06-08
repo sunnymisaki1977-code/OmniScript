@@ -22,30 +22,21 @@ export async function POST(req) {
       return NextResponse.json({ error: "Notion API key is missing." }, { status: 500 });
     }
 
-    // 儲存檔案到 public/uploads
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const uploadsDir = path.join(process.cwd(), "public/uploads");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-    const filepath = path.join(uploadsDir, filename);
-    await writeFile(filepath, buffer);
-
-    // 產生公開網址 (若部署至遠端，請替換為實際網域)
-    const protocol = req.headers.get('x-forwarded-proto') || 'http';
-    const host = req.headers.get('host') || 'localhost:3000';
-    const fileUrl = `${protocol}://${host}/uploads/${filename}`;
-
     // 嘗試附加到 Notion Page
     const notion = new Client({ auth: apiKey });
     
-    // 注意：Notion API 目前不支援直接上傳二進位圖片至其伺服器，
-    // 因此這裡使用 external URL。如果使用的是 localhost，
-    // Notion 網頁版可能會因為無法連線本地端而無法顯示預覽。
+    // 1. 初始化上傳
+    const uploadRes = await notion.fileUploads.create({
+      mode: "single_part",
+    });
+    
+    // 2. 送出檔案 (將前端傳來的 Blob/File 直接送給 Notion SDK)
+    await notion.fileUploads.send({
+      file_upload_id: uploadRes.id,
+      file: file,
+    });
+
+    // 3. 將上傳的檔案附加到 Notion 頁面中
     await notion.blocks.children.append({
       block_id: pageId,
       children: [
@@ -65,16 +56,16 @@ export async function POST(req) {
           object: "block",
           type: "image",
           image: {
-            type: "external",
-            external: {
-              url: fileUrl,
+            type: "file_upload",
+            file_upload: {
+              id: uploadRes.id,
             },
           },
         },
       ],
     });
 
-    return NextResponse.json({ success: true, url: fileUrl });
+    return NextResponse.json({ success: true, url: uploadRes.upload_url });
   } catch (error) {
     console.error("Notion API Upload Error:", error);
     return NextResponse.json(

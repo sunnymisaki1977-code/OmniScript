@@ -101,7 +101,6 @@ export default function EditorWorkspace({
                     src={videoUrl}
                     autoPlay 
                     loop
-                    muted 
                     playsInline
                     className="w-full h-full object-cover opacity-90"
                   />

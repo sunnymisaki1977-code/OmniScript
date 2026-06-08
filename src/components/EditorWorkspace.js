@@ -16,6 +16,12 @@ export default function EditorWorkspace({
   const textareaRef = useRef(null);
   const [copied, setCopied] = useState(false);
   const [loadingText, setLoadingText] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+
+  const videos = [
+    "https://res.cloudinary.com/dhvzfeo7p/video/upload/q_auto/f_auto/v1780920395/_%E5%9C%96%E7%94%9F%E5%8B%95%E7%95%AB%E8%A6%8F%E5%8A%83_Animation_Planning__o5hw6k.mp4",
+    "https://res.cloudinary.com/dhvzfeo7p/video/upload/q_auto/f_auto/v1780920477/_%E5%9C%96%E7%94%9F%E5%8B%95%E7%95%AB%E8%A6%8F%E5%8A%83_Animation_Planning__1_umfge3.mp4"
+  ];
 
   const loadingMessages = [
     "正在讀取背景資料...",
@@ -29,6 +35,7 @@ export default function EditorWorkspace({
     if (isLoading) {
       let i = 0;
       setLoadingText(loadingMessages[0]);
+      setVideoUrl(videos[Math.floor(Math.random() * videos.length)]);
       const interval = setInterval(() => {
         i = (i + 1) % loadingMessages.length;
         setLoadingText(loadingMessages[i]);
@@ -83,17 +90,23 @@ export default function EditorWorkspace({
         {/* Content Area */}
         <div className="flex-1 relative pb-32">
           {isLoading ? (
-            <div className="animate-pulse space-y-6">
-              <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400 font-medium text-lg mb-6">
+            <div className="flex flex-col h-[60vh] space-y-4">
+              <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400 font-medium text-lg mb-2">
                 <Sparkles className="w-6 h-6 animate-spin" />
                 <span className="typewriter">{loadingText}</span>
               </div>
-              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
-              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2"></div>
-              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-5/6"></div>
-              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-2/3"></div>
-              <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
-              <div className="h-32 mt-8 bg-slate-100 dark:bg-slate-800/50 rounded-xl"></div>
+              <div className="flex-1 w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 relative bg-slate-900 shadow-xl">
+                {videoUrl && (
+                  <video 
+                    src={videoUrl}
+                    autoPlay 
+                    loop
+                    muted 
+                    playsInline
+                    className="w-full h-full object-cover opacity-90"
+                  />
+                )}
+              </div>
             </div>
           ) : (
             <div className={`relative ${isCodeType ? 'rounded-xl overflow-hidden shadow-sm' : ''}`}>

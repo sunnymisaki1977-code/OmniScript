@@ -46,8 +46,6 @@ export default function Home() {
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [activeInputMode, setActiveInputMode] = useState(null);
   const [activeTab, setActiveTab] = useState("planning");
-  const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
-  const [animationUrl, setAnimationUrl] = useState("");
 
   // Fetch Team Projects from Notion on mount
   useEffect(() => {
@@ -305,18 +303,8 @@ export default function Home() {
     }
   };
 
-  const triggerAnimation = () => {
-    const videos = [
-      "https://res.cloudinary.com/dhvzfeo7p/video/upload/q_auto/f_auto/v1780920395/_%E5%9C%96%E7%94%9F%E5%8B%95%E7%95%AB%E8%A6%8F%E5%8A%83_Animation_Planning__o5hw6k.mp4",
-      "https://res.cloudinary.com/dhvzfeo7p/video/upload/q_auto/f_auto/v1780920477/_%E5%9C%96%E7%94%9F%E5%8B%95%E7%95%AB%E8%A6%8F%E5%8A%83_Animation_Planning__1_umfge3.mp4"
-    ];
-    setAnimationUrl(videos[Math.floor(Math.random() * videos.length)]);
-    setIsPlayingAnimation(true);
-  };
-
   const handleStartManual = () => {
     if (!theme.trim()) return;
-    triggerAnimation();
     createNewProject();
     setCurrentStep(1);
     generateContent(1, { theme });
@@ -325,7 +313,6 @@ export default function Home() {
   const handleStartAuto = async () => {
     if (!theme.trim()) return;
     
-    triggerAnimation();
     setIsAutoRunning(true);
     createNewProject();
     setStepData({});
@@ -816,20 +803,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* 載入動畫滿版遮罩 */}
-      {isPlayingAnimation && (
-        <div className="fixed inset-0 z-[100] bg-slate-950 flex items-center justify-center animate-in fade-in duration-300">
-          <video 
-            src={animationUrl}
-            autoPlay 
-            muted 
-            playsInline
-            onEnded={() => setIsPlayingAnimation(false)}
-            onError={() => setIsPlayingAnimation(false)}
-            className="w-full h-full object-cover opacity-80"
-          />
-        </div>
-      )}
     </div>
   );
 }

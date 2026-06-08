@@ -39,7 +39,7 @@ const INITIAL_ROLES = [
       "微互動 (Micro-interactions)",
       "防抖 (Debounce) 儲存機制"
     ],
-    assignee: ""
+    assignee: "林亞欣"
   },
   {
     id: "backend",
@@ -92,7 +92,7 @@ const INITIAL_ROLES = [
       "能設計友善的錯誤狀態 (Error States) 與極端情況",
       "具備可用性測試 (Usability Testing) 概念"
     ],
-    assignee: ""
+    assignee: "白采鑫 Jasmine"
   }
 ];
 
@@ -137,9 +137,7 @@ export default function JoinPage() {
   const [editForm, setEditForm] = useState({});
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   
-  const [roles, setRoles] = useState(INITIAL_ROLES);
-  const [editingRoleId, setEditingRoleId] = useState(null);
-  const [editRoleForm, setEditRoleForm] = useState({});
+
 
   useEffect(() => {
     const savedMilestones = localStorage.getItem('omni_milestones');
@@ -154,11 +152,6 @@ export default function JoinPage() {
         return m;
       });
       setMilestones(migrated);
-    }
-    
-    const savedRoles = localStorage.getItem('omni_roles');
-    if (savedRoles) {
-      setRoles(JSON.parse(savedRoles));
     }
   }, []);
 
@@ -179,17 +172,7 @@ export default function JoinPage() {
     setEditingId(null);
   };
 
-  const startEditRole = (r) => {
-    setEditingRoleId(r.id);
-    setEditRoleForm(r);
-  };
 
-  const handleSaveRole = () => {
-    const updated = roles.map(r => r.id === editingRoleId ? editRoleForm : r);
-    setRoles(updated);
-    localStorage.setItem('omni_roles', JSON.stringify(updated));
-    setEditingRoleId(null);
-  };
 
   const getIcon = (iconName) => {
     if (iconName === 'Terminal') return <Terminal className="w-6 h-6" />;
@@ -478,38 +461,13 @@ export default function JoinPage() {
           </div>
           
                     <div className="grid md:grid-cols-2 gap-6">
-            {roles.map((r) => {
-              const isEditing = editingRoleId === r.id;
+            {INITIAL_ROLES.map((r) => {
               const hasAssignee = !!r.assignee;
               const colorConfig = getColorClasses(r.color, hasAssignee);
               
               return (
                 <div key={r.id} className={`bg-slate-950 border p-8 rounded-2xl flex flex-col transition-all duration-300 relative ${hasAssignee ? colorConfig.active : 'border-slate-800 hover:border-slate-700'}`}>
-                  {isEditing ? (
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs text-slate-500 mb-1 block">職位名稱</label>
-                        <input value={editRoleForm.title} onChange={e => setEditRoleForm({...editRoleForm, title: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white text-sm focus:outline-none focus:border-indigo-500" />
-                      </div>
-                      <div>
-                        <label className="text-xs text-slate-500 mb-1 block">你的戰場 (說明)</label>
-                        <textarea rows={3} value={editRoleForm.battlefield} onChange={e => setEditRoleForm({...editRoleForm, battlefield: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-300 text-sm" />
-                      </div>
-                      <div>
-                        <label className="text-xs text-indigo-400 font-bold mb-1 block flex items-center gap-1"><UserCheck className="w-4 h-4" /> 當責 (負責人)</label>
-                        <input placeholder="尚未指派..." value={editRoleForm.assignee} onChange={e => setEditRoleForm({...editRoleForm, assignee: e.target.value})} className="w-full bg-indigo-950/30 border border-indigo-500/50 rounded p-2 text-white font-bold focus:outline-none focus:border-indigo-500" />
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <button onClick={handleSaveRole} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg py-2 text-sm font-bold transition-colors">儲存修改</button>
-                        <button onClick={() => setEditingRoleId(null)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-lg py-2 text-sm transition-colors">取消</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <button onClick={() => startEditRole(r)} className="absolute top-6 right-6 text-slate-500 hover:text-white bg-slate-900 hover:bg-slate-800 p-2 rounded-lg transition-colors border border-slate-800 z-10">
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <div className="mb-6 flex justify-between items-start">
+                  <div className="mb-6 flex justify-between items-start">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorConfig.bg} ${colorConfig.text}`}>
                           {getIcon(r.icon)}
                         </div>
@@ -550,8 +508,6 @@ export default function JoinPage() {
                           </ul>
                         </div>
                       </div>
-                    </>
-                  )}
                 </div>
               );
             })}

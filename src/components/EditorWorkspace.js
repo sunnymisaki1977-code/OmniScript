@@ -160,24 +160,30 @@ export default function EditorWorkspace({
             
             <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
             
-            <button
-              onClick={onSaveNext}
-              disabled={isLoading || !value?.trim() || isArchived}
-              className={`flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all ${
-                isArchived
-                  ? "bg-slate-400 dark:bg-slate-700 cursor-not-allowed shadow-none hover:translate-y-0"
-                  : "bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 dark:shadow-none hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
-              }`}
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : isArchived ? (
+            {isArchived ? (
+              <a
+                href={typeof isArchived === 'string' ? isArchived : '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200 dark:shadow-none hover:-translate-y-0.5"
+              >
                 <Check className="w-4 h-4" />
-              ) : isLastStep ? (
-                <Save className="w-4 h-4" />
-              ) : null}
-              {isArchived ? "專案已歸檔" : isLastStep ? "確認並歸檔至 Notion" : "儲存並進行下一步 ➔"}
-            </button>
+                在 Notion 開啟
+              </a>
+            ) : (
+              <button
+                onClick={onSaveNext}
+                disabled={isLoading || !value?.trim()}
+                className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 dark:shadow-none hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : isLastStep ? (
+                  <Save className="w-4 h-4" />
+                ) : null}
+                {isLastStep ? "確認並歸檔至 Notion" : "儲存並進行下一步 ➔"}
+              </button>
+            )}
           </>
         )}
       </div>

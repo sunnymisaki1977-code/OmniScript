@@ -786,7 +786,7 @@ export default function Home() {
                 isLastStep={currentStep === 9}
                 saveStatus={saveStatus}
                 isAutoRunning={isAutoRunning}
-                isArchived={!!archivedUrl}
+                isArchived={archivedUrl}
               />
             )}
           </>

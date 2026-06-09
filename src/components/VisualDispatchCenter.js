@@ -193,39 +193,50 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
         <div className="max-w-5xl mx-auto flex flex-col min-h-full space-y-6">
           
           {/* 選擇歸檔主題下拉選單 */}
-          <div className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex items-center gap-4 shrink-0">
+          <div className="w-full bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-center gap-4 shrink-0">
             <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap flex items-center gap-2">
               <Cloud className="w-4 h-4 text-sky-500" />
               選擇歸檔主題
             </span>
-            <div className="relative flex-1">
+            <div className="relative flex-1 flex items-center gap-3">
               {isFetchingTeam ? (
                 <div className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-500 flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-sky-200 border-t-sky-500 rounded-full animate-spin"></div>
                   同步資料中...
                 </div>
               ) : (
-                <select
-                  onChange={(e) => {
-                    const proj = teamProjects.find(p => p.id === e.target.value);
-                    if (proj) loadNotionProject(proj);
-                  }}
-                  disabled={isLoading || teamProjects.length === 0}
-                  className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
-                  value={activeProjectId || ""}
-                >
-                  <option value="" disabled>-- 點擊選擇團隊專案 --</option>
-                  {teamProjects.map(proj => (
-                    <option key={proj.id} value={proj.id}>
-                      【{proj.theme}】歸檔於 {new Date(proj.updatedAt).toLocaleDateString()}
-                    </option>
-                  ))}
-                </select>
-              )}
-              {!isFetchingTeam && (
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                <div className="relative flex-1">
+                  <select
+                    onChange={(e) => {
+                      const proj = teamProjects.find(p => p.id === e.target.value);
+                      if (proj) loadNotionProject(proj);
+                    }}
+                    disabled={isLoading || teamProjects.length === 0}
+                    className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50 cursor-pointer"
+                    value={activeProjectId || ""}
+                  >
+                    <option value="" disabled>-- 點擊選擇團隊專案 --</option>
+                    {teamProjects.map(proj => (
+                      <option key={proj.id} value={proj.id}>
+                        【{proj.theme}】歸檔於 {new Date(proj.updatedAt).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
                 </div>
+              )}
+              {activeProjectId && teamProjects.find(p => p.id === activeProjectId)?.url && (
+                <a 
+                  href={teamProjects.find(p => p.id === activeProjectId).url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-800/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors whitespace-nowrap shrink-0"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  在 Notion 開啟
+                </a>
               )}
             </div>
           </div>

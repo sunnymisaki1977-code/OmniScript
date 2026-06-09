@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Activity, RefreshCw } from "lucide-react";
+import { Activity, RefreshCw, ExternalLink } from "lucide-react";
 
 export default function ActivityFeed() {
   const [logs, setLogs] = useState([]);
@@ -36,13 +36,25 @@ export default function ActivityFeed() {
           <Activity className="w-5 h-5 text-indigo-400" /> 
           團隊活動軌跡 (即時同步)
         </h3>
-        <button 
-          onClick={fetchActivities}
-          className={`text-slate-500 hover:text-indigo-400 transition-colors ${loading ? 'animate-spin' : ''}`}
-          title="手動重新整理"
-        >
-          <RefreshCw className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://www.notion.so/377cf7781506809e98d5f1163b1067d5"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-indigo-400 transition-colors bg-slate-900/50 hover:bg-slate-800 px-2 py-1 rounded border border-slate-700 hover:border-indigo-500/50"
+            title="在 Notion 開啟"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            Notion
+          </a>
+          <button 
+            onClick={fetchActivities}
+            className={`text-slate-500 hover:text-indigo-400 transition-colors ${loading ? 'animate-spin' : ''}`}
+            title="手動重新整理"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
       </div>
       
       <div className="p-4 max-h-[300px] overflow-y-auto">

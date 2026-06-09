@@ -56,7 +56,7 @@ const INITIAL_ROLES = [
       "高併發 API 處理經驗",
       "非同步隊列 (Queue) 架構"
     ],
-    assignee: ""
+    assignee: "蘇之苓"
   },
   {
     id: "ui",
@@ -74,7 +74,7 @@ const INITIAL_ROLES = [
       "具備微互動 (Micro-interactions) 與動態視覺設計概念",
       "了解前端切版邏輯，設計出「工程師寫得出來」的畫面"
     ],
-    assignee: ""
+    assignee: "王瑞鐘"
   },
   {
     id: "ux",

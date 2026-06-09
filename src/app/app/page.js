@@ -282,10 +282,14 @@ export default function Home() {
     setIsLoading(true);
     try {
       const payloadContext = contextOverride || { theme, ...stepData };
+      const identityStr = localStorage.getItem("omni_identity");
+      const identity = identityStr ? JSON.parse(identityStr) : null;
+      const creatorName = identity ? `${identity.role} ${identity.name}` : "未知使用者";
+
       const res = await fetch("/api/notion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context: payloadContext }),
+        body: JSON.stringify({ context: payloadContext, creatorName }),
       });
       const data = await res.json();
       if (!res.ok) {

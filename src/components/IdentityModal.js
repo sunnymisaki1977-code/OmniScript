@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { UserCircle, Shield, CheckCircle2 } from "lucide-react";
 
-const MEMBERS = ["Misaki", "Hsin", "瑞鐘", "Will", "Jasmine"];
-const ROLES = ["前端工程師", "後端工程師", "UI/UX 設計師", "PM 專案經理", "行銷/營運", "訪客"];
+const MEMBERS = ["林亞欣", "蘇之苓", "王瑞鐘", "白采鑫", "江世銘"];
+const ROLES = ["前端工程師 (Frontend)", "後端工程師 (Backend)", "UI 設計師 (User Interface)", "UX 設計師 (User Experience)", "專案經理 PM", "行銷/營運", "訪客"];
 
 export default function IdentityModal() {
   const [isOpen, setIsOpen] = useState(false);

@@ -9,7 +9,7 @@ import {
 
 export async function POST(req) {
   try {
-    const { context } = await req.json();
+    const { context, creatorName } = await req.json();
     const theme = context.theme;
 
     const apiKey = process.env.NOTION_API_KEY;
@@ -26,6 +26,11 @@ export async function POST(req) {
 
     // 準備所有的 Blocks
     const childrenBlocks = [];
+
+    if (creatorName) {
+      const timeStr = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+      childrenBlocks.push(...createSafeParagraphBlocks(`歸檔人員：${creatorName}\n歸檔時間：${timeStr}\n\n---\n`));
+    }
 
     // 依序處理每個步驟
     for (const step of WORKFLOW_STEPS) {

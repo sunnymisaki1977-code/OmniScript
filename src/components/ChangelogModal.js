@@ -5,6 +5,20 @@ import { X, Rocket, Bug, Layout, Zap, Star } from "lucide-react";
 
 export const changelogs = [
   {
+    version: "v1.2.0",
+    date: "2026/06/09",
+    title: "團隊協作體驗升級與 Vercel 佈署修復",
+    description: "全面翻新團隊名單與 Notion 實名歸檔機制，並徹底解決 Vercel 環境下的圖片上傳與預覽問題，同時導入更具沉浸感的生成動畫。",
+    updates: [
+      { type: "Feature", content: "Notion 實名歸檔：將專案歸檔至 Notion 時，會自動在文件最頂端印出執行歸檔的「團隊成員名稱」與「時間」，權責更清晰。" },
+      { type: "Feature", content: "跨區域 Notion 傳送門：在系統各處（企劃工作區、視覺發控中心、首頁團隊軌跡）新增「🔗 在 Notion 開啟」的一鍵跳轉按鈕。" },
+      { type: "Fix", content: "修復 Vercel 500 錯誤：重寫圖片上傳機制，全面捨棄本機暫存，改採記憶體 Blob 串接 Notion File Upload API，解決伺服器路徑錯誤。" },
+      { type: "Feature", content: "圖片上傳即時預覽：在視覺發控中心上傳圖片至 Notion 後，畫面上會立刻載入該圖片的縮圖預覽，不用再兩邊切換確認。" },
+      { type: "UI/UX", content: "沉浸式等待動畫：AI 生成的等待時間中加入專屬有聲科技動畫，大幅減輕使用者的等待焦慮感。" },
+      { type: "UI/UX", content: "團隊名單更新：全面換上最新的團隊職稱與成員名單（Frontend 林亞欣、Backend 蘇之苓、UI 王瑞鐘、UX 白采鑫、PM 江世銘），並固定首頁看板為唯讀狀態。" }
+    ]
+  },
+  {
     version: "v1.1.1",
     date: "2026/06/06",
     title: "全域版面流暢度與即時動態修復",

@@ -61,16 +61,30 @@ export async function POST(req) {
     let insertAfterId = undefined;
     if (stepId) {
       try {
-        const blocksResponse = await notion.blocks.children.list({ block_id: pageId });
-        const targetBlock = blocksResponse.results.find(block => {
-          if (block.type === 'heading_2' && block.heading_2.rich_text.length > 0) {
-            const text = block.heading_2.rich_text[0].plain_text;
-            return text.startsWith(`${stepId}. `);
+        let hasMore = true;
+        let nextCursor = undefined;
+        
+        while (hasMore && !insertAfterId) {
+          const blocksResponse = await notion.blocks.children.list({ 
+            block_id: pageId,
+            start_cursor: nextCursor
+          });
+          
+          const targetBlock = blocksResponse.results.find(block => {
+            if (block.type === 'heading_2' && block.heading_2.rich_text.length > 0) {
+              const text = block.heading_2.rich_text.map(rt => rt.plain_text).join("");
+              // 匹配 '6. ' 或 'Step 6' 等可能的格式
+              return text.startsWith(`${stepId}. `) || text.includes(`Step ${stepId}`);
+            }
+            return false;
+          });
+          
+          if (targetBlock) {
+            insertAfterId = targetBlock.id;
           }
-          return false;
-        });
-        if (targetBlock) {
-          insertAfterId = targetBlock.id;
+          
+          hasMore = blocksResponse.has_more;
+          nextCursor = blocksResponse.next_cursor;
         }
       } catch (err) {
         console.warn("Failed to find target block for precise insertion, falling back to end of page", err);

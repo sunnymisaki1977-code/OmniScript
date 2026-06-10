@@ -9,6 +9,7 @@ export async function POST(req) {
     const formData = await req.formData();
     const file = formData.get("file");
     const pageId = formData.get("pageId");
+    const stepId = formData.get("stepId");
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -56,8 +57,28 @@ export async function POST(req) {
     else if (file.type.startsWith("video/")) blockType = "video";
     else if (file.type.startsWith("audio/")) blockType = "audio";
 
+    // 尋找要插入的目標區塊 (如果前端有提供 stepId)
+    let insertAfterId = undefined;
+    if (stepId) {
+      try {
+        const blocksResponse = await notion.blocks.children.list({ block_id: pageId });
+        const targetBlock = blocksResponse.results.find(block => {
+          if (block.type === 'heading_2' && block.heading_2.rich_text.length > 0) {
+            const text = block.heading_2.rich_text[0].plain_text;
+            return text.startsWith(`${stepId}. `);
+          }
+          return false;
+        });
+        if (targetBlock) {
+          insertAfterId = targetBlock.id;
+        }
+      } catch (err) {
+        console.warn("Failed to find target block for precise insertion, falling back to end of page", err);
+      }
+    }
+
     // 3. 將上傳的檔案附加到 Notion 頁面中
-    await notion.blocks.children.append({
+    const appendPayload = {
       block_id: pageId,
       children: [
         {
@@ -83,7 +104,13 @@ export async function POST(req) {
           },
         },
       ],
-    });
+    };
+
+    if (insertAfterId) {
+      appendPayload.after = insertAfterId;
+    }
+
+    await notion.blocks.children.append(appendPayload);
 
     return NextResponse.json({ success: true, url: uploadRes.upload_url });
   } catch (error) {

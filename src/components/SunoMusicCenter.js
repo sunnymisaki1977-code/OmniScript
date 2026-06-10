@@ -94,6 +94,7 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
       const formData = new FormData();
       formData.append("file", file);
       formData.append("pageId", activeProjectId); // activeProjectId 為 Notion 的 page ID
+      formData.append("stepId", "8"); // 傳遞這是哪個步驟，以便精準插入
 
       const res = await fetch("/api/notion/upload", {
         method: "POST",

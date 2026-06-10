@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import ReferenceContext from "@/components/ReferenceContext";
 import EditorWorkspace from "@/components/EditorWorkspace";
 import VisualDispatchCenter from "@/components/VisualDispatchCenter";
+import SunoMusicCenter from "@/components/SunoMusicCenter";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { logActivity } from "../../utils/activityLogger";
 import IdentityModal from "../../components/IdentityModal";
@@ -717,6 +718,12 @@ export default function Home() {
             >
               🎨 視覺發控中心
             </button>
+            <button 
+              onClick={() => setActiveTab('suno')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'suno' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
+            >
+              🎵 Suno 配樂中心
+            </button>
           </div>
           )}
         </div>
@@ -794,7 +801,7 @@ export default function Home() {
               />
             )}
           </>
-        ) : (
+        ) : activeTab === 'dispatch' ? (
           <VisualDispatchCenter 
             stepData={stepData} 
             teamProjects={teamProjects} 
@@ -804,7 +811,17 @@ export default function Home() {
             theme={theme}
             activeProjectId={projectId}
           />
-        )}
+        ) : activeTab === 'suno' ? (
+          <SunoMusicCenter 
+            stepData={stepData} 
+            teamProjects={teamProjects} 
+            isFetchingTeam={isFetchingTeam} 
+            loadNotionProject={loadNotionProject} 
+            isLoading={isLoading}
+            theme={theme}
+            activeProjectId={projectId}
+          />
+        ) : null}
       </div>
 
     </div>

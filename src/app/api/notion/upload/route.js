@@ -30,9 +30,11 @@ export async function POST(req) {
       mode: "single_part",
     });
     
-    // 2. 送出檔案 (使用原生的 fetch 搭配 FormData 以確保 Content-Type 正確)
+    // 2. 送出檔案 (讀取為 Buffer 以避免 Node.js fetch stream deadlock 導致 ECONNRESET)
+    const arrayBuffer = await file.arrayBuffer();
+    const fileBlob = new Blob([arrayBuffer], { type: file.type });
     const uploadFormData = new FormData();
-    uploadFormData.append("file", file, file.name);
+    uploadFormData.append("file", fileBlob, file.name);
 
     const sendRes = await fetch(uploadRes.upload_url, {
       method: "POST",
@@ -48,6 +50,12 @@ export async function POST(req) {
       throw new Error(`Upload failed: ${sendRes.status} ${errorText}`);
     }
 
+    // 判斷檔案類型以決定 Notion Block Type
+    let blockType = "file";
+    if (file.type.startsWith("image/")) blockType = "image";
+    else if (file.type.startsWith("video/")) blockType = "video";
+    else if (file.type.startsWith("audio/")) blockType = "audio";
+
     // 3. 將上傳的檔案附加到 Notion 頁面中
     await notion.blocks.children.append({
       block_id: pageId,
@@ -59,15 +67,15 @@ export async function POST(req) {
             rich_text: [
               {
                 type: "text",
-                text: { content: "匯入的生成圖像" },
+                text: { content: "匯入的媒體檔案" },
               },
             ],
           },
         },
         {
           object: "block",
-          type: "image",
-          image: {
+          type: blockType,
+          [blockType]: {
             type: "file_upload",
             file_upload: {
               id: uploadRes.id,

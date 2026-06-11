@@ -6,6 +6,7 @@ import ReferenceContext from "@/components/ReferenceContext";
 import EditorWorkspace from "@/components/EditorWorkspace";
 import VisualDispatchCenter from "@/components/VisualDispatchCenter";
 import SunoMusicCenter from "@/components/SunoMusicCenter";
+import NotebookLMCenter from "@/components/NotebookLMCenter";
 import { WORKFLOW_REGISTRY } from "@/utils/promptConfigs";
 import { logActivity } from "../../utils/activityLogger";
 import IdentityModal from "../../components/IdentityModal";
@@ -745,6 +746,12 @@ export default function Home() {
             >
               🎵 Suno 配樂中心
             </button>
+            <button 
+              onClick={() => setActiveTab('notebooklm')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'notebooklm' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
+            >
+              📚 NotebookLM 影片中心
+            </button>
           </div>
           )}
         </div>
@@ -837,6 +844,17 @@ export default function Home() {
           />
         ) : activeTab === 'suno' ? (
           <SunoMusicCenter 
+            stepData={stepData} 
+            teamProjects={teamProjects} 
+            isFetchingTeam={isFetchingTeam} 
+            loadNotionProject={loadNotionProject} 
+            isLoading={isLoading}
+            theme={theme}
+            activeProjectId={projectId}
+            mode={mode}
+          />
+        ) : activeTab === 'notebooklm' ? (
+          <NotebookLMCenter 
             stepData={stepData} 
             teamProjects={teamProjects} 
             isFetchingTeam={isFetchingTeam} 

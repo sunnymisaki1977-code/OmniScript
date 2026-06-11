@@ -189,26 +189,22 @@ export default function EditorWorkspace({
               重新生成 (消耗 1 點)
             </button>
             
-            <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
-            
-            {isArchived ? (
-              <div className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-slate-500 dark:text-slate-400">
-                <Check className="w-4 h-4 text-emerald-500" />
-                已自動在 Notion 開啟
-              </div>
-            ) : (
-              <button
-                onClick={onSaveNext}
-                disabled={isLoading || !value?.trim()}
-                className={`flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 ${mode === 'ecommerce' ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-200 dark:shadow-none' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 dark:shadow-none'}`}
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : isLastStep ? (
-                  <Save className="w-4 h-4" />
-                ) : null}
-                {isLastStep ? "確認並歸檔至 Notion" : "儲存並進行下一步 ➔"}
-              </button>
+            {!isArchived && (
+              <>
+                <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
+                <button
+                  onClick={onSaveNext}
+                  disabled={isLoading || !value?.trim()}
+                  className={`flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 ${mode === 'ecommerce' ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-200 dark:shadow-none' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 dark:shadow-none'}`}
+                >
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : isLastStep ? (
+                    <Save className="w-4 h-4" />
+                  ) : null}
+                  {isLastStep ? "確認並歸檔至 Notion" : "儲存並進行下一步 ➔"}
+                </button>
+              </>
             )}
           </>
         )}

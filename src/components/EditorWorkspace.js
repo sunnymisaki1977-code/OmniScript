@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Save, Copy, Check, Cloud, CloudOff } from "lucide-react";
+import { Sparkles, Save, Copy, Check, Cloud, CloudOff, Eye, Edit3 } from "lucide-react";
+import LandingPagePreview from "./LandingPagePreview";
+import { parseLandingPageText } from "@/utils/landingPageParser";
 
 export default function EditorWorkspace({ 
+  mode = "creator",
   step, 
   value, 
   onChange, 
@@ -17,6 +20,12 @@ export default function EditorWorkspace({
   const [copied, setCopied] = useState(false);
   const [loadingText, setLoadingText] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+
+  // Reset preview state when changing steps
+  useEffect(() => {
+    setShowPreview(false);
+  }, [step.id]);
 
   const videos = [
     "https://res.cloudinary.com/dhvzfeo7p/video/upload/q_auto/f_auto/v1780920395/_%E5%9C%96%E7%94%9F%E5%8B%95%E7%95%AB%E8%A6%8F%E5%8A%83_Animation_Planning__o5hw6k.mp4",
@@ -85,13 +94,31 @@ export default function EditorWorkspace({
               <><CloudOff className="w-4 h-4 text-rose-500" /> 儲存失敗</>
             )}
           </div>
+          
+          {/* Landing Page Preview Toggle (Ecommerce Step 3 only) */}
+          {mode === "ecommerce" && step.id === 3 && value?.trim() && !isLoading && (
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className={`ml-4 flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-colors shadow-sm ${
+                showPreview 
+                  ? 'bg-slate-800 text-white hover:bg-slate-700' 
+                  : 'bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200'
+              }`}
+            >
+              {showPreview ? (
+                <><Edit3 className="w-4 h-4" /> 返回編輯文案</>
+              ) : (
+                <><Eye className="w-4 h-4" /> 👁️ 一鍵預覽網頁</>
+              )}
+            </button>
+          )}
         </div>
 
         {/* Content Area */}
         <div className="flex-1 relative pb-32">
           {isLoading ? (
             <div className="flex flex-col h-[60vh] space-y-4">
-              <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400 font-medium text-lg mb-2">
+              <div className={`flex items-center gap-3 font-medium text-lg mb-2 ${mode === 'ecommerce' ? 'text-amber-600 dark:text-amber-400' : 'text-indigo-600 dark:text-indigo-400'}`}>
                 <Sparkles className="w-6 h-6 animate-spin" />
                 <span className="typewriter">{loadingText}</span>
               </div>
@@ -106,6 +133,10 @@ export default function EditorWorkspace({
                   />
                 )}
               </div>
+            </div>
+          ) : showPreview && mode === "ecommerce" && step.id === 3 ? (
+            <div className="absolute inset-0 bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+              <LandingPagePreview parsedData={parseLandingPageText(value)} />
             </div>
           ) : (
             <div className={`relative ${isCodeType ? 'rounded-xl overflow-hidden shadow-sm' : ''}`}>
@@ -143,8 +174,8 @@ export default function EditorWorkspace({
       {/* Floating Action Bar */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-white dark:bg-slate-800 p-2 pl-4 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-700 z-20 transition-all">
         {isAutoRunning ? (
-          <div className="flex items-center gap-3 px-6 py-3 text-sm font-bold text-indigo-600 dark:text-indigo-400">
-            <div className="w-5 h-5 border-2 border-indigo-600/30 border-t-indigo-600 dark:border-indigo-400/30 dark:border-t-indigo-400 rounded-full animate-spin" />
+          <div className={`flex items-center gap-3 px-6 py-3 text-sm font-bold ${mode === 'ecommerce' ? 'text-amber-600 dark:text-amber-400' : 'text-indigo-600 dark:text-indigo-400'}`}>
+            <div className={`w-5 h-5 border-2 rounded-full animate-spin ${mode === 'ecommerce' ? 'border-amber-600/30 border-t-amber-600 dark:border-amber-400/30 dark:border-t-amber-400' : 'border-indigo-600/30 border-t-indigo-600 dark:border-indigo-400/30 dark:border-t-indigo-400'}`} />
             自動生成中，請稍候...
           </div>
         ) : (
@@ -161,20 +192,15 @@ export default function EditorWorkspace({
             <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
             
             {isArchived ? (
-              <a
-                href={typeof isArchived === 'string' ? isArchived : '#'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200 dark:shadow-none hover:-translate-y-0.5"
-              >
-                <Check className="w-4 h-4" />
-                在 Notion 開啟
-              </a>
+              <div className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-slate-500 dark:text-slate-400">
+                <Check className="w-4 h-4 text-emerald-500" />
+                已自動在 Notion 開啟
+              </div>
             ) : (
               <button
                 onClick={onSaveNext}
                 disabled={isLoading || !value?.trim()}
-                className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 dark:shadow-none hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
+                className={`flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all shadow-md hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 ${mode === 'ecommerce' ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-200 dark:shadow-none' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 dark:shadow-none'}`}
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

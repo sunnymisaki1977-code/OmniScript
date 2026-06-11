@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
+import { WORKFLOW_REGISTRY } from "@/utils/promptConfigs";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60; // Next.js App Router 設定，延長 Vercel 預設截斷時間
@@ -7,9 +7,10 @@ export const maxDuration = 60; // Next.js App Router 設定，延長 Vercel 預�
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { stepId, context } = body;
+    const { stepId, context, mode = "creator" } = body;
 
-    const stepConfig = WORKFLOW_STEPS.find((s) => s.id === stepId);
+    const currentWorkflowSteps = WORKFLOW_REGISTRY[mode] || WORKFLOW_REGISTRY.creator;
+    const stepConfig = currentWorkflowSteps.find((s) => s.id === stepId);
     if (!stepConfig) {
       return NextResponse.json({ error: "Invalid step ID" }, { status: 400 });
     }

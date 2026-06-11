@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { CheckCircle2, CircleDot, Lock, RotateCcw, Moon, Sun } from "lucide-react";
 
-export default function Sidebar({ steps, currentStep, theme, onStepClick, completedSteps, onReset }) {
+export default function Sidebar({ mode, steps, currentStep, theme, onStepClick, completedSteps, onReset }) {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -26,9 +26,18 @@ export default function Sidebar({ steps, currentStep, theme, onStepClick, comple
   return (
     <div className="w-[280px] h-full shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex flex-col">
       <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <span className="text-indigo-600">✨</span> OmniScript
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-3">
+          <span className={mode === 'ecommerce' ? "text-amber-500" : "text-indigo-600"}>✨</span> OmniScript
         </h1>
+        {mode === 'ecommerce' ? (
+          <div className="inline-flex items-center justify-center w-full gap-2 px-3 py-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-lg">
+            🛍️ 電商帶貨模式
+          </div>
+        ) : (
+          <div className="inline-flex items-center justify-center w-full gap-2 px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 text-xs font-bold rounded-lg">
+            💡 知識創作者模式
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
@@ -49,7 +58,9 @@ export default function Sidebar({ steps, currentStep, theme, onStepClick, comple
                   className={`w-full text-left flex items-start gap-3 p-3 rounded-lg transition-colors relative
                     ${
                       isActive
-                        ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                        ? mode === 'ecommerce' 
+                          ? "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-medium"
+                          : "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
                         : isLocked
                         ? "text-slate-400 dark:text-slate-600 cursor-not-allowed"
                         : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -57,14 +68,14 @@ export default function Sidebar({ steps, currentStep, theme, onStepClick, comple
                   `}
                 >
                   {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-600 rounded-r-md" />
+                    <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-md ${mode === 'ecommerce' ? 'bg-amber-500' : 'bg-indigo-600'}`} />
                   )}
                   
                   <div className="mt-0.5 shrink-0">
                     {isCompleted && !isActive ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                     ) : isActive ? (
-                      <CircleDot className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                      <CircleDot className={`w-5 h-5 ${mode === 'ecommerce' ? 'text-amber-600 dark:text-amber-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
                     ) : isLocked ? (
                       <Lock className="w-5 h-5 opacity-50" />
                     ) : (

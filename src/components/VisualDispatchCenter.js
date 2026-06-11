@@ -7,7 +7,10 @@ import { Copy, ExternalLink, Image as ImageIcon, Smartphone, AlertCircle, CheckC
 const parseVisualData = (text, type) => {
   if (!text) return [];
   
-  const blocks = text.split(/###\s+/).filter(b => b.trim().length > 0);
+  const matchFirstHeading = text.match(/###\s+[\s\S]*/);
+  const cleanText = matchFirstHeading ? matchFirstHeading[0] : text;
+  
+  const blocks = cleanText.split(/###\s+/).filter(b => b.trim().length > 0);
   
   return blocks.map((block, index) => {
     const extractLine = (keywordRegex) => {
@@ -18,10 +21,10 @@ const parseVisualData = (text, type) => {
     const lines = block.split('\n');
     const title = lines[0].trim() || `提案 ${index + 1}`;
     
-    const mainTitle = extractLine(/\*?(?:主標|高點擊文案)\*?[：:]\s*(.*?)(?=\n|$)/i);
-    const subTitle = extractLine(/\*?副標\*?[：:]\s*(.*?)(?=\n|$)/i);
-    const zhPrompt = extractLine(/\*?中文(?:指令)?\*?[：:]\s*(.*?)(?=\n|$)/i);
-    const enPrompt = extractLine(/\*?English(?: Prompt)?\*?[：:]\s*(.*?)(?=\n|$)/i);
+    const mainTitle = extractLine(/\*?(?:主標(?:題)?|高點擊文案|主圖廣告文案|秒殺點擊文案)\*?[：:]\s*(.*?)(?=\n|$)/i);
+    const subTitle = extractLine(/\*?副標(?:題)?\*?[：:]\s*(.*?)(?=\n|$)/i);
+    const zhPrompt = extractLine(/\*?中文(?:指令|提示詞)?\*?[：:]\s*(.*?)(?=\n|$)/i);
+    const enPrompt = extractLine(/\*?(?:English|英文)(?: Prompt|提示詞)?\*?[：:]\s*(.*?)(?=\n|$)/i);
     
     const ratioStr = type === "step6" ? "16:9" : "9:16";
     let compiledText = `[請幫我生成一張 ${ratioStr} 圖像]\nPrompt:\n${enPrompt || zhPrompt}\n\n文字排版參考：\n主標：${mainTitle}`;
@@ -40,7 +43,7 @@ const parseVisualData = (text, type) => {
   });
 };
 
-export default function VisualDispatchCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null }) {
+export default function VisualDispatchCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null, mode = "creator" }) {
   const [activeTab, setActiveTab] = useState("step6");
   const [bubbles, setBubbles] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
@@ -159,18 +162,20 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
             onClick={() => setActiveTab("step6")}
             className={`w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 transition-colors ${
               activeTab === "step6" 
-                ? "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800" 
+                ? mode === "ecommerce" ? "bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800" : "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800" 
                 : "hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-transparent"
             }`}
           >
-            <div className={`p-2 rounded-lg ${activeTab === "step6" ? "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-700 text-slate-500"}`}>
+            <div className={`p-2 rounded-lg ${activeTab === "step6" ? (mode === "ecommerce" ? "bg-amber-100 dark:bg-amber-800 text-amber-600 dark:text-amber-400" : "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400") : "bg-slate-100 dark:bg-slate-700 text-slate-500"}`}>
               <ImageIcon className="w-5 h-5" />
             </div>
             <div>
-              <div className={`font-semibold ${activeTab === "step6" ? "text-indigo-900 dark:text-indigo-300" : "text-slate-700 dark:text-slate-300"}`}>
+              <div className={`font-semibold ${activeTab === "step6" ? (mode === "ecommerce" ? "text-amber-900 dark:text-amber-300" : "text-indigo-900 dark:text-indigo-300") : "text-slate-700 dark:text-slate-300"}`}>
                 Step 6
               </div>
-              <div className="text-xs text-slate-500">長影音縮圖 (16:9)</div>
+              <div className="text-xs text-slate-500">
+                {mode === "ecommerce" ? "電商主圖/橫幅視覺設計 (16:9)" : "長影音縮圖 (16:9)"}
+              </div>
             </div>
           </button>
 
@@ -178,18 +183,20 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
             onClick={() => setActiveTab("step7")}
             className={`w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 transition-colors ${
               activeTab === "step7" 
-                ? "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800" 
+                ? mode === "ecommerce" ? "bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800" : "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800" 
                 : "hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-transparent"
             }`}
           >
-            <div className={`p-2 rounded-lg ${activeTab === "step7" ? "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-700 text-slate-500"}`}>
+            <div className={`p-2 rounded-lg ${activeTab === "step7" ? (mode === "ecommerce" ? "bg-amber-100 dark:bg-amber-800 text-amber-600 dark:text-amber-400" : "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400") : "bg-slate-100 dark:bg-slate-700 text-slate-500"}`}>
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
-              <div className={`font-semibold ${activeTab === "step7" ? "text-indigo-900 dark:text-indigo-300" : "text-slate-700 dark:text-slate-300"}`}>
+              <div className={`font-semibold ${activeTab === "step7" ? (mode === "ecommerce" ? "text-amber-900 dark:text-amber-300" : "text-indigo-900 dark:text-indigo-300") : "text-slate-700 dark:text-slate-300"}`}>
                 Step 7
               </div>
-              <div className="text-xs text-slate-500">短影音縮圖 (9:16)</div>
+              <div className="text-xs text-slate-500">
+                {mode === "ecommerce" ? "短影音廣告封面設計 (9:16)" : "短影音縮圖 (9:16)"}
+              </div>
             </div>
           </button>
         </div>

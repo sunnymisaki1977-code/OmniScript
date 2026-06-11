@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
+import { WORKFLOW_REGISTRY } from "@/utils/promptConfigs";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60; // Next.js App Router 設定，延長 Vercel 預設截斷時間
@@ -7,7 +7,7 @@ export const maxDuration = 60; // Next.js App Router 設定，延長 Vercel 預�
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { theme } = body;
+    const { theme, mode = "creator" } = body;
 
     const customApiKey = req.headers.get("x-gemini-api-key");
     const apiKey = customApiKey || process.env.GEMINI_API_KEY;
@@ -39,7 +39,8 @@ export async function POST(req) {
 
 以下是這 9 個步驟的詳細指令：\n\n`;
 
-    for (const step of WORKFLOW_STEPS) {
+    const currentWorkflowSteps = WORKFLOW_REGISTRY[mode] || WORKFLOW_REGISTRY.creator;
+    for (const step of currentWorkflowSteps) {
       masterPrompt += `--- [步驟 ${step.id}：${step.title}] ---\n`;
       masterPrompt += step.prompt(selfReferenceContext) + "\n\n";
     }

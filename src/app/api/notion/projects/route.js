@@ -3,10 +3,15 @@ import { NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const mode = searchParams.get('mode') || 'creator';
+    
     const apiKey = process.env.NOTION_API_KEY;
-    const databaseId = process.env.NOTION_DATABASE_ID;
+    const databaseId = mode === 'ecommerce' 
+      ? (process.env.NOTION_ECOMMERCE_DATABASE_ID || "37bcf7781506807b9031d8db8dc83dd1")
+      : process.env.NOTION_DATABASE_ID;
 
     if (!apiKey || !databaseId) {
       return NextResponse.json(

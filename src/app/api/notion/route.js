@@ -1,6 +1,6 @@
 import { Client } from "@notionhq/client";
 import { NextResponse } from "next/server";
-import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
+import { WORKFLOW_REGISTRY } from "@/utils/promptConfigs";
 import {
   createSafeParagraphBlocks,
   createHeading2Block,
@@ -9,11 +9,13 @@ import {
 
 export async function POST(req) {
   try {
-    const { context, creatorName } = await req.json();
+    const { context, creatorName, mode = "creator" } = await req.json();
     const theme = context.theme;
 
     const apiKey = process.env.NOTION_API_KEY;
-    const databaseId = process.env.NOTION_DATABASE_ID;
+    const databaseId = mode === 'ecommerce' 
+      ? (process.env.NOTION_ECOMMERCE_DATABASE_ID || "37bcf7781506807b9031d8db8dc83dd1")
+      : process.env.NOTION_DATABASE_ID;
 
     if (!apiKey || !databaseId) {
       return NextResponse.json(
@@ -32,8 +34,9 @@ export async function POST(req) {
       childrenBlocks.push(...createSafeParagraphBlocks(`歸檔人員：${creatorName}\n歸檔時間：${timeStr}\n\n---\n`));
     }
 
+    const currentWorkflowSteps = WORKFLOW_REGISTRY[mode] || WORKFLOW_REGISTRY.creator;
     // 依序處理每個步驟
-    for (const step of WORKFLOW_STEPS) {
+    for (const step of currentWorkflowSteps) {
       const stepData = context[`step${step.id}`];
       if (!stepData) continue;
 

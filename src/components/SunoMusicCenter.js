@@ -35,7 +35,7 @@ const parseSunoData = (text) => {
   });
 };
 
-export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null }) {
+export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null, mode = "creator" }) {
   const activeTab = "step8"; // Suno配樂固定為 Step 8
   const [bubbles, setBubbles] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
@@ -139,22 +139,26 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
       {/* 左側選單 */}
       <div className="w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col h-full shrink-0">
         <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Suno 配樂中心</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+            {mode === "ecommerce" ? "Suno 廣告配樂中心" : "Suno 配樂中心"}
+          </h2>
           <p className="text-sm text-slate-500 mt-1">點擊區塊產生獨立的對話指令，並派發至 Suno AI。</p>
         </div>
         
         <div className="p-4 space-y-2 flex-1 overflow-y-auto">
           <button
-            className="w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 transition-colors bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800"
+            className={`w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 transition-colors ${mode === "ecommerce" ? "bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800" : "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800"}`}
           >
-            <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400">
+            <div className={`p-2 rounded-lg ${mode === "ecommerce" ? "bg-amber-100 dark:bg-amber-800 text-amber-600 dark:text-amber-400" : "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400"}`}>
               <Music className="w-5 h-5" />
             </div>
             <div>
-              <div className="font-semibold text-indigo-900 dark:text-indigo-300">
+              <div className={`font-semibold ${mode === "ecommerce" ? "text-amber-900 dark:text-amber-300" : "text-indigo-900 dark:text-indigo-300"}`}>
                 Step 8
               </div>
-              <div className="text-xs text-slate-500">Suno AI 配樂設計</div>
+              <div className="text-xs text-slate-500">
+                {mode === "ecommerce" ? "Suno AI 廣告配樂設計" : "Suno AI 配樂設計"}
+              </div>
             </div>
           </button>
         </div>
@@ -241,9 +245,9 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
                   {/* 小提示區塊 */}
                   <div className="bg-slate-800 rounded-xl p-4 border border-slate-700">
                     <div className="flex items-start gap-3">
-                      <Music className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                      <Music className={`w-5 h-5 shrink-0 mt-0.5 ${mode === 'ecommerce' ? 'text-amber-400' : 'text-indigo-400'}`} />
                       <div className="text-sm">
-                        <span className="font-bold text-indigo-300 block mb-1">配樂小提示</span>
+                        <span className={`font-bold block mb-1 ${mode === 'ecommerce' ? 'text-amber-300' : 'text-indigo-300'}`}>配樂小提示</span>
                         <span className="text-slate-400 leading-relaxed">
                           將指令貼上至 Suno 的 Custom Mode (自訂模式) 的 Style of Music 欄位中。
                         </span>
@@ -339,7 +343,7 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
                         </button>
                         <button
                           onClick={() => handleCopyAndGo(bubble.compiledText)}
-                          className="px-4 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-2 transition-all shadow-sm shadow-indigo-200 dark:shadow-none"
+                          className={`px-4 py-2 text-sm font-bold text-white rounded-lg flex items-center gap-2 transition-all shadow-sm ${mode === 'ecommerce' ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-200 dark:shadow-none' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200 dark:shadow-none'}`}
                         >
                           <ExternalLink className="w-4 h-4" /> 複製並前往 Suno
                         </button>

@@ -6,7 +6,7 @@ import ReferenceContext from "@/components/ReferenceContext";
 import EditorWorkspace from "@/components/EditorWorkspace";
 import VisualDispatchCenter from "@/components/VisualDispatchCenter";
 import SunoMusicCenter from "@/components/SunoMusicCenter";
-import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
+import { WORKFLOW_REGISTRY } from "@/utils/promptConfigs";
 import { logActivity } from "../../utils/activityLogger";
 import IdentityModal from "../../components/IdentityModal";
 import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud } from "lucide-react";
@@ -47,13 +47,14 @@ export default function Home() {
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [activeInputMode, setActiveInputMode] = useState(null);
   const [activeTab, setActiveTab] = useState("planning");
+  const [mode, setMode] = useState("creator");
 
-  // Fetch Team Projects from Notion on mount
+  // Fetch Team Projects from Notion on mount or mode change
   useEffect(() => {
     const fetchTeamProjects = async () => {
       setIsFetchingTeam(true);
       try {
-        const res = await fetch("/api/notion/projects", { cache: 'no-store' });
+        const res = await fetch(`/api/notion/projects?mode=${mode}`, { cache: 'no-store' });
         const data = await res.json();
         if (data.success && data.projects) {
           setTeamProjects(data.projects);
@@ -65,7 +66,7 @@ export default function Home() {
       }
     };
     fetchTeamProjects();
-  }, []);
+  }, [mode]);
   
   // 初始化載入 LocalStorage 與主題
   useEffect(() => {
@@ -263,7 +264,7 @@ export default function Home() {
           "Content-Type": "application/json",
           "x-gemini-api-key": customApiKey || ""
         },
-        body: JSON.stringify({ stepId, context }),
+        body: JSON.stringify({ stepId, context, mode }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed");
@@ -290,7 +291,7 @@ export default function Home() {
       const res = await fetch("/api/notion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context: payloadContext, creatorName }),
+        body: JSON.stringify({ context: payloadContext, creatorName, mode }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -301,6 +302,7 @@ export default function Home() {
       setArchivedUrl(data.url);
       if (!isAutoRunning) alert("成功歸檔至 Notion!");
       logActivity("已將專案歸檔至 Notion");
+      window.open(data.url, '_blank');
     } catch (error) {
       alert("歸檔失敗: " + error.message);
     } finally {
@@ -378,7 +380,8 @@ export default function Home() {
     generateContent(currentStep, contextForCurrent);
   };
 
-  const currentStepConfig = WORKFLOW_STEPS.find((s) => s.id === currentStep);
+  const currentWorkflowSteps = WORKFLOW_REGISTRY[mode] || WORKFLOW_REGISTRY.creator;
+  const currentStepConfig = currentWorkflowSteps.find((s) => s.id === currentStep);
 
   const renderApiModal = () => {
     if (!isApiKeyModalOpen) return null;
@@ -435,7 +438,25 @@ export default function Home() {
           
           {/* Central Card */}
           <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 md:p-12 text-center mb-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${mode === 'ecommerce' ? 'from-amber-500 via-orange-500 to-red-500' : 'from-indigo-500 via-purple-500 to-pink-500'}`}></div>
+            
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl shadow-inner">
+                <button
+                  onClick={() => setMode('creator')}
+                  className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${mode === 'creator' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                >
+                  💡 知識創作者模式
+                </button>
+                <button
+                  onClick={() => setMode('ecommerce')}
+                  className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${mode === 'ecommerce' ? 'bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+                >
+                  🛍️ 電商帶貨模式
+                </button>
+              </div>
+            </div>
+
             <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
               今天想創作什麼？
             </h1>
@@ -448,7 +469,7 @@ export default function Home() {
                 type="text"
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
-                placeholder="例如：日本京阪神五日遊攻略"
+                placeholder={mode === 'ecommerce' ? "例如：新款抗敏除蟎掃地機器人（打解決換季過敏等痛點）" : "例如：日本京阪神五日遊攻略"}
                 className="w-full px-6 py-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-lg text-slate-900 dark:text-white placeholder:text-slate-400"
                 onKeyDown={(e) => e.key === "Enter" && handleStartAuto()}
               />
@@ -767,7 +788,8 @@ export default function Home() {
         {activeTab === 'planning' ? currentStep === 0 ? renderDashboardHero() : (
           <>
             <Sidebar
-              steps={WORKFLOW_STEPS}
+              mode={mode}
+              steps={currentWorkflowSteps}
               currentStep={currentStep}
               theme={theme}
               completedSteps={completedSteps}
@@ -788,6 +810,7 @@ export default function Home() {
             
             {currentStepConfig && (
               <EditorWorkspace
+                mode={mode}
                 step={currentStepConfig}
                 value={stepData[`step${currentStep}`] || ""}
                 onChange={(val) => setStepData({ ...stepData, [`step${currentStep}`]: val })}
@@ -810,6 +833,7 @@ export default function Home() {
             isLoading={isLoading}
             theme={theme}
             activeProjectId={projectId}
+            mode={mode}
           />
         ) : activeTab === 'suno' ? (
           <SunoMusicCenter 
@@ -820,6 +844,7 @@ export default function Home() {
             isLoading={isLoading}
             theme={theme}
             activeProjectId={projectId}
+            mode={mode}
           />
         ) : null}
       </div>

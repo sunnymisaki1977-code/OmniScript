@@ -301,6 +301,7 @@ export default function Home() {
       setArchivedUrl(data.url);
       if (!isAutoRunning) alert("成功歸檔至 Notion!");
       logActivity("已將專案歸檔至 Notion");
+      window.open(data.url, '_blank');
     } catch (error) {
       alert("歸檔失敗: " + error.message);
     } finally {

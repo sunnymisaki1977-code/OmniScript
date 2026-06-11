@@ -838,7 +838,7 @@ export default function Home() {
             isLoading={isLoading}
             theme={theme}
             activeProjectId={projectId}
-            mode={mode}
+            mode="creator"
           />
         ) : null}
       </div>

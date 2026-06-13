@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, CircleDot, Lock, RotateCcw, Moon, Sun } from "lucide-react";
+import { CheckCircle2, CircleDot, Lock, RotateCcw, Moon, Sun, Sparkles } from "lucide-react";
 
 export default function Sidebar({ steps, currentStep, theme, onStepClick, completedSteps, onReset }) {
   const [isDark, setIsDark] = useState(false);
@@ -24,10 +24,10 @@ export default function Sidebar({ steps, currentStep, theme, onStepClick, comple
   };
 
   return (
-    <div className="w-[280px] h-full shrink-0 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex flex-col">
-      <div className="p-6 border-b border-slate-200 dark:border-slate-800">
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <span className="text-indigo-600">✨</span> OmniScript
+    <div className="w-72 h-full shrink-0 border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col">
+      <div className="h-14 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center shrink-0">
+        <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-amber-500" /> OmniScript
         </h1>
       </div>
 
@@ -46,13 +46,13 @@ export default function Sidebar({ steps, currentStep, theme, onStepClick, comple
                 <button
                   onClick={() => !isLocked && onStepClick(step.id)}
                   disabled={isLocked}
-                  className={`w-full text-left flex items-start gap-3 p-3 rounded-lg transition-colors relative
+                  className={`w-full text-left flex items-start gap-3 px-4 py-3 rounded-xl transition-colors relative border
                     ${
                       isActive
-                        ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium"
+                        ? "bg-indigo-50 dark:bg-indigo-900/40 text-indigo-900 dark:text-indigo-300 font-semibold border-indigo-200 dark:border-indigo-800"
                         : isLocked
-                        ? "text-slate-400 dark:text-slate-600 cursor-not-allowed"
-                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        ? "text-slate-400 dark:text-slate-600 cursor-not-allowed border-transparent"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 border-transparent"
                     }
                   `}
                 >

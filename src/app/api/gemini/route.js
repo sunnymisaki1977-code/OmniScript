@@ -31,38 +31,50 @@ export async function POST(req) {
     // Note: The new @google/genai SDK is used here
     const ai = new GoogleGenAI({ apiKey: apiKey });
 
-    // 自動重試機制 (最高 3 次) 處理 503/429 錯誤
-    let response;
-    let retries = 3;
-    let delay = 2000;
-    while (retries > 0) {
+    // 自動重試機制與模型降級
+    const MODELS = [
+      "gemini-2.5-pro",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-lite"
+    ];
+
+    let text = "";
+    let modelUsed = "";
+    const MAX_RETRIES = 5;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      modelUsed = MODELS[attempt - 1] || MODELS[MODELS.length - 1];
+
       try {
-        // 如果重試最後一次，降級為 lite 版本以提高成功率
-        const modelName = retries === 1 ? "gemini-2.5-flash-lite" : "gemini-2.5-flash";
-        response = await ai.models.generateContent({
-          model: modelName,
+        const response = await ai.models.generateContent({
+          model: modelUsed,
           contents: finalPrompt,
         });
-        break; // 成功則跳出迴圈
+
+        text = response.text || "";
+        return NextResponse.json({ result: text, modelUsed: modelUsed });
+        
       } catch (err) {
-        if (err.message && (err.message.includes("503") || err.message.includes("429")) && retries > 1) {
-          console.warn(`Model busy or rate limited, retrying in ${delay/1000}s... (${retries-1} attempts left)`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          retries--;
-          delay *= 2; // 指數退避 (Exponential backoff)
-        } else {
-          throw err; // 其他錯誤或重試耗盡，直接往外拋
+        const errorMsg = err.message || "";
+        const isRateLimitOrUnavailable = err.status === 429 || err.status === 503 || errorMsg.includes("503") || errorMsg.includes("429") || errorMsg.includes("quota") || errorMsg.includes("not found");
+        
+        if (isRateLimitOrUnavailable && attempt < MAX_RETRIES) {
+          console.warn(`[Gemini API] Error (${errorMsg || err.status}) with model ${modelUsed}. Retrying attempt ${attempt + 1}...`);
+          const delay = Math.pow(2, attempt) * 1500; // 指數退避: 3s, 6s, 12s, 24s
+          await new Promise(res => setTimeout(res, delay));
+          continue;
         }
+        throw err; // 如果已經是最後一次或非限流錯誤，就直接拋出
       }
     }
-
-    const generatedText = response.text || "";
-
-    return NextResponse.json({ result: generatedText });
   } catch (error) {
     console.error("Gemini API Error:", error);
+    const errorMsg = error.message || "";
+    if (errorMsg.includes("429") || errorMsg.includes("quota")) {
+      return NextResponse.json({ error: "Google API 免費額度已達上限 (429 Too Many Requests)。請稍後再重新嘗試！" }, { status: 429 });
+    }
     return NextResponse.json(
-      { error: "Failed to generate content", details: error.message },
+      { error: "Failed to generate content", details: errorMsg },
       { status: 500 }
     );
   }

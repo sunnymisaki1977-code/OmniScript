@@ -33,7 +33,23 @@ export async function POST(req) {
     
     // 2. 送出檔案 (讀取為 Buffer 以避免 Node.js fetch stream deadlock 導致 ECONNRESET)
     const arrayBuffer = await file.arrayBuffer();
-    const fileBlob = new Blob([arrayBuffer], { type: file.type });
+    
+    // 如果檔案類型遺失或是不支援的 octet-stream，根據檔名給予預設值 (處理圖片與音檔)
+    let mimeType = file.type;
+    if (!mimeType || mimeType === 'application/octet-stream') {
+      const ext = file.name ? file.name.split('.').pop().toLowerCase() : '';
+      if (ext === 'jpg' || ext === 'jpeg') mimeType = 'image/jpeg';
+      else if (ext === 'png') mimeType = 'image/png';
+      else if (ext === 'gif') mimeType = 'image/gif';
+      else if (ext === 'webp') mimeType = 'image/webp';
+      else if (ext === 'mp3') mimeType = 'audio/mpeg';
+      else if (ext === 'wav') mimeType = 'audio/wav';
+      else if (ext === 'mp4') mimeType = 'video/mp4';
+      else if (ext === 'mov') mimeType = 'video/quicktime';
+      else mimeType = 'application/octet-stream'; // 最後防線，不強制轉為 jpeg
+    }
+
+    const fileBlob = new Blob([arrayBuffer], { type: mimeType });
     const uploadFormData = new FormData();
     uploadFormData.append("file", fileBlob, file.name);
 
@@ -130,7 +146,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Notion API Upload Error:", error);
     return NextResponse.json(
-      { error: "Failed to upload file to Notion", details: error.message },
+      { error: "Failed to upload file to Notion: " + error.message, details: error.message },
       { status: 500 }
     );
   }

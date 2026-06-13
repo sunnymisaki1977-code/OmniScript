@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
-import ReferenceContext from "@/components/ReferenceContext";
 import EditorWorkspace from "@/components/EditorWorkspace";
 import VisualDispatchCenter from "@/components/VisualDispatchCenter";
 import SunoMusicCenter from "@/components/SunoMusicCenter";
@@ -10,7 +9,7 @@ import NotebookLMCenter from "@/components/NotebookLMCenter";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { logActivity } from "../../utils/activityLogger";
 import IdentityModal from "../../components/IdentityModal";
-import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud, Palette, Music, BookOpen } from "lucide-react";
+import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud, Palette, Music, BookOpen, Sparkles } from "lucide-react";
 import ChangelogModal from "../../components/ChangelogModal";
 
 const INSPIRATION_PILLS = [
@@ -693,51 +692,67 @@ export default function Home() {
   // Step 1~9: Workspace
   // -----------------------------------------------------
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
       <IdentityModal />
-      
-      {/* Global Header inside Workspace */}
-      <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between z-50">
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={handleReset}>
-            <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0">
-              <Rocket className="w-4 h-4" />
-            </span>
-            <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[150px]">
-              OmniScript
-            </span>
-          </div>
-          
-          {currentStep > 0 && (
-          <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-            <button 
-              onClick={() => setActiveTab('planning')}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'planning' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-            >
-              <FileText className="w-4 h-4" /> 企劃工作區
-            </button>
-            <button 
-              onClick={() => setActiveTab('dispatch')}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'dispatch' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-            >
-              <Palette className="w-4 h-4" /> 視覺發控中心
-            </button>
-            <button 
-              onClick={() => setActiveTab('suno')}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'suno' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-            >
-              <Music className="w-4 h-4" /> Suno 配樂中心
-            </button>
-            <button 
-              onClick={() => setActiveTab('notebooklm')}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'notebooklm' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-            >
-              <BookOpen className="w-4 h-4" /> NotebookLM 影片中心
-            </button>
-          </div>
-          )}
-        </div>
 
+      {/* 只有在企劃工作區且不是在儀表板首頁時，才在最左側顯示全高的 Sidebar */}
+      {activeTab === 'planning' && currentStep > 0 && (
+        <Sidebar
+          steps={WORKFLOW_STEPS}
+          currentStep={currentStep}
+          theme={theme}
+          completedSteps={completedSteps}
+          onStepClick={(id) => {
+            if (!isAutoRunning) setCurrentStep(id);
+          }}
+          onReset={handleReset}
+        />
+      )}
+      
+      {/* 右側主畫面區塊 (包含上方導覽列與主要內容區) */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Global Header */}
+        <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between z-50">
+          <div className="flex items-center gap-8">
+            {/* 當左側沒有 Sidebar 時，才在這裡顯示 Logo */}
+            {!(activeTab === 'planning' && currentStep > 0) && (
+              <div className="flex items-center gap-2 cursor-pointer" onClick={handleReset}>
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[150px]">
+                  OmniScript
+                </span>
+              </div>
+            )}
+            
+            {currentStep > 0 && (
+            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+              <button 
+                onClick={() => setActiveTab('planning')}
+                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'planning' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
+              >
+                <FileText className="w-4 h-4" /> 企劃工作區
+              </button>
+              <button 
+                onClick={() => setActiveTab('dispatch')}
+                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'dispatch' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
+              >
+                <Palette className="w-4 h-4" /> 視覺發控中心
+              </button>
+              <button 
+                onClick={() => setActiveTab('suno')}
+                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'suno' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
+              >
+                <Music className="w-4 h-4" /> Suno 配樂中心
+              </button>
+              <button 
+                onClick={() => setActiveTab('notebooklm')}
+                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'notebooklm' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
+              >
+                <BookOpen className="w-4 h-4" /> NotebookLM 影片中心
+              </button>
+            </div>
+            )}
+          </div>
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 rounded-full font-medium text-sm border border-amber-200 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors cursor-pointer">
@@ -770,31 +785,11 @@ export default function Home() {
               )}
             </div>
           </div>
+        </header>
 
-      </header>
-
-      <div className="flex flex-1 overflow-hidden">
-        {activeTab === 'planning' ? currentStep === 0 ? renderDashboardHero() : (
-          <>
-            <Sidebar
-              steps={WORKFLOW_STEPS}
-              currentStep={currentStep}
-              theme={theme}
-              completedSteps={completedSteps}
-              onStepClick={(id) => {
-                if (!isAutoRunning) setCurrentStep(id);
-              }}
-              onReset={handleReset}
-            />
-            
-            {currentStepConfig && (
-              <ReferenceContext
-                isCollapsed={isRefCollapsed}
-                onToggleCollapse={() => setIsRefCollapsed(!isRefCollapsed)}
-                contextData={{ theme, ...stepData }}
-                dependencies={currentStepConfig.dependsOn || []}
-              />
-            )}
+        <div className="flex flex-1 overflow-hidden">
+          {activeTab === 'planning' ? currentStep === 0 ? renderDashboardHero() : (
+            <>
             
             {currentStepConfig && (
               <EditorWorkspace
@@ -802,12 +797,16 @@ export default function Home() {
                 value={stepData[`step${currentStep}`] || ""}
                 onChange={(val) => setStepData({ ...stepData, [`step${currentStep}`]: val })}
                 isLoading={isLoading}
-                onRegenerate={() => handleRunStep(currentStep)}
-                onSaveNext={() => handleSaveAndNext(currentStep)}
+                onSaveNext={() => handleNextStep()}
                 isLastStep={currentStep === 9}
                 saveStatus={saveStatus}
                 isAutoRunning={isAutoRunning}
                 isArchived={archivedUrl}
+                teamProjects={teamProjects}
+                isFetchingTeam={isFetchingTeam}
+                loadNotionProject={loadNotionProject}
+                activeProjectId={projectId}
+                contextData={{ theme, ...stepData }}
               />
             )}
           </>
@@ -843,6 +842,7 @@ export default function Home() {
             mode="creator"
           />
         ) : null}
+        </div>
       </div>
 
     </div>

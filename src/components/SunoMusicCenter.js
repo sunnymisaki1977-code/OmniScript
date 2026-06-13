@@ -82,8 +82,8 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!activeProjectId) {
-      alert("尚未載入或儲存至 Notion 專案，無法上傳音檔。請先確保專案已同步。");
+    if (!activeProjectId || activeProjectId.length < 20) {
+      alert("尚未載入或儲存至 Notion 專案，無法上傳音檔。\n\n請先確認這個專案已經匯出至 Notion，或是從上方的下拉選單中選擇一個已經歸檔的團隊專案。");
       return;
     }
 

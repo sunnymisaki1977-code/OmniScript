@@ -1,11 +1,35 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Copy, ExternalLink, Image as ImageIcon, Smartphone, AlertCircle, CheckCircle2, Cloud, Upload } from "lucide-react";
+import { Copy, ExternalLink, Image as ImageIcon, Smartphone, AlertCircle, CheckCircle2, Cloud, Upload, LayoutTemplate } from "lucide-react";
 
 // 解析 Markdown 資料
 const parseVisualData = (text, type) => {
   if (!text) return [];
+  
+  if (type === "step9") {
+    const cards = [];
+    const parts = text.split(/\*\s*\*\*/).filter(b => b.trim().length > 0);
+    
+    parts.forEach((part) => {
+      const titleMatch = part.match(/^(.*?)\*\*/);
+      if (!titleMatch) return;
+      const rawTitle = titleMatch[1].trim();
+      
+      if (!rawTitle.includes("張") && !rawTitle.includes("提案")) return;
+      
+      const content = part.replace(/^(.*?)\*\*/, '').trim();
+      const ratioStr = rawTitle.includes("提案") ? "FB 爆款單圖 (1:1 或 4:5)" : "IG 懶人包 (4:5)";
+      const compiledText = `[請幫我生成一張 ${ratioStr} 圖像]\n\n卡片主題：${rawTitle}\n\n設計與文字需求：\n${content}`;
+      
+      cards.push({
+        id: cards.length,
+        title: rawTitle,
+        compiledText
+      });
+    });
+    return cards;
+  }
   
   const blocks = text.split(/###\s+/).filter(b => b.trim().length > 0);
   
@@ -56,6 +80,11 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
     }
   }, [activeTab, stepData]);
 
+  // 切換分頁時清空上傳狀態與預覽圖
+  useEffect(() => {
+    setUploadState({});
+  }, [activeTab]);
+
   const handleTextChange = (index, newText) => {
     const newBubbles = [...bubbles];
     newBubbles[index].compiledText = newText;
@@ -83,8 +112,8 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
   const handleFileChange = async (e, bubbleIndex) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (!activeProjectId) {
-      alert("尚未載入或儲存至 Notion 專案，無法上傳圖片。請先確保專案已同步。");
+    if (!activeProjectId || activeProjectId.length < 20) {
+      alert("尚未載入或儲存至 Notion 專案，無法上傳圖片。\n\n請先確認這個專案已經匯出至 Notion，或是從上方的下拉選單中選擇一個已經歸檔的團隊專案。");
       return;
     }
 
@@ -192,6 +221,25 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
               <div className="text-xs text-slate-500">短影音縮圖 (9:16)</div>
             </div>
           </button>
+
+          <button
+            onClick={() => setActiveTab("step9")}
+            className={`w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 transition-colors ${
+              activeTab === "step9" 
+                ? "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800" 
+                : "hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-transparent"
+            }`}
+          >
+            <div className={`p-2 rounded-lg ${activeTab === "step9" ? "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-700 text-slate-500"}`}>
+              <LayoutTemplate className="w-5 h-5" />
+            </div>
+            <div>
+              <div className={`font-semibold ${activeTab === "step9" ? "text-indigo-900 dark:text-indigo-300" : "text-slate-700 dark:text-slate-300"}`}>
+                Step 9
+              </div>
+              <div className="text-xs text-slate-500">社群圖文企劃</div>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -266,7 +314,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
               <div className="w-full lg:w-[320px] shrink-0 bg-slate-900 text-white p-8 flex flex-col justify-between">
                 <div>
                   <div className="text-amber-400 text-sm font-bold tracking-wider mb-2">
-                    {activeTab === "step6" ? "長影音縮圖 (16:9)" : "短影音縮圖 (9:16)"}
+                    {activeTab === "step6" ? "長影音縮圖 (16:9)" : activeTab === "step9" ? "IG, FaceBook 圖文" : "短影音縮圖 (9:16)"}
                   </div>
                   <h3 className="text-3xl font-extrabold mb-8 leading-tight">
                     {theme}

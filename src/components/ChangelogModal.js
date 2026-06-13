@@ -5,6 +5,19 @@ import { X, Rocket, Bug, Layout, Zap, Star } from "lucide-react";
 
 export const changelogs = [
   {
+    version: "v1.3.0",
+    date: "2026/06/14",
+    title: "企劃工作區介面重構與 AI 容錯引擎升級",
+    description: "重新設計了主要企劃工作區的卡片式視覺佈局，帶來極致的跨視窗整合體驗；並且深度強化了後端 AI 處理能力，全面導入 5 次指數退避重試與嚴格的 JSON 防呆機制。",
+    updates: [
+      { type: "UI/UX", content: "企劃工作區介面翻新：引入「左側深色大標面板、右側淺色編輯區」的精緻圓角卡片設計，並將「參考資料」無縫融合至深色面板，大幅提升螢幕空間利用率與閱讀質感。" },
+      { type: "UI/UX", content: "全域視覺與 Logo 升級：更換代表魔法的星芒 (Sparkles) Logo，並精準修正頂部導覽列對齊問題，讓全站介面結構與發控中心完美統一。" },
+      { type: "Feature", content: "發控中心擴充 Step 9：視覺發控中心現在完整支援解析「社群圖文企劃」，能自動將長文精準切分為 5 張 IG 懶人包與 2 張 FB 爆款單圖，實現單張卡片一鍵複製發送。" },
+      { type: "Feature", content: "AI 三階段智能退避 (Fallback)：大幅強化 Gemini API 呼叫韌性，新增 5 次自動重試，並在遇到 429 限流時，自動按照 pro -> flash -> flash-lite 的順序無縫降級生成。" },
+      { type: "Fix", content: "終極防 JSON 破圖防禦：現在若 AI API 意外返回截斷或非標準的內容 (SyntaxError)，後端會主動攔截並觸發重試機制；同時加入深層資料防呆轉換，徹底杜絕 React 渲染報錯崩潰。" }
+    ]
+  },
+  {
     version: "v1.2.0",
     date: "2026/06/09",
     title: "團隊協作體驗升級與 Vercel 佈署修復",

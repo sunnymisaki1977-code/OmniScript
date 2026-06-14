@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Copy, ExternalLink, Music, AlertCircle, CheckCircle2, Cloud, Upload } from "lucide-react";
 
 // 解析 Markdown 資料
@@ -39,12 +39,7 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
   const activeTab = "step8"; // Suno配樂固定為 Step 8
   const [bubbles, setBubbles] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
-  
-  // 上傳相關狀態
-  const fileInputRef = useRef(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState("");
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [uploadState, setUploadState] = useState({});
 
   useEffect(() => {
     const rawData = stepData[activeTab];
@@ -53,6 +48,7 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
     } else {
       setBubbles([]);
     }
+    setUploadState({});
   }, [activeTab, stepData]);
 
   const handleTextChange = (index, newText) => {
@@ -79,7 +75,7 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
     }, 500);
   };
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = async (e, bubbleIndex) => {
     const file = e.target.files[0];
     if (!file) return;
     if (!activeProjectId || activeProjectId.length < 20) {
@@ -87,9 +83,11 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
       return;
     }
 
-    setIsUploading(true);
-    setUploadProgress("上傳中...");
-    
+    setUploadState(prev => ({
+      ...prev,
+      [bubbleIndex]: { ...prev[bubbleIndex], isUploading: true, progress: "上傳中..." }
+    }));
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -100,26 +98,34 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
         method: "POST",
         body: formData
       });
-      
+
       const data = await res.json();
       if (data.success) {
-        setUploadProgress("上傳成功！");
-        setPreviewUrl(URL.createObjectURL(file));
-        setTimeout(() => setUploadProgress(""), 3000);
+        setUploadState(prev => ({
+          ...prev,
+          [bubbleIndex]: { isUploading: false, progress: "上傳成功！", previewUrl: URL.createObjectURL(file) }
+        }));
+        setTimeout(() => {
+          setUploadState(prev => ({
+            ...prev,
+            [bubbleIndex]: { ...prev[bubbleIndex], progress: "" }
+          }));
+        }, 3000);
       } else {
-        setUploadProgress("上傳失敗");
+        setUploadState(prev => ({
+          ...prev,
+          [bubbleIndex]: { ...prev[bubbleIndex], isUploading: false, progress: "上傳失敗" }
+        }));
         console.error(data.error);
         alert("上傳失敗: " + data.error);
       }
     } catch (err) {
       console.error("Upload error", err);
-      setUploadProgress("發生錯誤");
+      setUploadState(prev => ({
+        ...prev,
+        [bubbleIndex]: { ...prev[bubbleIndex], isUploading: false, progress: "發生錯誤" }
+      }));
       alert("發生錯誤，請稍後再試");
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
     }
   };
 
@@ -251,101 +257,91 @@ export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchin
                     </div>
                   </div>
                 </div>
-
-                {/* Notion 上傳區塊 */}
-                <div className="mt-8 border-t border-slate-800 pt-6">
-                  <div className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
-                    <Cloud className="w-4 h-4" /> 歸檔至 Notion
-                  </div>
-                  <p className="text-xs text-slate-500 mb-4">
-                    將生成的音檔 (MP3/MP4) 直接上傳附加到目前的專案中。
-                  </p>
-                  
-                  <div className="space-y-3">
-                    <input 
-                      type="file"
-                      accept="audio/*,video/mp4"
-                      className="hidden"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                    />
-                    
-                    <button 
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isUploading || !activeProjectId}
-                      className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 hover:border-slate-500 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isUploading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-slate-400 border-t-white rounded-full animate-spin" />
-                          上傳中...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-4 h-4" />
-                          上傳本機音檔
-                        </>
-                      )}
-                    </button>
-                    
-                    {uploadProgress && !isUploading && (
-                      <div className="text-xs text-emerald-400 text-center flex items-center justify-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        {uploadProgress}
-                      </div>
-                    )}
-
-                    {previewUrl && (
-                      <div className="mt-4 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 p-2">
-                        <div className="text-xs text-slate-500 mb-2 flex items-center gap-1 px-1">
-                          上傳成功
-                        </div>
-                        <audio src={previewUrl} controls className="w-full h-10" />
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
 
-              {/* 右側明亮區塊 (Light Panel) */}
-              <div className="flex-1 bg-white dark:bg-slate-800 p-8 overflow-y-auto">
-                <div className="max-w-2xl mx-auto space-y-8">
-                  {bubbles.map((bubble, idx) => (
-                    <div key={idx} className="bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
-                      {/* 卡片標題列 */}
-                      <div className="bg-slate-100 dark:bg-slate-800/80 px-5 py-3 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-                        <span className="font-bold text-slate-700 dark:text-slate-300">
-                          {bubble.title}
-                        </span>
-                      </div>
-                      
-                      {/* 文字編輯區 */}
-                      <div className="p-5">
+              {/* 右側淺色區塊 (Light Panel - Grid of Cards) */}
+              <div className="flex-1 bg-slate-50 dark:bg-slate-900 p-6 lg:p-8">
+                <div className="grid gap-6">
+                  {bubbles.map((bubble, idx) => {
+                    const uState = uploadState[idx] || {};
+                    return (
+                    <div key={idx} className="flex flex-col md:flex-row gap-6 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 animate-in fade-in slide-in-from-right-4" style={{ animationDelay: `${idx * 100}ms` }}>
+
+                      <div className="flex-1 flex flex-col">
+                        {/* 小卡標題 */}
+                        <div className="flex items-center gap-2 mb-4">
+                          <span className="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500 flex items-center justify-center text-xs font-bold">
+                            {idx + 1}
+                          </span>
+                          <h4 className="font-bold text-slate-800 dark:text-slate-200">
+                            {bubble.title}
+                          </h4>
+                        </div>
+
+                        {/* 文字編輯區 */}
                         <textarea
                           value={bubble.compiledText}
                           onChange={(e) => handleTextChange(idx, e.target.value)}
-                          className="w-full min-h-[140px] p-4 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow font-mono"
+                          className="w-full min-h-[140px] p-4 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-y leading-relaxed text-sm mb-4 font-mono"
                           spellCheck="false"
                         />
+
+                        {/* 按鈕列 */}
+                        <div className="flex items-center justify-end gap-3 mt-auto">
+                          <button
+                            onClick={() => handleCopy(bubble.compiledText)}
+                            className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium transition-colors flex items-center gap-2 shadow-sm"
+                          >
+                            <Copy className="w-4 h-4" />
+                            複製指令
+                          </button>
+                          <button
+                            onClick={() => handleCopyAndGo(bubble.compiledText)}
+                            className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-white text-sm font-bold transition-colors flex items-center gap-2 shadow-sm shadow-amber-500/20"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            複製並前往 Suno
+                          </button>
+                        </div>
                       </div>
 
-                      {/* 動作按鈕列 */}
-                      <div className="px-5 py-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
-                        <button
-                          onClick={() => handleCopy(bubble.compiledText)}
-                          className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2 transition-all shadow-sm"
-                        >
-                          <Copy className="w-4 h-4" /> 複製指令
-                        </button>
-                        <button
-                          onClick={() => handleCopyAndGo(bubble.compiledText)}
-                          className="px-4 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg flex items-center gap-2 transition-all shadow-sm shadow-indigo-200 dark:shadow-none"
-                        >
-                          <ExternalLink className="w-4 h-4" /> 複製並前往 Suno
-                        </button>
+                      {/* 上傳區塊 (Right side per card) */}
+                      <div className="w-full md:w-[180px] shrink-0 flex flex-col border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 pt-6 md:pt-0 md:pl-6">
+                        <div className="text-xs font-bold text-slate-400 mb-3 flex items-center justify-between">
+                          <span>匯入生成音檔至 Notion</span>
+                          {uState.progress && (
+                            <span className="text-[10px] text-amber-400">{uState.progress}</span>
+                          )}
+                        </div>
+                        <label className={`flex-1 w-full border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative overflow-hidden min-h-[140px] bg-slate-900/20 transition-colors p-2 ${
+                          !activeProjectId || uState.isUploading
+                            ? "border-slate-700 opacity-50 cursor-not-allowed"
+                            : "border-slate-600 hover:border-slate-400 hover:bg-slate-700/50 cursor-pointer group"
+                        }`}>
+                          <input
+                            type="file"
+                            accept="audio/*,video/mp4"
+                            className="hidden"
+                            onChange={(e) => handleFileChange(e, idx)}
+                            disabled={!activeProjectId || uState.isUploading}
+                          />
+                          {uState.previewUrl ? (
+                            <div className="flex flex-col items-center gap-2 w-full">
+                              <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                              <audio src={uState.previewUrl} controls className="w-full h-8" />
+                            </div>
+                          ) : (
+                            <>
+                              <Upload className="w-6 h-6 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                              <span className="text-xs text-slate-400 group-hover:text-slate-300 font-medium z-10 text-center px-2">
+                                {uState.isUploading ? "上傳中..." : "點擊上傳音檔"}
+                              </span>
+                            </>
+                          )}
+                        </label>
                       </div>
                     </div>
-                  ))}
+                  );})}
                 </div>
               </div>
 

@@ -27,8 +27,10 @@ export default function Sidebar({ steps, currentStep, theme, onStepClick, comple
 
   return (
     <div className="w-72 h-full shrink-0 border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col">
-      <div className="h-16 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center shrink-0">
-        <img src="/logo.png" alt="OmniScript Logo" className="h-10 w-auto object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+      <div className="h-14 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center shrink-0">
+        <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-amber-500" /> OmniScript
+        </h1>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">

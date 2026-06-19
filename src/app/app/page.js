@@ -390,7 +390,7 @@ export default function Home() {
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <KeyRound className="w-5 h-5 text-indigo-500" /> API 金鑰管理
+              <KeyRound className="w-5 h-5 text-indigo-500" /> Gemini API 金鑰管理
             </h3>
             <button onClick={() => setIsApiKeyModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
               <X className="w-5 h-5" />
@@ -719,7 +719,10 @@ export default function Home() {
             {/* 當左側沒有 Sidebar 時，才在這裡顯示 Logo */}
             {!(activeTab === 'planning' && currentStep > 0) && (
               <div className="flex items-center gap-2 cursor-pointer" onClick={handleReset}>
-                <img src="/logo.png" alt="OmniScript Logo" className="h-8 w-auto object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[150px]">
+                  OmniScript
+                </span>
               </div>
             )}
             
@@ -786,7 +789,7 @@ export default function Home() {
               {isAvatarOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden py-1 z-50">
                   <button onClick={() => setIsApiKeyModalOpen(true)} className="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2">
-                    <KeyRound className="w-4 h-4" /> 設定 API 金鑰
+                    <KeyRound className="w-4 h-4" /> 設定 Gemini API
                   </button>
                 </div>
               )}

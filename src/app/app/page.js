@@ -696,6 +696,7 @@ export default function Home() {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
       <IdentityModal />
+      {renderApiModal()}
 
       {/* 只有在企劃工作區且不是在儀表板首頁時，才在最左側顯示全高的 Sidebar */}
       {activeTab === 'planning' && currentStep > 0 && (

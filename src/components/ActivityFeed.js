@@ -37,16 +37,7 @@ export default function ActivityFeed() {
           團隊活動軌跡 (即時同步)
         </h3>
         <div className="flex items-center gap-3">
-          <a
-            href="https://www.notion.so/377cf7781506809e98d5f1163b1067d5"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-indigo-400 transition-colors bg-slate-900/50 hover:bg-slate-800 px-2 py-1 rounded border border-slate-700 hover:border-indigo-500/50"
-            title="在 Notion 開啟"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            Notion
-          </a>
+
           <button 
             onClick={fetchActivities}
             className={`text-slate-500 hover:text-indigo-400 transition-colors ${loading ? 'animate-spin' : ''}`}

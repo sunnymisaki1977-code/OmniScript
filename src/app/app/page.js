@@ -719,10 +719,7 @@ export default function Home() {
             {/* 當左側沒有 Sidebar 時，才在這裡顯示 Logo */}
             {!(activeTab === 'planning' && currentStep > 0) && (
               <div className="flex items-center gap-2 cursor-pointer" onClick={handleReset}>
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[150px]">
-                  OmniScript
-                </span>
+                <img src="/logo.png" alt="OmniScript Logo" className="h-8 w-auto object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
               </div>
             )}
             

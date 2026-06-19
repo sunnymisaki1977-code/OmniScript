@@ -5,6 +5,19 @@ import { X, Rocket, Bug, Layout, Zap, Star } from "lucide-react";
 
 export const changelogs = [
   {
+    version: "v1.4.0",
+    date: "2026/06/20",
+    title: "導入 Google 帳號授權登入與安全性升級",
+    description: "為系統引入了業界標準的 NextAuth.js 驗證機制，全面提升系統安全性，並優化了登入動線與使用者身分識別體驗。",
+    updates: [
+      { type: "Feature", content: "Google OAuth 登入：全面整合 Google 帳號授權登入，提升進入企劃工作區的安全性與便利性。" },
+      { type: "Feature", content: "強制帳號切換 (Select Account)：優化 OAuth 授權動線，點擊登入時強制開啟 Google 帳號選擇視窗，方便多帳號使用者靈活切換。" },
+      { type: "UI/UX", content: "首頁動態入口：Landing Page 的「體驗 Demo」按鈕會根據登入狀態智慧切換，未登入時引導授權，登入後則無縫進入系統。" },
+      { type: "UI/UX", content: "工作區個人面板：側邊欄左下角新增動態登入者面板，即時顯示您的 Google 大頭貼、姓名與 Email，並支援一鍵安全登出。" },
+      { type: "Perf", content: "全站路由防護 (Middleware)：部署伺服器端中介層，嚴格阻擋未登入訪客存取 /app 等系統核心操作區，防護系統資產。" }
+    ]
+  },
+  {
     version: "v1.3.0",
     date: "2026/06/14",
     title: "企劃工作區介面重構與 AI 容錯引擎升級",

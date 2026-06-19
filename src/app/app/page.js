@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import Sidebar from "@/components/Sidebar";
 import EditorWorkspace from "@/components/EditorWorkspace";
 import VisualDispatchCenter from "@/components/VisualDispatchCenter";
@@ -19,6 +20,7 @@ const INSPIRATION_PILLS = [
 ];
 
 export default function Home() {
+  const { data: session } = useSession();
   const [isMounted, setIsMounted] = useState(false);
   
   // Project State
@@ -772,9 +774,17 @@ export default function Home() {
             <div className="relative">
               <button 
                 onClick={() => setIsAvatarOpen(!isAvatarOpen)}
-                className="w-9 h-9 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:ring-2 ring-indigo-500/30 transition-all"
+                className={`w-9 h-9 rounded-full flex items-center justify-center hover:ring-2 transition-all ${
+                  session?.user?.image 
+                    ? "ring-indigo-500/30" 
+                    : "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 ring-indigo-500/30"
+                }`}
               >
-                <User className="w-5 h-5" />
+                {session?.user?.image ? (
+                  <img src={session.user.image} alt="Avatar" className="w-9 h-9 rounded-full object-cover" />
+                ) : (
+                  <User className="w-5 h-5" />
+                )}
               </button>
               {isAvatarOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden py-1 z-50">

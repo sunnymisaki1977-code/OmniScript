@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, CircleDot, Lock, RotateCcw, Moon, Sun, Sparkles } from "lucide-react";
+import { CheckCircle2, CircleDot, Lock, RotateCcw, Moon, Sun, Sparkles, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Sidebar({ steps, currentStep, theme, onStepClick, completedSteps, onReset }) {
+  const { data: session } = useSession();
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -101,6 +103,33 @@ export default function Sidebar({ steps, currentStep, theme, onStepClick, comple
           <RotateCcw className="w-4 h-4" />
           清除資料並重新開始
         </button>
+
+        {session && session.user && (
+          <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-3 px-2 py-2">
+              <img 
+                src={session.user.image} 
+                alt="Avatar" 
+                className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700" 
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                  {session.user.name}
+                </p>
+                <p className="text-xs text-slate-500 truncate">
+                  {session.user.email}
+                </p>
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                title="登出"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

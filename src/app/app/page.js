@@ -12,7 +12,7 @@ import AutoPipelineMatrix from "@/components/AutoPipelineMatrix";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { logActivity } from "../../utils/activityLogger";
 import IdentityModal from "../../components/IdentityModal";
-import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud, Palette, Music, BookOpen, Sparkles, Wand2 } from "lucide-react";
+import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud, Palette, Music, BookOpen, Sparkles } from "lucide-react";
 import ChangelogModal from "../../components/ChangelogModal";
 
 const INSPIRATION_PILLS = [
@@ -28,6 +28,7 @@ export default function Home() {
   // Project State
   const [projectId, setProjectId] = useState(null);
   const [theme, setTheme] = useState("");
+  const [topTheme, setTopTheme] = useState("");
   const [currentStep, setCurrentStep] = useState(0); 
   const [stepData, setStepData] = useState({});
   const [completedSteps, setCompletedSteps] = useState([]);
@@ -52,7 +53,6 @@ export default function Home() {
   const [activeInputMode, setActiveInputMode] = useState(null);
   const [activeTab, setActiveTab] = useState("planning");
   const [activeSubTab, setActiveSubTab] = useState(null);
-  const [topInputTheme, setTopInputTheme] = useState("");
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -327,9 +327,9 @@ export default function Home() {
       logActivity("已將專案歸檔至 Notion");
       window.open(data.url, '_blank');
     } catch (error) {
-      alert("自動化流程遭遇錯誤: " + error.message);
+      alert("歸檔失敗: " + error.message);
     } finally {
-      setIsAutoRunning(false);
+      setIsLoading(false);
     }
   };
 
@@ -340,21 +340,20 @@ export default function Home() {
     generateContent(1, { theme });
   };
 
-  const handleStartAuto = async (overrideTheme) => {
-    const targetTheme = typeof overrideTheme === 'string' ? overrideTheme : theme;
-    if (!targetTheme.trim()) return;
+  const handleStartAuto = async (forcedTheme) => {
+    const activeTheme = forcedTheme && typeof forcedTheme === 'string' ? forcedTheme : theme;
+    if (!activeTheme.trim()) return;
     
+    if (forcedTheme && typeof forcedTheme === 'string') setTheme(forcedTheme);
+
     setIsAutoRunning(true);
     setWorkspaceMode('auto');
-    const newId = Date.now().toString();
-    setProjectId(newId);
-    setTheme(targetTheme);
-    localStorage.setItem("omniscript_active_project", newId);
+    createNewProject();
     setStepData({});
     setCompletedSteps([]);
-    setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[System] Starting Auto Pipeline for: ${targetTheme}`, type: "info" }]);
+    setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[System] Starting Auto Pipeline for: ${activeTheme}`, type: "info" }]);
     
-    let currentContext = { theme: targetTheme };
+    let currentContext = { theme: activeTheme };
     let currentCompleted = [];
     
     try {
@@ -385,6 +384,19 @@ export default function Home() {
       setIsAutoRunning(false);
       setIsLoading(false);
     }
+  };
+
+  const handleTopStartAuto = () => {
+    if (!topTheme.trim()) return;
+    if (currentStep > 0) {
+      if (!window.confirm("這將會放棄當前進度並開啟全新主題，確定嗎？")) {
+        return;
+      }
+    }
+    const newTheme = topTheme;
+    setTopTheme("");
+    setActiveTab('planning');
+    handleStartAuto(newTheme);
   };
 
   const handleResumeAuto = async () => {
@@ -496,26 +508,6 @@ export default function Home() {
   // -----------------------------------------------------
   // Step 0: Dashboard
   // -----------------------------------------------------
-  const handleTopStartAuto = () => {
-    if (!topInputTheme.trim()) return;
-    
-    if (currentStep > 0) {
-      if (!window.confirm("確定要放棄當前進度，使用新主題重新開始嗎？")) {
-        return;
-      }
-    }
-    
-    setActiveTab('planning');
-    setActiveSubTab(null);
-    setNotionStatus(null);
-    setArchivedUrl(null);
-    const newTheme = topInputTheme;
-    setTopInputTheme("");
-    
-    // We pass newTheme directly to handleStartAuto to avoid state closure issues
-    handleStartAuto(newTheme);
-  };
-
     const renderDashboardHero = () => (
     <div className="w-full h-full overflow-y-auto">
       <div className="flex-1 max-w-4xl w-full mx-auto p-6 pt-12 animate-in fade-in slide-in-from-bottom-4">
@@ -754,32 +746,32 @@ export default function Home() {
       {/* 2. Middle Main Stage */}
       <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#0f172a] relative z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.2)]">
         {/* Top Header */}
-        <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white/80 dark:bg-[#0a0f1d]/80 backdrop-blur-md">
-          <div className="flex-1 flex items-center max-w-2xl gap-3 pr-4">
-            <div className="relative flex-1">
-              <input 
-                type="text" 
-                placeholder="例如：日本自助旅行路線安排..."
-                value={topInputTheme}
-                onChange={(e) => setTopInputTheme(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleTopStartAuto();
-                }}
-                className="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-4 flex-1">
+            {/* Top Bar Quick Start */}
+            <div className="flex items-center gap-2 w-full max-w-xl">
+              <input
+                type="text"
+                placeholder="例如：日本寺廟抽籤攻略"
+                value={topTheme}
+                onChange={(e) => setTopTheme(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleTopStartAuto()}
+                disabled={isAutoRunning}
+                className="flex-1 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
               />
+              <button
+                onClick={handleTopStartAuto}
+                disabled={isAutoRunning || !topTheme.trim()}
+                className="flex items-center gap-2 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg text-sm font-semibold transition-all shadow-sm"
+              >
+                <Zap className="w-4 h-4" />
+                <span className="hidden sm:inline">一鍵全自動模式</span>
+              </button>
             </div>
-            <button 
-              onClick={handleTopStartAuto}
-              disabled={isAutoRunning}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition-colors disabled:opacity-50"
-            >
-              <Wand2 className="w-4 h-4" />
-              一鍵全自動
-            </button>
           </div>
 
           {/* Right Top Header Controls */}
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 rounded-full font-medium text-sm border border-amber-200 dark:border-amber-800/30">
               <Zap className="w-4 h-4" />
               <span>125 點額度</span>

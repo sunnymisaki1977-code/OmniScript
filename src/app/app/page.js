@@ -12,7 +12,7 @@ import AutoPipelineMatrix from "@/components/AutoPipelineMatrix";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { logActivity } from "../../utils/activityLogger";
 import IdentityModal from "../../components/IdentityModal";
-import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud, Palette, Music, BookOpen, Sparkles } from "lucide-react";
+import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud, Palette, Music, BookOpen, Sparkles, Wand2 } from "lucide-react";
 import ChangelogModal from "../../components/ChangelogModal";
 
 const INSPIRATION_PILLS = [
@@ -52,6 +52,7 @@ export default function Home() {
   const [activeInputMode, setActiveInputMode] = useState(null);
   const [activeTab, setActiveTab] = useState("planning");
   const [activeSubTab, setActiveSubTab] = useState(null);
+  const [topInputTheme, setTopInputTheme] = useState("");
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -326,9 +327,9 @@ export default function Home() {
       logActivity("已將專案歸檔至 Notion");
       window.open(data.url, '_blank');
     } catch (error) {
-      alert("歸檔失敗: " + error.message);
+      alert("自動化流程遭遇錯誤: " + error.message);
     } finally {
-      setIsLoading(false);
+      setIsAutoRunning(false);
     }
   };
 
@@ -339,17 +340,21 @@ export default function Home() {
     generateContent(1, { theme });
   };
 
-  const handleStartAuto = async () => {
-    if (!theme.trim()) return;
+  const handleStartAuto = async (overrideTheme) => {
+    const targetTheme = typeof overrideTheme === 'string' ? overrideTheme : theme;
+    if (!targetTheme.trim()) return;
     
     setIsAutoRunning(true);
     setWorkspaceMode('auto');
-    createNewProject();
+    const newId = Date.now().toString();
+    setProjectId(newId);
+    setTheme(targetTheme);
+    localStorage.setItem("omniscript_active_project", newId);
     setStepData({});
     setCompletedSteps([]);
-    setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[System] Starting Auto Pipeline for: ${theme}`, type: "info" }]);
+    setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[System] Starting Auto Pipeline for: ${targetTheme}`, type: "info" }]);
     
-    let currentContext = { theme };
+    let currentContext = { theme: targetTheme };
     let currentCompleted = [];
     
     try {
@@ -729,13 +734,32 @@ export default function Home() {
       {/* 2. Middle Main Stage */}
       <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#0f172a] relative z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.2)]">
         {/* Top Header */}
-        <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Mode Toggle Switch (Removed) */}
+        <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white/80 dark:bg-[#0a0f1d]/80 backdrop-blur-md">
+          <div className="flex-1 flex items-center max-w-2xl gap-3 pr-4">
+            <div className="relative flex-1">
+              <input 
+                type="text" 
+                placeholder="例如：日本自助旅行路線安排..."
+                value={topInputTheme}
+                onChange={(e) => setTopInputTheme(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleTopStartAuto();
+                }}
+                className="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <button 
+              onClick={handleTopStartAuto}
+              disabled={isAutoRunning}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition-colors disabled:opacity-50"
+            >
+              <Wand2 className="w-4 h-4" />
+              一鍵全自動
+            </button>
           </div>
 
           {/* Right Top Header Controls */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 shrink-0">
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 rounded-full font-medium text-sm border border-amber-200 dark:border-amber-800/30">
               <Zap className="w-4 h-4" />
               <span>125 點額度</span>

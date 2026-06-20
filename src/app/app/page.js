@@ -882,26 +882,24 @@ export default function Home() {
       </div>
 
       {/* 3. Right Contextual Inspector */}
-      {currentStep > 0 && (
-        <ContextualInspector 
-          aiStatus={aiStatus}
-          logs={logs}
-          notionStatus={notionStatus}
-          onExportNotion={async () => {
-            if (!isLoading) {
-              setNotionStatus('saving');
-              try {
-                await exportToNotion();
-                setNotionStatus('saved');
-              } catch (e) {
-                setNotionStatus('error');
-              }
+      <ContextualInspector 
+        aiStatus={aiStatus}
+        logs={logs}
+        notionStatus={notionStatus}
+        onExportNotion={async () => {
+          if (!isLoading) {
+            setNotionStatus('saving');
+            try {
+              await exportToNotion();
+              setNotionStatus('saved');
+            } catch (e) {
+              setNotionStatus('error');
             }
-          }}
-          archivedUrl={archivedUrl}
-          activeTab={activeTab}
-        />
-      )}
+          }
+        }}
+        archivedUrl={archivedUrl}
+        activeTab={activeTab}
+      />
 
     </div>
   );

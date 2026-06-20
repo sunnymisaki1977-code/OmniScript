@@ -496,6 +496,26 @@ export default function Home() {
   // -----------------------------------------------------
   // Step 0: Dashboard
   // -----------------------------------------------------
+  const handleTopStartAuto = () => {
+    if (!topInputTheme.trim()) return;
+    
+    if (currentStep > 0) {
+      if (!window.confirm("確定要放棄當前進度，使用新主題重新開始嗎？")) {
+        return;
+      }
+    }
+    
+    setActiveTab('planning');
+    setActiveSubTab(null);
+    setNotionStatus(null);
+    setArchivedUrl(null);
+    const newTheme = topInputTheme;
+    setTopInputTheme("");
+    
+    // We pass newTheme directly to handleStartAuto to avoid state closure issues
+    handleStartAuto(newTheme);
+  };
+
     const renderDashboardHero = () => (
     <div className="w-full h-full overflow-y-auto">
       <div className="flex-1 max-w-4xl w-full mx-auto p-6 pt-12 animate-in fade-in slide-in-from-bottom-4">

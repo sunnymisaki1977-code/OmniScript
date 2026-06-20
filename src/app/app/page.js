@@ -7,6 +7,8 @@ import EditorWorkspace from "@/components/EditorWorkspace";
 import VisualDispatchCenter from "@/components/VisualDispatchCenter";
 import SunoMusicCenter from "@/components/SunoMusicCenter";
 import NotebookLMCenter from "@/components/NotebookLMCenter";
+import ContextualInspector from "@/components/ContextualInspector";
+import AutoPipelineMatrix from "@/components/AutoPipelineMatrix";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { logActivity } from "../../utils/activityLogger";
 import IdentityModal from "../../components/IdentityModal";
@@ -49,6 +51,11 @@ export default function Home() {
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [activeInputMode, setActiveInputMode] = useState(null);
   const [activeTab, setActiveTab] = useState("planning");
+  const [workspaceMode, setWorkspaceMode] = useState("manual");
+  const [logs, setLogs] = useState([
+    { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: "[System] OmniScript OS 初始化完畢。", type: "info" }
+  ]);
+  const [aiStatus, setAiStatus] = useState("pro");
 
   // Fetch Team Projects from Notion on mount
   useEffect(() => {
@@ -267,6 +274,11 @@ export default function Home() {
         },
         body: JSON.stringify({ stepId, context }),
       });
+      
+      const modelUsed = res.headers.get("x-fallback-model") || "pro";
+      setAiStatus(modelUsed);
+      setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[API] Step ${stepId} generated using ${modelUsed === 'pro' ? 'Gemini 1.5 Pro' : modelUsed === 'flash' ? 'Flash' : 'Flash-Lite'}`, type: "success" }]);
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed");
       
@@ -322,9 +334,11 @@ export default function Home() {
     if (!theme.trim()) return;
     
     setIsAutoRunning(true);
+    setWorkspaceMode('auto');
     createNewProject();
     setStepData({});
     setCompletedSteps([]);
+    setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[System] Starting Auto Pipeline for: ${theme}`, type: "info" }]);
     
     let currentContext = { theme };
     let currentCompleted = [];
@@ -681,82 +695,55 @@ export default function Home() {
   // Step 1~9: Workspace
   // -----------------------------------------------------
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-[#0a0f1d]">
       <IdentityModal />
       {renderApiModal()}
 
-      {/* 只有在企劃工作區且不是在儀表板首頁時，才在最左側顯示全高的 Sidebar */}
-      {activeTab === 'planning' && currentStep > 0 && (
-        <Sidebar
-          steps={WORKFLOW_STEPS}
-          currentStep={currentStep}
-          theme={theme}
-          completedSteps={completedSteps}
-          onStepClick={(id) => {
-            if (!isAutoRunning) setCurrentStep(id);
-          }}
-          onReset={handleReset}
-        />
-      )}
-      
-      {/* 右側主畫面區塊 (包含上方導覽列與主要內容區) */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Global Header */}
-        <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#1E293B] flex items-center justify-between z-50">
-          <div className="flex items-center gap-8">
-            {/* 當左側沒有 Sidebar 時，才在這裡顯示 Logo */}
-            {!(activeTab === 'planning' && currentStep > 0) && (
-              <div className="flex items-center gap-2 cursor-pointer" onClick={handleReset}>
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[150px]">
-                  OmniScript
-                </span>
+      {/* 1. Left Navigation Rail */}
+      <Sidebar
+        steps={WORKFLOW_STEPS}
+        currentStep={currentStep}
+        theme={theme}
+        completedSteps={completedSteps}
+        onStepClick={(id) => {
+          if (!isAutoRunning && workspaceMode === 'manual') setCurrentStep(id);
+        }}
+        onReset={handleReset}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isDark={isDark}
+        toggleTheme={toggleTheme}
+      />
+
+      {/* 2. Middle Main Stage */}
+      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-[#0f172a] relative z-10 shadow-[-10px_0_30px_rgba(0,0,0,0.2)]">
+        {/* Top Header */}
+        <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {/* Mode Toggle Switch */}
+            {currentStep > 0 && activeTab === 'planning' && (
+              <div className="flex items-center bg-slate-100 dark:bg-slate-900/50 rounded-xl p-1 shadow-inner border border-slate-200 dark:border-slate-800/60">
+                <button
+                  onClick={() => setWorkspaceMode('manual')}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${workspaceMode === 'manual' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                >
+                  <Hand className="w-3.5 h-3.5 inline mr-1.5" /> 手動精修
+                </button>
+                <button
+                  onClick={() => setWorkspaceMode('auto')}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${workspaceMode === 'auto' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                >
+                  <Zap className="w-3.5 h-3.5 inline mr-1.5" /> 一鍵全自動
+                </button>
               </div>
-            )}
-            
-            {currentStep > 0 && (
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-              <button 
-                onClick={() => setActiveTab('planning')}
-                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'planning' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-              >
-                <FileText className="w-4 h-4" /> 企劃工作區
-              </button>
-              <button 
-                onClick={() => setActiveTab('dispatch')}
-                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'dispatch' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-              >
-                <Palette className="w-4 h-4" /> 視覺發控中心
-              </button>
-              <button 
-                onClick={() => setActiveTab('suno')}
-                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'suno' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-              >
-                <Music className="w-4 h-4" /> Suno 配樂中心
-              </button>
-              <button 
-                onClick={() => setActiveTab('notebooklm')}
-                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${activeTab === 'notebooklm' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'}`}
-              >
-                <BookOpen className="w-4 h-4" /> NotebookLM 影片中心
-              </button>
-            </div>
             )}
           </div>
 
+          {/* Right Top Header Controls */}
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 rounded-full font-medium text-sm border border-amber-200 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors cursor-pointer">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500 rounded-full font-medium text-sm border border-amber-200 dark:border-amber-800/30">
               <Zap className="w-4 h-4" />
               <span>125 點額度</span>
-            </div>
-            
-            <div className="relative">
-              <button 
-                onClick={toggleTheme}
-                className="w-9 h-9 mr-2 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:ring-2 ring-slate-200 dark:ring-slate-700 transition-all"
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
             </div>
             
             <div className="relative">
@@ -785,64 +772,102 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="flex flex-1 overflow-hidden">
-          {activeTab === 'planning' ? currentStep === 0 ? renderDashboardHero() : (
+        {/* Middle Stage Content */}
+        <div className="flex-1 overflow-hidden relative">
+          {currentStep === 0 ? renderDashboardHero() : (
             <>
-            
-            {currentStepConfig && (
-              <EditorWorkspace
-                step={currentStepConfig}
-                value={stepData[`step${currentStep}`] || ""}
-                onChange={(val) => setStepData({ ...stepData, [`step${currentStep}`]: val })}
-                isLoading={isLoading}
-                onSaveNext={() => handleNextStep()}
-                isLastStep={currentStep === 9}
-                saveStatus={saveStatus}
-                isAutoRunning={isAutoRunning}
-                isArchived={archivedUrl}
-                teamProjects={teamProjects}
-                isFetchingTeam={isFetchingTeam}
-                loadNotionProject={loadNotionProject}
-                activeProjectId={projectId}
-                contextData={{ theme, ...stepData }}
-                onResumeAuto={handleResumeAuto}
-              />
-            )}
-          </>
-        ) : activeTab === 'dispatch' ? (
-          <VisualDispatchCenter 
-            stepData={stepData} 
-            teamProjects={teamProjects} 
-            isFetchingTeam={isFetchingTeam} 
-            loadNotionProject={loadNotionProject} 
-            isLoading={isLoading}
-            theme={theme}
-            activeProjectId={projectId}
-          />
-        ) : activeTab === 'suno' ? (
-          <SunoMusicCenter 
-            stepData={stepData} 
-            teamProjects={teamProjects} 
-            isFetchingTeam={isFetchingTeam} 
-            loadNotionProject={loadNotionProject} 
-            isLoading={isLoading}
-            theme={theme}
-            activeProjectId={projectId}
-          />
-        ) : activeTab === 'notebooklm' ? (
-          <NotebookLMCenter 
-            stepData={stepData} 
-            teamProjects={teamProjects} 
-            isFetchingTeam={isFetchingTeam} 
-            loadNotionProject={loadNotionProject} 
-            isLoading={isLoading}
-            theme={theme}
-            activeProjectId={projectId}
-            mode="creator"
-          />
-        ) : null}
+              {activeTab === 'planning' ? (
+                workspaceMode === 'auto' ? (
+                  <AutoPipelineMatrix 
+                    theme={theme}
+                    activeStep={currentStep}
+                    completedSteps={completedSteps}
+                    isGenerating={isAutoRunning}
+                    onReset={handleReset}
+                    onSwitchToManual={(stepId) => {
+                      setCurrentStep(stepId);
+                      setWorkspaceMode('manual');
+                    }}
+                  />
+                ) : (
+                  currentStepConfig && (
+                    <EditorWorkspace
+                      step={currentStepConfig}
+                      value={stepData[`step${currentStep}`] || ""}
+                      onChange={(val) => setStepData({ ...stepData, [`step${currentStep}`]: val })}
+                      isLoading={isLoading}
+                      onSaveNext={() => handleNextStep()}
+                      isLastStep={currentStep === 9}
+                      saveStatus={saveStatus}
+                      isAutoRunning={isAutoRunning}
+                      isArchived={archivedUrl}
+                      teamProjects={teamProjects}
+                      isFetchingTeam={isFetchingTeam}
+                      loadNotionProject={loadNotionProject}
+                      activeProjectId={projectId}
+                      contextData={{ theme, ...stepData }}
+                      onResumeAuto={handleResumeAuto}
+                    />
+                  )
+                )
+              ) : activeTab === 'dispatch' ? (
+                <VisualDispatchCenter 
+                  stepData={stepData} 
+                  teamProjects={teamProjects} 
+                  isFetchingTeam={isFetchingTeam} 
+                  loadNotionProject={loadNotionProject} 
+                  isLoading={isLoading}
+                  theme={theme}
+                  activeProjectId={projectId}
+                />
+              ) : activeTab === 'suno' ? (
+                <SunoMusicCenter 
+                  stepData={stepData} 
+                  teamProjects={teamProjects} 
+                  isFetchingTeam={isFetchingTeam} 
+                  loadNotionProject={loadNotionProject} 
+                  isLoading={isLoading}
+                  theme={theme}
+                  activeProjectId={projectId}
+                />
+              ) : activeTab === 'notebooklm' ? (
+                <NotebookLMCenter 
+                  stepData={stepData} 
+                  teamProjects={teamProjects} 
+                  isFetchingTeam={isFetchingTeam} 
+                  loadNotionProject={loadNotionProject} 
+                  isLoading={isLoading}
+                  theme={theme}
+                  activeProjectId={projectId}
+                  mode="creator"
+                />
+              ) : null}
+            </>
+          )}
         </div>
       </div>
+
+      {/* 3. Right Contextual Inspector */}
+      {currentStep > 0 && (
+        <ContextualInspector 
+          aiStatus={aiStatus}
+          logs={logs}
+          notionStatus={notionStatus}
+          onExportNotion={async () => {
+            if (!isLoading) {
+              setNotionStatus('saving');
+              try {
+                await exportToNotion();
+                setNotionStatus('saved');
+              } catch (e) {
+                setNotionStatus('error');
+              }
+            }
+          }}
+          archivedUrl={archivedUrl}
+          activeTab={activeTab}
+        />
+      )}
 
     </div>
   );

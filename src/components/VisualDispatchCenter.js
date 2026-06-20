@@ -64,8 +64,8 @@ const parseVisualData = (text, type) => {
   });
 };
 
-export default function VisualDispatchCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null }) {
-  const [activeTab, setActiveTab] = useState("step6");
+export default function VisualDispatchCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null, activeSubTab = "step6" }) {
+  const activeTab = activeSubTab;
   const [bubbles, setBubbles] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
   
@@ -175,75 +175,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
           </div>
         </div>
       )}
-
-      {/* 左側選單 */}
-      <div className="w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col h-full shrink-0">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">視覺發控中心</h2>
-          <p className="text-sm text-slate-500 mt-1">點擊區塊產生獨立的對話指令，並派發至 Gemini。</p>
-        </div>
-        
-        <div className="p-4 space-y-2 flex-1 overflow-y-auto">
-          <button
-            onClick={() => setActiveTab("step6")}
-            className={`w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 transition-colors ${
-              activeTab === "step6" 
-                ? "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800" 
-                : "hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-transparent"
-            }`}
-          >
-            <div className={`p-2 rounded-lg ${activeTab === "step6" ? "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-700 text-slate-500"}`}>
-              <ImageIcon className="w-5 h-5" />
-            </div>
-            <div>
-              <div className={`font-semibold ${activeTab === "step6" ? "text-indigo-900 dark:text-indigo-300" : "text-slate-700 dark:text-slate-300"}`}>
-                Step 6
-              </div>
-              <div className="text-xs text-slate-500">長影音縮圖 (16:9)</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("step7")}
-            className={`w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 transition-colors ${
-              activeTab === "step7" 
-                ? "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800" 
-                : "hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-transparent"
-            }`}
-          >
-            <div className={`p-2 rounded-lg ${activeTab === "step7" ? "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-700 text-slate-500"}`}>
-              <Smartphone className="w-5 h-5" />
-            </div>
-            <div>
-              <div className={`font-semibold ${activeTab === "step7" ? "text-indigo-900 dark:text-indigo-300" : "text-slate-700 dark:text-slate-300"}`}>
-                Step 7
-              </div>
-              <div className="text-xs text-slate-500">短影音縮圖 (9:16)</div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("step9")}
-            className={`w-full text-left px-4 py-4 rounded-xl flex items-center gap-3 transition-colors ${
-              activeTab === "step9" 
-                ? "bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800" 
-                : "hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-transparent"
-            }`}
-          >
-            <div className={`p-2 rounded-lg ${activeTab === "step9" ? "bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-400" : "bg-slate-100 dark:bg-slate-700 text-slate-500"}`}>
-              <LayoutTemplate className="w-5 h-5" />
-            </div>
-            <div>
-              <div className={`font-semibold ${activeTab === "step9" ? "text-indigo-900 dark:text-indigo-300" : "text-slate-700 dark:text-slate-300"}`}>
-                Step 9
-              </div>
-              <div className="text-xs text-slate-500">社群圖文企劃</div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* 右側主畫面 */}
+      {/* 主畫面 */}
       <div className="flex-1 h-full overflow-y-auto bg-slate-100 dark:bg-slate-900/50 p-6 lg:p-10">
         <div className="max-w-5xl mx-auto flex flex-col min-h-full space-y-6">
           

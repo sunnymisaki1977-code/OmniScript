@@ -35,8 +35,8 @@ const parseSunoData = (text) => {
   });
 };
 
-export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null }) {
-  const activeTab = "step8"; // Suno配樂固定為 Step 8
+export default function SunoMusicCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null, activeSubTab = "step8" }) {
+  const activeTab = activeSubTab;
   const [bubbles, setBubbles] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
   const [uploadState, setUploadState] = useState({});

@@ -51,6 +51,15 @@ export default function Home() {
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [activeInputMode, setActiveInputMode] = useState(null);
   const [activeTab, setActiveTab] = useState("planning");
+  const [activeSubTab, setActiveSubTab] = useState(null);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'planning') setActiveSubTab(null);
+    else if (tab === 'dispatch') setActiveSubTab('step6');
+    else if (tab === 'suno') setActiveSubTab('step8');
+    else if (tab === 'notebooklm') setActiveSubTab('step2');
+  };
   const [workspaceMode, setWorkspaceMode] = useState("manual");
   const [logs, setLogs] = useState([
     { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: "[System] OmniScript OS 初始化完畢。", type: "info" }
@@ -710,7 +719,9 @@ export default function Home() {
         }}
         onReset={handleReset}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
+        activeSubTab={activeSubTab}
+        setActiveSubTab={setActiveSubTab}
         isDark={isDark}
         toggleTheme={toggleTheme}
       />
@@ -803,6 +814,7 @@ export default function Home() {
                   isLoading={isLoading}
                   theme={theme}
                   activeProjectId={projectId}
+                  activeSubTab={activeSubTab}
                 />
               ) : activeTab === 'suno' ? (
                 <SunoMusicCenter 
@@ -813,6 +825,7 @@ export default function Home() {
                   isLoading={isLoading}
                   theme={theme}
                   activeProjectId={projectId}
+                  activeSubTab={activeSubTab}
                 />
               ) : activeTab === 'notebooklm' ? (
                 <NotebookLMCenter 
@@ -824,6 +837,7 @@ export default function Home() {
                   theme={theme}
                   activeProjectId={projectId}
                   mode="creator"
+                  activeSubTab={activeSubTab}
                 />
               ) : null}
             </>

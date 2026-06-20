@@ -720,23 +720,7 @@ export default function Home() {
         {/* Top Header */}
         <header className="h-14 shrink-0 px-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* Mode Toggle Switch */}
-            {currentStep > 0 && activeTab === 'planning' && (
-              <div className="flex items-center bg-slate-100 dark:bg-slate-900/50 rounded-xl p-1 shadow-inner border border-slate-200 dark:border-slate-800/60">
-                <button
-                  onClick={() => setWorkspaceMode('manual')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${workspaceMode === 'manual' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
-                >
-                  <Hand className="w-3.5 h-3.5 inline mr-1.5" /> 手動精修
-                </button>
-                <button
-                  onClick={() => setWorkspaceMode('auto')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${workspaceMode === 'auto' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
-                >
-                  <Zap className="w-3.5 h-3.5 inline mr-1.5" /> 一鍵全自動
-                </button>
-              </div>
-            )}
+            {/* Mode Toggle Switch (Removed) */}
           </div>
 
           {/* Right Top Header Controls */}

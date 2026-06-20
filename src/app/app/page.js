@@ -359,6 +359,43 @@ export default function Home() {
     }
   };
 
+  const handleResumeAuto = async () => {
+    if (!theme.trim() || currentStep === 0) return;
+    
+    setIsAutoRunning(true);
+    let currentContext = { theme, ...stepData };
+    let currentCompleted = [...completedSteps];
+    
+    try {
+      for (let i = currentStep; i <= 9; i++) {
+        setCurrentStep(i);
+        
+        // Only generate if we are on the current step, or if it's the following steps
+        // This ensures we start generating right from where they clicked "接續自動生成"
+        const result = await generateContent(i, currentContext);
+        
+        currentContext = { ...currentContext, [`step${i}`]: result };
+        if (!currentCompleted.includes(i)) {
+          currentCompleted.push(i);
+          setCompletedSteps([...currentCompleted]);
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+      
+      setCurrentStep(9);
+      await exportToNotion(currentContext);
+      
+    } catch (error) {
+      console.error("自動接續中斷:", error);
+      alert("自動接續意外中斷！但不用擔心，已經為您保留了中斷前生成的所有卡片資料。");
+    } finally {
+      setIsAutoRunning(false);
+      setIsLoading(false);
+    }
+  };
+
+
   const handleNextStep = () => {
     if (currentStep === 9) {
       exportToNotion();
@@ -818,6 +855,7 @@ export default function Home() {
                 loadNotionProject={loadNotionProject}
                 activeProjectId={projectId}
                 contextData={{ theme, ...stepData }}
+                onResumeAuto={handleResumeAuto}
               />
             )}
           </>

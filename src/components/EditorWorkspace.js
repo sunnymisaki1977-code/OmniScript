@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Sparkles, Save, Copy, Check, Cloud, CloudOff, ExternalLink, Info } from "lucide-react";
+import { Sparkles, Save, Copy, Check, Cloud, CloudOff, ExternalLink, Info, Zap } from "lucide-react";
 
 export default function EditorWorkspace({ 
   step, 
@@ -15,7 +15,8 @@ export default function EditorWorkspace({
   isFetchingTeam,
   loadNotionProject,
   activeProjectId,
-  contextData
+  contextData,
+  onResumeAuto
 }) {
   const textareaRef = useRef(null);
   const [copied, setCopied] = useState(false);
@@ -237,18 +238,30 @@ export default function EditorWorkspace({
                 </div>
               ) : (
                 !isArchived && (
-                  <button
-                    onClick={onSaveNext}
-                    disabled={isLoading || !value?.trim()}
-                    className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:shadow-none"
-                  >
-                    {isLoading ? (
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    ) : isLastStep ? (
-                      <Save className="w-4 h-4" />
-                    ) : null}
-                    {isLastStep ? "確認並歸檔至 Notion" : "儲存並進行下一步 ➔"}
-                  </button>
+                  <div className="flex items-center gap-3">
+                    {!isLastStep && (
+                      <button
+                        onClick={onResumeAuto}
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-indigo-600 dark:text-indigo-400 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800/50 rounded-xl transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/30 shadow-sm hover:-translate-y-0.5 disabled:opacity-50"
+                      >
+                        <Zap className="w-4 h-4" />
+                        自動接續完成
+                      </button>
+                    )}
+                    <button
+                      onClick={onSaveNext}
+                      disabled={isLoading || !value?.trim()}
+                      className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-white rounded-xl transition-all bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 disabled:shadow-none"
+                    >
+                      {isLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : isLastStep ? (
+                        <Save className="w-4 h-4" />
+                      ) : null}
+                      {isLastStep ? "確認並歸檔至 Notion" : "儲存並進行下一步 ➔"}
+                    </button>
+                  </div>
                 )
               )}
             </div>

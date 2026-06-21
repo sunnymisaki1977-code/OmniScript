@@ -1,6 +1,18 @@
 import React from 'react';
-import { Circle, Check, Sparkles, FastForward } from 'lucide-react';
+import { Circle, Check, Sparkles, FastForward, Search, Video, FileText, Smartphone, Image as ImageIcon, Music, Share2 } from 'lucide-react';
 import { WORKFLOW_STEPS } from '@/utils/promptConfigs';
+
+const STEP_ICONS = {
+  1: Search,
+  2: Video,
+  3: FileText,
+  4: Smartphone,
+  5: FileText,
+  6: ImageIcon,
+  7: ImageIcon,
+  8: Music,
+  9: Share2
+};
 
 export default function AutoPipelineMatrix({ 
   theme,
@@ -30,7 +42,7 @@ export default function AutoPipelineMatrix({
           {WORKFLOW_STEPS.map((step) => {
             const isActive = activeStep === step.id && isGenerating;
             const isDone = completedSteps.includes(step.id);
-            const Icon = step.icon;
+            const Icon = STEP_ICONS[step.id] || Circle;
             
             return (
               <div 

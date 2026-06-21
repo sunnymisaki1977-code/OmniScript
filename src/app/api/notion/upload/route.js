@@ -24,10 +24,23 @@ export async function POST(req) {
     const notion = new Client({ auth: apiKey });
     
     // 1. 上傳檔案至 Vercel Blob
-    const blob = await put(file.name, file, {
-      access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN
-    });
+    let blob;
+    try {
+      blob = await put(file.name, file, {
+        access: 'public',
+        token: process.env.BLOB_READ_WRITE_TOKEN
+      });
+    } catch (err) {
+      if (err.message && err.message.includes('private store')) {
+        console.warn("Vercel Blob store is private. Falling back to private access...");
+        blob = await put(file.name, file, {
+          access: 'private',
+          token: process.env.BLOB_READ_WRITE_TOKEN
+        });
+      } else {
+        throw err;
+      }
+    }
 
     // 判斷檔案類型以決定 Notion Block Type
     let blockType = "file";

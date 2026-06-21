@@ -123,6 +123,15 @@
 
 /* 共用工具 class */
 @layer utilities {
+  @keyframes scanning {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+  
+  .animate-scanning {
+    animation: scanning 1.5s ease-in-out infinite;
+  }
+
   /* 主色光暈，用於 CTA / 重點卡片 */
   .glow-primary {
     box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25),

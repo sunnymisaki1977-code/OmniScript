@@ -79,8 +79,8 @@ export default function AutoPipelineMatrix({
                 <p className="text-[10px] text-slate-500 mt-1">Step 0{step.id} • {step.description.substring(0, 15)}...</p>
                 
                 {isActive && (
-                  <div className="absolute bottom-0 left-0 h-1 bg-indigo-500 w-full rounded-b-2xl overflow-hidden">
-                    <div className="h-full bg-indigo-400 w-1/2 animate-[translateX_1s_infinite]"></div>
+                  <div className="absolute bottom-0 left-0 h-1 bg-indigo-500/30 w-full rounded-b-2xl overflow-hidden">
+                    <div className="h-full bg-indigo-500 w-1/2 animate-scanning rounded-full"></div>
                   </div>
                 )}
               </div>

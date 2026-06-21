@@ -8,6 +8,7 @@ export async function POST(req) {
     const file = formData.get("file");
     const pageId = formData.get("pageId");
     const stepId = formData.get("stepId");
+    const bubbleIndex = formData.get("bubbleIndex");
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -93,7 +94,7 @@ export async function POST(req) {
             rich_text: [
               {
                 type: "text",
-                text: { content: "匯入的媒體檔案" },
+                text: { content: `匯入的媒體檔案 - 提案 ${bubbleIndex !== null ? parseInt(bubbleIndex) + 1 : 1}` },
               },
             ],
           },

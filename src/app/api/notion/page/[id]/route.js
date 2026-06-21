@@ -45,7 +45,9 @@ export async function GET(req, { params }) {
     }
 
     const stepData = {};
+    const stepImages = {};
     let currentStepKey = null;
+    let lastHeading3 = null;
 
     // 解析 Blocks 反向還原成 stepData
     for (const block of allBlocks) {
@@ -56,7 +58,10 @@ export async function GET(req, { params }) {
         if (match) {
           currentStepKey = `step${match[1]}`;
           stepData[currentStepKey] = "";
+          stepImages[currentStepKey] = {};
         }
+      } else if (block.type === "heading_3") {
+        lastHeading3 = block.heading_3.rich_text.map(t => t.plain_text).join("");
       } else if (currentStepKey) {
         if (block.type === "paragraph") {
           const text = block.paragraph.rich_text.map(t => t.plain_text).join("");
@@ -67,6 +72,15 @@ export async function GET(req, { params }) {
         } else if (block.type === "bulleted_list_item") {
           const text = block.bulleted_list_item.rich_text.map(t => t.plain_text).join("");
           stepData[currentStepKey] += "- " + text + "\n";
+        } else if (block.type === "image" || block.type === "video" || block.type === "audio") {
+          const media = block[block.type];
+          if (media.type === "external" && lastHeading3 && lastHeading3.startsWith("匯入的媒體檔案")) {
+            const proposalMatch = lastHeading3.match(/提案\s*(\d+)/);
+            if (proposalMatch) {
+              const bubbleIndex = parseInt(proposalMatch[1], 10) - 1;
+              stepImages[currentStepKey][bubbleIndex] = media.external.url;
+            }
+          }
         }
       }
     }
@@ -76,7 +90,7 @@ export async function GET(req, { params }) {
       stepData[key] = stepData[key].trim();
     });
 
-    return NextResponse.json({ success: true, theme, stepData });
+    return NextResponse.json({ success: true, theme, stepData, stepImages });
   } catch (error) {
     console.error("Notion API GET Blocks Error:", error);
     return NextResponse.json(

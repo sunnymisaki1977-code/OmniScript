@@ -31,6 +31,7 @@ export default function Home() {
   const [topTheme, setTopTheme] = useState("");
   const [currentStep, setCurrentStep] = useState(0); 
   const [stepData, setStepData] = useState({});
+  const [stepImages, setStepImages] = useState({});
   const [completedSteps, setCompletedSteps] = useState([]);
   const [archivedUrl, setArchivedUrl] = useState(null);
   
@@ -230,6 +231,7 @@ export default function Home() {
         setProjectId(proj.id);
         setTheme(data.theme || proj.theme);
         setStepData(data.stepData || {});
+        setStepImages(data.stepImages || {});
         // Mock completed steps based on populated data
         const completed = Object.keys(data.stepData || {})
           .map(k => parseInt(k.replace('step', '')))
@@ -256,6 +258,7 @@ export default function Home() {
       setTheme("");
       setCurrentStep(0);
       setStepData({});
+      setStepImages({});
       setCompletedSteps([]);
       setIsAutoRunning(false);
       setNotionStatus(null);
@@ -844,6 +847,7 @@ export default function Home() {
               ) : activeTab === 'dispatch' ? (
                 <VisualDispatchCenter 
                   stepData={stepData} 
+                  stepImages={stepImages}
                   teamProjects={teamProjects} 
                   isFetchingTeam={isFetchingTeam} 
                   loadNotionProject={loadNotionProject} 

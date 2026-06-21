@@ -64,7 +64,7 @@ const parseVisualData = (text, type) => {
   });
 };
 
-export default function VisualDispatchCenter({ stepData, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null, activeSubTab = "step6" }) {
+export default function VisualDispatchCenter({ stepData, stepImages = {}, teamProjects = [], isFetchingTeam = false, loadNotionProject = () => {}, isLoading = false, theme = "未命名專案", activeProjectId = null, activeSubTab = "step6" }) {
   const activeTab = activeSubTab;
   const [bubbles, setBubbles] = useState([]);
   const [toastMessage, setToastMessage] = useState(null);
@@ -80,10 +80,15 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
     }
   }, [activeTab, stepData]);
 
-  // 切換分頁時清空上傳狀態與預覽圖
+  // 切換分頁時，如果有已儲存的預覽圖就載入
   useEffect(() => {
-    setUploadState({});
-  }, [activeTab]);
+    const imagesForTab = stepImages[activeTab] || {};
+    const initialUploadState = {};
+    Object.keys(imagesForTab).forEach(idx => {
+      initialUploadState[idx] = { previewUrl: imagesForTab[idx] };
+    });
+    setUploadState(initialUploadState);
+  }, [activeTab, stepImages]);
 
   const handleTextChange = (index, newText) => {
     const newBubbles = [...bubbles];
@@ -127,6 +132,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
       formData.append("file", file);
       formData.append("pageId", activeProjectId); // activeProjectId 為 Notion 的 page ID
       formData.append("stepId", activeTab.replace("step", "")); // 傳遞這是哪個步驟，以便精準插入
+      formData.append("bubbleIndex", bubbleIndex); // 傳遞提案編號，以便重整時識別
 
       const res = await fetch("/api/blob/upload", {
         method: "POST",
@@ -316,7 +322,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
                       {/* 上傳區塊 (Right side per card) */}
                       <div className="w-full md:w-[180px] shrink-0 flex flex-col border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 pt-6 md:pt-0 md:pl-6">
                         <div className="text-xs font-bold text-slate-400 mb-3 flex items-center justify-between">
-                          <span>上傳 Vercel Blob 預覽</span>
+                          <span>匯入生成圖像至 Notion</span>
                           {uState.progress && (
                             <span className="text-[10px] text-amber-400">{uState.progress}</span>
                           )}

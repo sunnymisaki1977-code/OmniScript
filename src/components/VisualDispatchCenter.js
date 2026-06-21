@@ -137,7 +137,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
       if (data.success) {
         setUploadState(prev => ({
           ...prev,
-          [bubbleIndex]: { isUploading: false, progress: "上傳成功！", previewUrl: URL.createObjectURL(file) }
+          [bubbleIndex]: { isUploading: false, progress: "上傳成功！", previewUrl: data.url }
         }));
         setTimeout(() => {
           setUploadState(prev => ({

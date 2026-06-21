@@ -128,7 +128,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
       formData.append("pageId", activeProjectId); // activeProjectId 為 Notion 的 page ID
       formData.append("stepId", activeTab.replace("step", "")); // 傳遞這是哪個步驟，以便精準插入
 
-      const res = await fetch("/api/notion/upload", {
+      const res = await fetch("/api/blob/upload", {
         method: "POST",
         body: formData
       });
@@ -316,7 +316,7 @@ export default function VisualDispatchCenter({ stepData, teamProjects = [], isFe
                       {/* 上傳區塊 (Right side per card) */}
                       <div className="w-full md:w-[180px] shrink-0 flex flex-col border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 pt-6 md:pt-0 md:pl-6">
                         <div className="text-xs font-bold text-slate-400 mb-3 flex items-center justify-between">
-                          <span>匯入生成圖像至 Notion</span>
+                          <span>上傳 Vercel Blob 預覽</span>
                           {uState.progress && (
                             <span className="text-[10px] text-amber-400">{uState.progress}</span>
                           )}

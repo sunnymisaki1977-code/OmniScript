@@ -9,37 +9,38 @@ const parseVisualData = (text, type) => {
   
   if (type === "step9") {
     const cards = [];
-    const mainParts = text.split(/###\s+/).filter(b => b.trim().length > 0);
-    
-    mainParts.forEach(mainPart => {
-      if (mainPart.includes("第三部分") || mainPart.includes("社群貼文文案")) {
+    const mainSections = text.split(/###\s+/).filter(b => b.trim().length > 0);
+
+    mainSections.forEach(section => {
+      if (section.includes("第一部分") || section.includes("第二部分") || section.includes("第一部份") || section.includes("第二部份")) {
+        const parts = section.split(/\*\s*\*\*/).filter(b => b.trim().length > 0);
+        parts.forEach((part, index) => {
+          // index 0 is the section description
+          if (index === 0) return; 
+          
+          const titleMatch = part.match(/^(.*?)\*\*/);
+          if (!titleMatch) return;
+          const rawTitle = titleMatch[1].trim();
+          
+          const content = part.replace(/^(.*?)\*\*/, '').replace(/---$/, '').trim();
+          const ratioStr = rawTitle.includes("提案") ? "FB 爆款單圖 (1:1 或 4:5)" : "IG 懶人包 (4:5)";
+          const compiledText = `[請幫我生成一張 ${ratioStr} 圖像]\n\n卡片主題：${rawTitle}\n\n設計與文字需求：\n${content}`;
+          
+          cards.push({
+            id: cards.length,
+            title: rawTitle,
+            compiledText,
+            isImage: true
+          });
+        });
+      } else if (section.includes("第三部分") || section.includes("第三部份") || section.includes("文案")) {
         cards.push({
           id: cards.length,
           title: "通用社群貼文文案",
-          compiledText: mainPart.replace(/^(.*?)\n/, '').trim(),
-          isTextOnly: true
+          compiledText: section.replace(/^(.*?)\n/, '').replace(/---$/, '').trim(),
+          isImage: false
         });
-        return;
       }
-      
-      const parts = mainPart.split(/\*\s*\*\*|\-\s*\*\*/).filter(b => b.trim().length > 0);
-      parts.forEach((part) => {
-        const titleMatch = part.match(/^(.*?)\*\*/);
-        if (!titleMatch) return;
-        const rawTitle = titleMatch[1].trim();
-        
-        if (!rawTitle.includes("張") && !rawTitle.includes("提案")) return;
-        
-        const content = part.replace(/^(.*?)\*\*/, '').trim();
-        const ratioStr = rawTitle.includes("提案") ? "FB 爆款單圖 (1:1 或 4:5)" : "IG 懶人包 (4:5)";
-        const compiledText = `[請幫我生成一張 ${ratioStr} 圖像]\n\n卡片主題：${rawTitle}\n\n設計與文字需求：\n${content}`;
-        
-        cards.push({
-          id: cards.length,
-          title: rawTitle,
-          compiledText
-        });
-      });
     });
     return cards;
   }
@@ -333,7 +334,7 @@ export default function VisualDispatchCenter({ stepData, stepImages = {}, teamPr
                       </div>
 
                       {/* 上傳區塊 (Right side per card) */}
-                      {!bubble.isTextOnly && (
+                      {bubble.isImage !== false && (
                         <div className="w-full md:w-[180px] shrink-0 flex flex-col border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 pt-6 md:pt-0 md:pl-6">
                           <div className="text-xs font-bold text-slate-400 mb-3 flex items-center justify-between">
                             <span>匯入生成圖像至 Notion</span>

@@ -37,8 +37,25 @@ export default function AutoPipelineMatrix({
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-2">一鍵將核心創意主題「<span className="font-bold text-indigo-500">{theme}</span>」自動編排、優化並推演為 9 大行銷資產</p>
         </div>
 
-        {/* 9 步驟卡片生成矩陣 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-auto overflow-y-auto max-h-[60vh] p-2 custom-scrollbar">
+        {/* 生成狀態：播放影片 或 顯示 9 步驟卡片矩陣 */}
+        {isGenerating ? (
+          <div className="w-full my-auto flex items-center justify-center overflow-hidden rounded-2xl max-h-[60vh] h-[500px] shadow-2xl relative bg-slate-900 border border-indigo-500/30">
+            <video 
+              src="/loading.mp4" 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover opacity-90"
+            />
+            {/* 進度文字疊加 (可選) */}
+            <div className="absolute bottom-6 bg-slate-900/60 backdrop-blur-md px-6 py-3 rounded-full border border-slate-700/50 shadow-lg flex items-center gap-3">
+              <div className="w-5 h-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-white text-sm font-bold tracking-wider">A.I. 引擎運作中...</span>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-auto overflow-y-auto max-h-[60vh] p-2 custom-scrollbar">
           {WORKFLOW_STEPS.map((step) => {
             const isActive = activeStep === step.id && isGenerating;
             const isDone = completedSteps.includes(step.id);
@@ -87,6 +104,7 @@ export default function AutoPipelineMatrix({
             );
           })}
         </div>
+        )}
 
         {/* 全自動運行時的快捷重置/中斷鈕 */}
         <div className="flex justify-center gap-3 mt-8">

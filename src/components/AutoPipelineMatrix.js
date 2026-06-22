@@ -41,7 +41,7 @@ export default function AutoPipelineMatrix({
         {isGenerating ? (
           <div className="w-full my-auto flex items-center justify-center overflow-hidden rounded-2xl max-h-[60vh] h-[500px] shadow-2xl relative bg-slate-900 border border-indigo-500/30">
             <video 
-              src="/loading.mp4" 
+              src="https://res.cloudinary.com/dhvzfeo7p/video/upload/q_auto/f_auto/v1780920395/_%E5%9C%96%E7%94%9F%E5%8B%95%E7%95%AB%E8%A6%8F%E5%8A%83_Animation_Planning__o5hw6k.mp4" 
               autoPlay 
               loop 
               muted 

@@ -288,12 +288,12 @@ export default function Home() {
         body: JSON.stringify({ stepId, context }),
       });
       
-      const modelUsed = res.headers.get("x-fallback-model") || "pro";
-      setAiStatus(modelUsed);
-      setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[API] Step ${stepId} generated using ${modelUsed === 'pro' ? 'Gemini 1.5 Pro' : modelUsed === 'flash' ? 'Flash' : 'Flash-Lite'}`, type: "success" }]);
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Generation failed");
+
+      const modelUsed = data.modelUsed || "gemini-2.5-pro";
+      setAiStatus(modelUsed);
+      setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[API] Step ${stepId} generated using ${modelUsed}`, type: "success" }]);
       
       setStepData((prev) => ({ ...prev, [`step${stepId}`]: data.result }));
       logActivity(`執行了 AI 智能產製 (Step ${stepId})`);

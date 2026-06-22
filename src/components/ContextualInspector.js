@@ -51,9 +51,7 @@ export default function ContextualInspector({
               <div>
                 <div className="text-[10px] text-slate-500 font-mono mb-0.5">ACTIVE ENGINE</div>
                 <div className="text-sm font-bold text-slate-200">
-                  {aiStatus === 'pro' && 'Gemini 1.5 Pro'}
-                  {aiStatus === 'flash' && 'Gemini Flash'}
-                  {aiStatus === 'lite' && 'Gemini Flash-Lite'}
+                  {aiStatus === 'idle' ? 'Ready' : aiStatus}
                 </div>
               </div>
             </div>
@@ -61,7 +59,7 @@ export default function ContextualInspector({
           
           <div className="flex justify-between text-[10px] text-slate-500 px-1 font-mono">
             <span>Uptime: 99.99%</span>
-            <span>Latency: {aiStatus === 'pro' ? '1.2s' : aiStatus === 'flash' ? '0.6s' : '0.3s'}</span>
+            <span>Latency: {aiStatus?.includes('pro') ? '1.2s' : aiStatus?.includes('flash') ? '0.6s' : '0.3s'}</span>
           </div>
         </div>
       </div>

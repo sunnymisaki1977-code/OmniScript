@@ -9,23 +9,36 @@ const parseVisualData = (text, type) => {
   
   if (type === "step9") {
     const cards = [];
-    const parts = text.split(/\*\s*\*\*/).filter(b => b.trim().length > 0);
+    const mainParts = text.split(/###\s+/).filter(b => b.trim().length > 0);
     
-    parts.forEach((part) => {
-      const titleMatch = part.match(/^(.*?)\*\*/);
-      if (!titleMatch) return;
-      const rawTitle = titleMatch[1].trim();
+    mainParts.forEach(mainPart => {
+      if (mainPart.includes("第三部分") || mainPart.includes("社群貼文文案")) {
+        cards.push({
+          id: cards.length,
+          title: "通用社群貼文文案",
+          compiledText: mainPart.replace(/^(.*?)\n/, '').trim(),
+          isTextOnly: true
+        });
+        return;
+      }
       
-      if (!rawTitle.includes("張") && !rawTitle.includes("提案")) return;
-      
-      const content = part.replace(/^(.*?)\*\*/, '').trim();
-      const ratioStr = rawTitle.includes("提案") ? "FB 爆款單圖 (1:1 或 4:5)" : "IG 懶人包 (4:5)";
-      const compiledText = `[請幫我生成一張 ${ratioStr} 圖像]\n\n卡片主題：${rawTitle}\n\n設計與文字需求：\n${content}`;
-      
-      cards.push({
-        id: cards.length,
-        title: rawTitle,
-        compiledText
+      const parts = mainPart.split(/\*\s*\*\*|\-\s*\*\*/).filter(b => b.trim().length > 0);
+      parts.forEach((part) => {
+        const titleMatch = part.match(/^(.*?)\*\*/);
+        if (!titleMatch) return;
+        const rawTitle = titleMatch[1].trim();
+        
+        if (!rawTitle.includes("張") && !rawTitle.includes("提案")) return;
+        
+        const content = part.replace(/^(.*?)\*\*/, '').trim();
+        const ratioStr = rawTitle.includes("提案") ? "FB 爆款單圖 (1:1 或 4:5)" : "IG 懶人包 (4:5)";
+        const compiledText = `[請幫我生成一張 ${ratioStr} 圖像]\n\n卡片主題：${rawTitle}\n\n設計與文字需求：\n${content}`;
+        
+        cards.push({
+          id: cards.length,
+          title: rawTitle,
+          compiledText
+        });
       });
     });
     return cards;
@@ -320,42 +333,44 @@ export default function VisualDispatchCenter({ stepData, stepImages = {}, teamPr
                       </div>
 
                       {/* 上傳區塊 (Right side per card) */}
-                      <div className="w-full md:w-[180px] shrink-0 flex flex-col border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 pt-6 md:pt-0 md:pl-6">
-                        <div className="text-xs font-bold text-slate-400 mb-3 flex items-center justify-between">
-                          <span>匯入生成圖像至 Notion</span>
-                          {uState.progress && (
-                            <span className="text-[10px] text-amber-400">{uState.progress}</span>
-                          )}
+                      {!bubble.isTextOnly && (
+                        <div className="w-full md:w-[180px] shrink-0 flex flex-col border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-700 pt-6 md:pt-0 md:pl-6">
+                          <div className="text-xs font-bold text-slate-400 mb-3 flex items-center justify-between">
+                            <span>匯入生成圖像至 Notion</span>
+                            {uState.progress && (
+                              <span className="text-[10px] text-amber-400">{uState.progress}</span>
+                            )}
+                          </div>
+                          <label className={`flex-1 w-full border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative overflow-hidden min-h-[140px] bg-slate-900/20 transition-colors ${
+                            !activeProjectId || uState.isUploading 
+                              ? "border-slate-700 opacity-50 cursor-not-allowed" 
+                              : "border-slate-600 hover:border-slate-400 hover:bg-slate-700/50 cursor-pointer group"
+                          }`}>
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              className="hidden" 
+                              onChange={(e) => handleFileChange(e, index)}
+                              disabled={!activeProjectId || uState.isUploading}
+                            />
+                            {uState.previewUrl ? (
+                              <>
+                                <img src={uState.previewUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity" />
+                                <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <span className="text-white text-xs font-bold bg-slate-900/80 px-2 py-1 rounded-md">重新上傳</span>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <ImageIcon className="w-6 h-6 text-slate-500 group-hover:text-slate-300 transition-colors" />
+                                <span className="text-xs text-slate-400 group-hover:text-slate-300 font-medium z-10 text-center px-2">
+                                  {uState.isUploading ? "上傳中..." : "點擊上傳圖檔"}
+                                </span>
+                              </>
+                            )}
+                          </label>
                         </div>
-                        <label className={`flex-1 w-full border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 relative overflow-hidden min-h-[140px] bg-slate-900/20 transition-colors ${
-                          !activeProjectId || uState.isUploading 
-                            ? "border-slate-700 opacity-50 cursor-not-allowed" 
-                            : "border-slate-600 hover:border-slate-400 hover:bg-slate-700/50 cursor-pointer group"
-                        }`}>
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            className="hidden" 
-                            onChange={(e) => handleFileChange(e, index)}
-                            disabled={!activeProjectId || uState.isUploading}
-                          />
-                          {uState.previewUrl ? (
-                            <>
-                              <img src={uState.previewUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity" />
-                              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="text-white text-xs font-bold bg-slate-900/80 px-2 py-1 rounded-md">重新上傳</span>
-                              </div>
-                            </>
-                          ) : (
-                            <>
-                              <ImageIcon className="w-6 h-6 text-slate-500 group-hover:text-slate-300 transition-colors" />
-                              <span className="text-xs text-slate-400 group-hover:text-slate-300 font-medium z-10 text-center px-2">
-                                {uState.isUploading ? "上傳中..." : "點擊上傳圖檔"}
-                              </span>
-                            </>
-                          )}
-                        </label>
-                      </div>
+                      )}
                     </div>
                   );})}
                 </div>

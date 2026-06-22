@@ -68,22 +68,24 @@ export default function Home() {
   ]);
   const [aiStatus, setAiStatus] = useState("pro");
 
-  // Fetch Team Projects from Notion on mount
-  useEffect(() => {
-    const fetchTeamProjects = async () => {
-      setIsFetchingTeam(true);
-      try {
-        const res = await fetch("/api/notion/projects", { cache: 'no-store' });
-        const data = await res.json();
-        if (data.success && data.projects) {
-          setTeamProjects(data.projects);
-        }
-      } catch (err) {
-        console.error("Failed to fetch team projects", err);
-      } finally {
-        setIsFetchingTeam(false);
+  // Fetch Team Projects from Notion
+  const fetchTeamProjects = async () => {
+    setIsFetchingTeam(true);
+    try {
+      const res = await fetch("/api/notion/projects", { cache: 'no-store' });
+      const data = await res.json();
+      if (data.success && data.projects) {
+        setTeamProjects(data.projects);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch team projects", err);
+    } finally {
+      setIsFetchingTeam(false);
+    }
+  };
+
+  // 初始載入
+  useEffect(() => {
     fetchTeamProjects();
   }, []);
   
@@ -326,9 +328,14 @@ export default function Home() {
       
       setNotionStatus(data.url);
       setArchivedUrl(data.url);
+      if (data.id) setActiveProjectId(data.id);
+      
       if (!isAutoRunning) alert("成功歸檔至 Notion!");
       logActivity("已將專案歸檔至 Notion");
       window.open(data.url, '_blank');
+      
+      // 重新抓取 Notion 專案清單，讓下拉選單即時更新
+      await fetchTeamProjects();
     } catch (error) {
       alert("歸檔失敗: " + error.message);
     } finally {

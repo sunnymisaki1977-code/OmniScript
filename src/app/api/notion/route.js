@@ -84,7 +84,7 @@ export async function POST(req) {
       });
     }
 
-    return NextResponse.json({ success: true, url: response.url });
+    return NextResponse.json({ success: true, url: response.url, id: response.id });
   } catch (error) {
     console.error("Notion API Error:", error);
     return NextResponse.json(

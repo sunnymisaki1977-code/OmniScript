@@ -4,7 +4,7 @@ import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import {
   createSafeParagraphBlocks,
   createHeading2Block,
-  createCodeBlock,
+  createSafeCodeBlocks,
 } from "@/utils/notionUtils";
 
 export async function POST(req) {
@@ -42,8 +42,9 @@ export async function POST(req) {
 
       // 根據步驟類型加入不同的 Block
       if (step.type === "code") {
-        // Step 6-8 是 Code 區塊
-        childrenBlocks.push(createCodeBlock(stepData));
+        // Step 6-8, 9 是 Code 區塊
+        const codeBlocks = createSafeCodeBlocks(stepData);
+        childrenBlocks.push(...codeBlocks);
       } else {
         // Step 1-5, 9 是 Text 區塊
         const paragraphs = createSafeParagraphBlocks(stepData);

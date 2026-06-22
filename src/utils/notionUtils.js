@@ -78,7 +78,12 @@ export function createHeading2Block(text) {
   };
 }
 
-export function createCodeBlock(text) {
+export function createSafeCodeBlocks(text, language = "plain text") {
+  if (!text) return [];
+
+  const MAX_LENGTH = 2000;
+  const blocks = [];
+  
   let safeText = text;
   if (typeof safeText === "object") {
     try {
@@ -89,10 +94,42 @@ export function createCodeBlock(text) {
   } else {
     safeText = String(safeText || "");
   }
-  
-  // Notion API limit for rich_text content is 2000 characters.
-  safeText = safeText.substring(0, 2000);
-  
+
+  // 將文字按行切分，儘量在換行處進行切割，避免單字斷裂
+  const lines = safeText.split('\n');
+  let currentChunk = "";
+
+  for (const line of lines) {
+    // 如果單獨一行就超過 2000 字，必須強制硬切
+    if (line.length > MAX_LENGTH) {
+      if (currentChunk) {
+        blocks.push(createCodeBlock(currentChunk, language));
+        currentChunk = "";
+      }
+      let idx = 0;
+      while (idx < line.length) {
+        blocks.push(createCodeBlock(line.substring(idx, idx + MAX_LENGTH), language));
+        idx += MAX_LENGTH;
+      }
+    } else {
+      // 檢查加上這行是否會超過限制
+      if (currentChunk.length + line.length + 1 > MAX_LENGTH) {
+        blocks.push(createCodeBlock(currentChunk, language));
+        currentChunk = line;
+      } else {
+        currentChunk += (currentChunk ? '\n' : '') + line;
+      }
+    }
+  }
+
+  if (currentChunk) {
+    blocks.push(createCodeBlock(currentChunk, language));
+  }
+
+  return blocks;
+}
+
+export function createCodeBlock(text, language = "plain text") {
   return {
     object: "block",
     type: "code",
@@ -101,11 +138,11 @@ export function createCodeBlock(text) {
         {
           type: "text",
           text: {
-            content: safeText,
+            content: text,
           },
         },
       ],
-      language: "plain text",
+      language: language,
     },
   };
 }

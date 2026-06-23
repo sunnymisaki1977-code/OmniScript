@@ -22,7 +22,7 @@ import {
 import { useState, useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
 import ChangelogModal from "../components/ChangelogModal";
-import IdentityModal from "../components/IdentityModal";
+import GoogleLoginModal from "../components/GoogleLoginModal";
 import ActivityFeed from "../components/ActivityFeed";
 
 const INITIAL_ROLES = [
@@ -214,7 +214,7 @@ export default function JoinPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30">
-      <IdentityModal />
+      <GoogleLoginModal />
 
       {/* Hero */}
       <header className="relative overflow-hidden border-b border-border">

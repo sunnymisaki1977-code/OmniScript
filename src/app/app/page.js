@@ -11,7 +11,7 @@ import ContextualInspector from "@/components/ContextualInspector";
 import AutoPipelineMatrix from "@/components/AutoPipelineMatrix";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
 import { logActivity } from "../../utils/activityLogger";
-import IdentityModal from "../../components/IdentityModal";
+import GoogleLoginModal from "../../components/GoogleLoginModal";
 import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud, Palette, Music, BookOpen, Sparkles } from "lucide-react";
 import ChangelogModal from "../../components/ChangelogModal";
 
@@ -732,7 +732,7 @@ export default function Home() {
   // -----------------------------------------------------
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-[#0a0f1d]">
-      <IdentityModal />
+      <GoogleLoginModal />
       {renderApiModal()}
 
       {/* 1. Left Navigation Rail */}

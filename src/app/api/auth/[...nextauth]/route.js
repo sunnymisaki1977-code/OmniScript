@@ -20,6 +20,19 @@ export const authOptions = {
     strategy: "jwt",
   },
   callbacks: {
+    async signIn({ user }) {
+      const allowedEmails = [
+        "wrc0315@gmail.com",
+        "toyear520@gmail.com",
+        "dada95712@gmail.com",
+        "pai9067113@gmail.com",
+        "sunnymisaki1977@gmail.com"
+      ];
+      if (user && user.email) {
+        return allowedEmails.includes(user.email.toLowerCase());
+      }
+      return false;
+    },
     async jwt({ token, account }) {
       if (account) {
         token.accessToken = account.access_token;

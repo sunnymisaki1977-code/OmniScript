@@ -277,6 +277,16 @@ export default function Home() {
     }
   };
 
+  // API 金鑰檢查
+  const checkApiKey = () => {
+    if (!customApiKey.trim()) {
+      alert("請先設定您的 Gemini API Key！");
+      setIsApiKeyModalOpen(true);
+      return false;
+    }
+    return true;
+  };
+
   // API 呼叫區塊
   const generateContent = async (stepId, context) => {
     setIsLoading(true);
@@ -345,6 +355,7 @@ export default function Home() {
 
   const handleStartManual = () => {
     if (!theme.trim()) return;
+    if (!checkApiKey()) return;
     createNewProject();
     setCurrentStep(1);
     generateContent(1, { theme });
@@ -353,6 +364,7 @@ export default function Home() {
   const handleStartAuto = async (forcedTheme) => {
     const activeTheme = forcedTheme && typeof forcedTheme === 'string' ? forcedTheme : theme;
     if (!activeTheme.trim()) return;
+    if (!checkApiKey()) return;
     
     if (forcedTheme && typeof forcedTheme === 'string') setTheme(forcedTheme);
 
@@ -398,6 +410,7 @@ export default function Home() {
 
   const handleTopStartAuto = () => {
     if (!topTheme.trim()) return;
+    if (!checkApiKey()) return;
     if (currentStep > 0) {
       if (!window.confirm("這將會放棄當前進度並開啟全新主題，確定嗎？")) {
         return;
@@ -411,6 +424,7 @@ export default function Home() {
 
   const handleResumeAuto = async () => {
     if (!theme.trim() || currentStep === 0) return;
+    if (!checkApiKey()) return;
     
     setIsAutoRunning(true);
     let currentContext = { theme, ...stepData };
@@ -451,6 +465,7 @@ export default function Home() {
       exportToNotion();
       return;
     }
+    if (!checkApiKey()) return;
     const nextStepId = currentStep + 1;
     setCompletedSteps((prev) => {
       if (!prev.includes(currentStep)) return [...prev, currentStep].sort((a, b) => a - b);
@@ -464,6 +479,7 @@ export default function Home() {
   };
 
   const handleRegenerate = () => {
+    if (!checkApiKey()) return;
     const contextForCurrent = { theme, ...stepData };
     generateContent(currentStep, contextForCurrent);
   };
@@ -494,7 +510,7 @@ export default function Home() {
                 className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                您的金鑰僅會安全地儲存在本地瀏覽器中，不會上傳至任何伺服器。若留空，將使用系統預設金鑰。
+                您的金鑰僅會安全地儲存在本地瀏覽器中，不會上傳至任何伺服器。必須輸入有效的 Gemini API Key 才能進行內容產製。
               </p>
             </div>
             <button 
@@ -555,6 +571,10 @@ export default function Home() {
                       autoFocus
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
+                          if (!customApiKey.trim()) {
+                            alert("請輸入有效的 Gemini API Key！");
+                            return;
+                          }
                           localStorage.setItem("omniscript_api_key", customApiKey);
                           setActiveInputMode(null);
                           handleStartAuto();
@@ -564,6 +584,10 @@ export default function Home() {
                     <div className="flex gap-2">
                       <button 
                         onClick={() => {
+                          if (!customApiKey.trim()) {
+                            alert("請輸入有效的 Gemini API Key！");
+                            return;
+                          }
                           localStorage.setItem("omniscript_api_key", customApiKey);
                           setActiveInputMode(null);
                           handleStartAuto();

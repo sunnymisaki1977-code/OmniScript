@@ -15,12 +15,12 @@ export async function POST(req) {
     }
 
     const customApiKey = req.headers.get("x-gemini-api-key");
-    const apiKey = customApiKey || process.env.GEMINI_API_KEY;
-    
+    const apiKey = customApiKey;
+
     if (!apiKey) {
       return NextResponse.json(
-        { error: "Gemini API key is not configured or provided." },
-        { status: 500 }
+        { error: "請先設定您的 Gemini API Key" },
+        { status: 401 }
       );
     }
 

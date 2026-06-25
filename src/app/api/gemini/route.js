@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
+import { getThemePrompts } from "@/utils/promptConfigs";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60; // Next.js App Router 設定，延長 Vercel 預設截斷時間
@@ -9,7 +9,9 @@ export async function POST(req) {
     const body = await req.json();
     const { stepId, context } = body;
 
-    const stepConfig = WORKFLOW_STEPS.find((s) => s.id === stepId);
+    const audienceTheme = context.audienceTheme || 'creator';
+    const workflowSteps = getThemePrompts(audienceTheme);
+    const stepConfig = workflowSteps.find((s) => s.id === stepId);
     if (!stepConfig) {
       return NextResponse.json({ error: "Invalid step ID" }, { status: 400 });
     }

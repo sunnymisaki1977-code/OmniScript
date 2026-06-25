@@ -10,6 +10,7 @@ import NotebookLMCenter from "@/components/NotebookLMCenter";
 import ContextualInspector from "@/components/ContextualInspector";
 import AutoPipelineMatrix from "@/components/AutoPipelineMatrix";
 import { WORKFLOW_STEPS } from "@/utils/promptConfigs";
+import { AUDIENCE_THEMES } from "@/utils/themeConfigs";
 import { logActivity } from "../../utils/activityLogger";
 import GoogleLoginModal from "../../components/GoogleLoginModal";
 import { Rocket, FileText, Play, Hand, Zap, User, Clock, ChevronRight, MoreVertical, Sun, Moon, KeyRound, X, Cloud, Palette, Music, BookOpen, Sparkles } from "lucide-react";
@@ -28,6 +29,7 @@ export default function Home() {
   // Project State
   const [projectId, setProjectId] = useState(null);
   const [theme, setTheme] = useState("");
+  const [audienceTheme, setAudienceTheme] = useState("creator");
   const [topTheme, setTopTheme] = useState("");
   const [currentStep, setCurrentStep] = useState(0); 
   const [stepData, setStepData] = useState({});
@@ -290,6 +292,7 @@ export default function Home() {
   // API 呼叫區塊
   const generateContent = async (stepId, context) => {
     setIsLoading(true);
+    const contextWithTheme = { ...context, audienceTheme };
     try {
       const res = await fetch("/api/gemini", {
         method: "POST",
@@ -297,7 +300,7 @@ export default function Home() {
           "Content-Type": "application/json",
           "x-gemini-api-key": customApiKey || ""
         },
-        body: JSON.stringify({ stepId, context }),
+        body: JSON.stringify({ stepId, context: contextWithTheme }),
       });
       
       const data = await res.json();
@@ -373,7 +376,11 @@ export default function Home() {
     createNewProject();
     setStepData({});
     setCompletedSteps([]);
-    setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[System] Starting Auto Pipeline for: ${activeTheme}`, type: "info" }]);
+    setLogs(prev => [
+      ...prev, 
+      { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: AUDIENCE_THEMES[audienceTheme].themeLogMessage, type: "info" },
+      { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: `[System] Starting Auto Pipeline for: ${activeTheme}`, type: "info" }
+    ]);
     
     let currentContext = { theme: activeTheme };
     let currentCompleted = [];
@@ -541,7 +548,7 @@ export default function Home() {
           
           {/* Central Card */}
           <div className="bg-white dark:bg-[#1E293B] rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-8 md:p-12 text-center mb-6 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-cyan-400"></div>
+            <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${AUDIENCE_THEMES[audienceTheme].gradient}`}></div>
             <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
               今天想創作什麼？
             </h1>
@@ -549,13 +556,37 @@ export default function Home() {
               輸入你想探討的主題，AI 將為你生成從研究、長短影音腳本到社群貼文的全域企劃。
             </p>
             
-            <div className="max-w-2xl mx-auto space-y-4">
+            <div className="max-w-2xl mx-auto space-y-6">
+              
+              {/* Audience Theme Selector */}
+              <div className="flex flex-wrap justify-center gap-2">
+                {Object.values(AUDIENCE_THEMES).map(themeOpt => {
+                  const isActive = audienceTheme === themeOpt.id;
+                  return (
+                    <button
+                      key={themeOpt.id}
+                      onClick={() => {
+                        setAudienceTheme(themeOpt.id);
+                        setLogs(prev => [...prev, { time: new Date().toLocaleTimeString('en-US', { hour12: false }), text: themeOpt.themeLogMessage, type: "info" }]);
+                      }}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        isActive 
+                          ? `${themeOpt.bgBadge} shadow-sm border` 
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-transparent hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {themeOpt.title}
+                    </button>
+                  );
+                })}
+              </div>
+
               <input
                 type="text"
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
                 placeholder="例如：日本京阪神五日遊攻略"
-                className="w-full px-6 py-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-lg text-slate-900 dark:text-white placeholder:text-slate-400"
+                className={`w-full px-6 py-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 ${AUDIENCE_THEMES[audienceTheme].ringColor} transition-all text-lg text-slate-900 dark:text-white placeholder:text-slate-400`}
                 onKeyDown={(e) => e.key === "Enter" && handleStartAuto()}
               />
               
@@ -592,7 +623,7 @@ export default function Home() {
                           setActiveInputMode(null);
                           handleStartAuto();
                         }} 
-                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 rounded-lg transition-colors shadow-sm shadow-indigo-500/20"
+                        className={`flex-1 ${AUDIENCE_THEMES[audienceTheme].primaryBtn} text-xs font-bold py-2 rounded-lg transition-colors shadow-sm`}
                       >
                         確認並開始
                       </button>

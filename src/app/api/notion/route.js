@@ -7,6 +7,19 @@ import {
   createSafeCodeBlocks,
 } from "@/utils/notionUtils";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 export async function POST(req) {
   try {
     const { context, creatorName } = await req.json();
@@ -18,7 +31,7 @@ export async function POST(req) {
     if (!apiKey || !databaseId) {
       return NextResponse.json(
         { error: "Notion API key or Database ID is missing in environment variables." },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
 
@@ -84,12 +97,12 @@ export async function POST(req) {
       });
     }
 
-    return NextResponse.json({ success: true, url: response.url, id: response.id });
+    return NextResponse.json({ success: true, url: response.url, id: response.id }, { status: 200, headers: corsHeaders });
   } catch (error) {
     console.error("Notion API Error:", error);
     return NextResponse.json(
       { error: "Failed to export to Notion", details: error.message },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

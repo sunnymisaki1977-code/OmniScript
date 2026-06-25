@@ -30,7 +30,8 @@ export async function POST(req) {
     }
 
     const customApiKey = req.headers.get("x-gemini-api-key");
-    const apiKey = customApiKey;
+    // 改為優先使用前端傳來的 Key，如果沒有則使用 Vercel 環境變數中的 Key
+    const apiKey = customApiKey || process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(

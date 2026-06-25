@@ -4,6 +4,19 @@ import { NextResponse } from "next/server";
 
 export const maxDuration = 60; // Next.js App Router 設定，延長 Vercel 預設截斷時間
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, x-gemini-api-key",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -13,7 +26,7 @@ export async function POST(req) {
     const workflowSteps = getThemePrompts(audienceTheme);
     const stepConfig = workflowSteps.find((s) => s.id === stepId);
     if (!stepConfig) {
-      return NextResponse.json({ error: "Invalid step ID" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid step ID" }, { status: 400, headers: corsHeaders });
     }
 
     const customApiKey = req.headers.get("x-gemini-api-key");
@@ -22,7 +35,7 @@ export async function POST(req) {
     if (!apiKey) {
       return NextResponse.json(
         { error: "請先設定您的 Gemini API Key" },
-        { status: 401 }
+        { status: 401, headers: corsHeaders }
       );
     }
 
@@ -40,21 +53,21 @@ export async function POST(req) {
       "gemini-2.5-flash-lite"
     ];
 
-    let text = "";
-    let modelUsed = "";
     const MAX_RETRIES = 5;
+    let attempt = 0;
 
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      modelUsed = MODELS[attempt - 1] || MODELS[MODELS.length - 1];
-
+    for (let modelIndex = 0; modelIndex < MODELS.length; modelIndex++) {
+      const modelUsed = MODELS[modelIndex];
+      attempt++;
       try {
+        console.log(`[Gemini API] Attempt ${attempt} with model ${modelUsed} for Step ${stepId}`);
         const response = await ai.models.generateContent({
           model: modelUsed,
           contents: finalPrompt,
         });
 
-        text = response.text || "";
-        return NextResponse.json({ result: text, modelUsed: modelUsed });
+        // 成功取得結果
+        return NextResponse.json({ result: response.text, modelUsed: modelUsed }, { status: 200, headers: corsHeaders });
         
       } catch (err) {
         const errorMsg = err.message || "";
@@ -73,11 +86,11 @@ export async function POST(req) {
     console.error("Gemini API Error:", error);
     const errorMsg = error.message || "";
     if (errorMsg.includes("429") || errorMsg.includes("quota")) {
-      return NextResponse.json({ error: "Google API 免費額度已達上限 (429 Too Many Requests)。請稍後再重新嘗試！" }, { status: 429 });
+      return NextResponse.json({ error: "Google API 免費額度已達上限 (429 Too Many Requests)。請稍後再重新嘗試！" }, { status: 429, headers: corsHeaders });
     }
     return NextResponse.json(
       { error: "Failed to generate content", details: errorMsg },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

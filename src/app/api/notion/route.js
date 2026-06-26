@@ -134,7 +134,8 @@ export async function GET(req) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          sorts: [{ timestamp: "created_time", direction: "descending" }]
+          sorts: [{ timestamp: "created_time", direction: "descending" }],
+          page_size: 10 // 限制只抓取最新的 10 筆資料
         })
       });
       

@@ -125,10 +125,24 @@ export async function GET(req) {
 
     // 如果沒有 pageId，回傳專案清單
     if (!pageId) {
-      const response = await notion.databases.query({
-        database_id: databaseId,
-        sorts: [{ timestamp: "created_time", direction: "descending" }],
+      // 在新版 Notion SDK v5 中 databases.query 的寫法已改變，我們直接用 REST API 確保相容性
+      const queryResponse = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Notion-Version': '2022-06-28',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sorts: [{ timestamp: "created_time", direction: "descending" }]
+        })
       });
+      
+      const response = await queryResponse.json();
+
+      if (!queryResponse.ok) {
+        throw new Error(response.message || "Failed to query database");
+      }
 
       const results = response.results.map(page => {
         let titleStr = "未命名專案";

@@ -106,3 +106,107 @@ export async function POST(req) {
     );
   }
 }
+
+export async function GET(req) {
+  try {
+    const apiKey = process.env.NOTION_API_KEY;
+    const databaseId = process.env.NOTION_DATABASE_ID;
+
+    if (!apiKey || !databaseId) {
+      return NextResponse.json(
+        { error: "Notion API key or Database ID is missing." },
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
+    const notion = new Client({ auth: apiKey });
+    const { searchParams } = new URL(req.url);
+    const pageId = searchParams.get('pageId');
+
+    // 如果沒有 pageId，回傳專案清單
+    if (!pageId) {
+      const response = await notion.databases.query({
+        database_id: databaseId,
+        sorts: [{ timestamp: "created_time", direction: "descending" }],
+      });
+
+      const results = response.results.map(page => {
+        let titleStr = "未命名專案";
+        if (page.properties.title && page.properties.title.title && page.properties.title.title.length > 0) {
+          titleStr = page.properties.title.title.map(t => t.plain_text).join("");
+        }
+        
+        const dateObj = new Date(page.created_time);
+        const formattedDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()} ${dateObj.getHours()}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+
+        return {
+          id: page.id,
+          title: titleStr,
+          createdTime: formattedDate
+        };
+      });
+
+      return NextResponse.json({ results }, { status: 200, headers: corsHeaders });
+    }
+
+    // 如果有 pageId，回傳該頁面詳細內容並解析回 step1 ~ step9
+    const pageResponse = await notion.pages.retrieve({ page_id: pageId });
+    let themeTitle = "未命名企劃";
+    if (pageResponse.properties.title && pageResponse.properties.title.title.length > 0) {
+      themeTitle = pageResponse.properties.title.title.map(t => t.plain_text).join("");
+      themeTitle = themeTitle.replace(/^OmniScript:\s*/, '');
+    }
+
+    // 取得所有 Blocks
+    let allBlocks = [];
+    let cursor = undefined;
+    while (true) {
+      const blocksResponse = await notion.blocks.children.list({
+        block_id: pageId,
+        start_cursor: cursor,
+        page_size: 100,
+      });
+      allBlocks.push(...blocksResponse.results);
+      if (blocksResponse.has_more) {
+        cursor = blocksResponse.next_cursor;
+      } else {
+        break;
+      }
+    }
+
+    // 解析 Blocks 回填到 context
+    const context = { theme: themeTitle };
+    let currentStep = null;
+
+    for (const block of allBlocks) {
+      if (block.type === 'heading_2') {
+        const text = block.heading_2.rich_text.map(t => t.plain_text).join("");
+        const match = text.match(/^(\d+)\./);
+        if (match) {
+          currentStep = `step${match[1]}`;
+          if (!context[currentStep]) context[currentStep] = "";
+        }
+      } else if (currentStep) {
+        if (block.type === 'paragraph') {
+          const text = block.paragraph.rich_text.map(t => t.plain_text).join("");
+          if (text) context[currentStep] += text + "\n\n";
+        } else if (block.type === 'code') {
+          const text = block.code.rich_text.map(t => t.plain_text).join("");
+          if (text) context[currentStep] += "```\n" + text + "\n```\n\n";
+        } else if (block.type === 'quote') {
+          const text = block.quote.rich_text.map(t => t.plain_text).join("");
+          if (text) context[currentStep] += "> " + text + "\n\n";
+        }
+      }
+    }
+
+    return NextResponse.json({ context }, { status: 200, headers: corsHeaders });
+
+  } catch (error) {
+    console.error("Notion GET Error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch from Notion", details: error.message },
+      { status: 500, headers: corsHeaders }
+    );
+  }
+}

@@ -132,8 +132,13 @@ export async function GET(req) {
 
       const results = response.results.map(page => {
         let titleStr = "未命名專案";
-        if (page.properties.title && page.properties.title.title && page.properties.title.title.length > 0) {
-          titleStr = page.properties.title.title.map(t => t.plain_text).join("");
+        
+        // 安全地尋找型別為 'title' 的屬性（因為使用者資料庫的標題欄位名稱不一定是 'title'）
+        const titlePropKey = Object.keys(page.properties).find(k => page.properties[k].type === 'title');
+        const titleProp = titlePropKey ? page.properties[titlePropKey] : null;
+
+        if (titleProp && titleProp.title && titleProp.title.length > 0) {
+          titleStr = titleProp.title.map(t => t.plain_text).join("");
         }
         
         const dateObj = new Date(page.created_time);
@@ -152,8 +157,12 @@ export async function GET(req) {
     // 如果有 pageId，回傳該頁面詳細內容並解析回 step1 ~ step9
     const pageResponse = await notion.pages.retrieve({ page_id: pageId });
     let themeTitle = "未命名企劃";
-    if (pageResponse.properties.title && pageResponse.properties.title.title.length > 0) {
-      themeTitle = pageResponse.properties.title.title.map(t => t.plain_text).join("");
+    
+    const pageTitlePropKey = Object.keys(pageResponse.properties).find(k => pageResponse.properties[k].type === 'title');
+    const pageTitleProp = pageTitlePropKey ? pageResponse.properties[pageTitlePropKey] : null;
+
+    if (pageTitleProp && pageTitleProp.title && pageTitleProp.title.length > 0) {
+      themeTitle = pageTitleProp.title.map(t => t.plain_text).join("");
       themeTitle = themeTitle.replace(/^OmniScript:\s*/, '');
     }
 
